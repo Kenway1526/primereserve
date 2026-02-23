@@ -1,0 +1,19 @@
+<div class="staff-dashboard">
+  <header class="staff-header">
+    <div class="brand-info">
+      <img src="assets/logoprimereserve.png" alt="Logo" class="nav-logo">
+      <h2 class="role-badge">PANEL MESEROS</h2>
+    </div>
+    <button (click)="cerrarSesion()" class="btn-logout">CERRAR SESIÓN</button>
+  </header>
+
+  <main class="dashboard-content">
+    <div *ngIf="router.url === '/meseros'" class="menu-grid">
+      <h1 class="main-title">Servicio al Cliente</h1>
+      <div class="actions-container">
+        <button routerLink="atender" class="card-btn">ATENDER RESERVACIONES</button>
+      </div>
+    </div>
+    <router-outlet></router-outlet>
+  </main>
+</div>

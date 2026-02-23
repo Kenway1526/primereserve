@@ -1,0 +1,95 @@
+.client-dashboard {
+  min-height: 100vh;
+  background-color: #f1f5f9;
+  display: flex;
+  flex-direction: column;
+}
+
+.client-header {
+  background: white;
+  padding: 1rem 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+
+  .brand-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    
+    .nav-logo { height: 60px; }
+    .role-badge {
+      font-weight: 800;
+      color: #334155;
+      font-size: 1.2rem;
+      border-left: 3px solid #cbd5e1;
+      padding-left: 1.5rem;
+    }
+  }
+}
+
+.btn-logout {
+  background: #ef4444; // Rojo para indicar salida
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  font-weight: 800;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+  &:hover { background: #dc2626; transform: scale(1.05); }
+}
+
+.dashboard-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.menu-grid {
+  text-align: center;
+  width: 100%;
+  max-width: 1000px;
+
+  .main-title {
+    font-size: 3rem;
+    font-weight: 900;
+    margin-bottom: 4rem;
+    color: #0f172a;
+  }
+}
+
+.actions-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+
+  .card-btn {
+    height: 200px;
+    background: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .btn-text {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #1e293b;
+    }
+
+    &:hover {
+      transform: translateY(-12px);
+      background: #1e293b;
+      box-shadow: 0 20px 30px rgba(0,0,0,0.15);
+      .btn-text { color: white; }
+    }
+  }
+}

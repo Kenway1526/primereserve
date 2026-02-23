@@ -1,0 +1,92 @@
+.register-container {
+  padding: 40px 20px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.register-card {
+  background: #ffffff;
+  padding: 3.5rem; // Más espacio interno
+  border-radius: 24px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 550px; // Un poco más ancho para las fuentes grandes
+  
+  .form-title {
+    font-size: 2.8rem; // Fuente muy grande para el título
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 2.5rem;
+    color: #0f172a;
+  }
+}
+
+.input-group {
+  margin-bottom: 1.8rem; // Más separación entre campos
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+
+  label {
+    font-weight: 700;
+    font-size: 1.2rem; // Fuente de etiqueta aumentada
+    color: #334155;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  input {
+    padding: 1.2rem; // Inputs más altos
+    border: 2px solid #e2e8f0; // Borde más grueso
+    border-radius: 12px;
+    font-size: 1.1rem; // Fuente interna del input aumentada
+    transition: all 0.3s ease;
+
+    &:focus {
+      outline: none;
+      border-color: #334155;
+      background-color: #f8fafc;
+    }
+  }
+}
+
+.actions {
+  margin-top: 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+
+  button {
+    padding: 1.4rem;
+    border-radius: 15px;
+    font-size: 1.2rem; // Fuente de botón aumentada
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .btn-create {
+    background: #1e293b;
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(30, 41, 59, 0.3);
+
+    &:hover {
+      background: #0f172a;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.4);
+    }
+  }
+
+  .btn-cancel {
+    background: transparent;
+    color: #64748b;
+    border: 2px solid #e2e8f0;
+
+    &:hover {
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+  }
+}

@@ -1,0 +1,21 @@
+<div class="admin-dashboard">
+  <header class="admin-header">
+    <div class="brand-info">
+      <img src="assets/logoprimereserve.png" alt="Logo" class="nav-logo">
+      <h2 class="role-badge">PANEL ADMINISTRATIVO</h2>
+    </div>
+    <button (click)="cerrarSesion()" class="btn-logout">SALIR</button>
+  </header>
+
+  <main class="dashboard-content">
+    <div *ngIf="router.url === '/admin'" class="menu-grid">
+      <h1 class="main-title">Gestión General</h1>
+      <div class="actions-container">
+        <button routerLink="gestion" class="card-btn">GESTIÓN DE RESERVAS</button>
+        <button routerLink="reportes" class="card-btn">GENERACIÓN DE REPORTES</button>
+        <button routerLink="lista-espera" class="card-btn">GESTIÓN LISTA DE ESPERA</button>
+      </div>
+    </div>
+    <router-outlet></router-outlet>
+  </main>
+</div>

@@ -1,0 +1,39 @@
+// Configuración de conexión con soporte para PgBouncer
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Modelo para los Restaurantes
+model Restaurante {
+  id          String   @id @default(uuid())
+  nombre      String
+  ubicacion   String
+  mesas       Mesa[]
+  createdAt   DateTime @default(now())
+}
+
+// Modelo para las Mesas de cada restaurante
+model Mesa {
+  id           String        @id @default(uuid())
+  numero       Int
+  capacidad    Int
+  restaurante  Restaurante   @relation(fields: [restauranteId], references: [id])
+  restauranteId String
+  reservas     Reservacion[]
+}
+
+// Modelo para la gestión de Reservaciones
+model Reservacion {
+  id          String   @id @default(uuid())
+  cliente     String
+  fechaHora   DateTime
+  personas    Int
+  mesa        Mesa     @relation(fields: [mesaId], references: [id])
+  mesaId      String
+  createdAt   DateTime @default(now())
+}

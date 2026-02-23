@@ -1,0 +1,41 @@
+/* You can add global styles to this file, and also import other style files */
+// Variables de diseño
+$primary-dark: #1e293b;
+$font-large: 1.2rem;
+$title-xl: 3.2rem;
+
+.btn-xl {
+  padding: 1.5rem 3rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  border-radius: 20px;
+  background: $primary-dark;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    background: #0f172a;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+  }
+}
+
+.input-field {
+  margin-bottom: 2rem;
+  label {
+    display: block;
+    font-weight: 800;
+    font-size: 1.3rem;
+    margin-bottom: 0.8rem;
+    color: #475569;
+  }
+  input, select {
+    width: 100%;
+    padding: 1.2rem;
+    font-size: 1.2rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+  }
+}
