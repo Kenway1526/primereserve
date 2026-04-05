@@ -1,39 +1,113 @@
-// Configuración de conexión con soporte para PgBouncer
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
 generator client {
   provider = "prisma-client-js"
 }
 
-// Modelo para los Restaurantes
-model Restaurante {
-  id          String   @id @default(uuid())
-  nombre      String
-  ubicacion   String
-  mesas       Mesa[]
-  createdAt   DateTime @default(now())
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-// Modelo para las Mesas de cada restaurante
-model Mesa {
-  id           String        @id @default(uuid())
-  numero       Int
-  capacidad    Int
-  restaurante  Restaurante   @relation(fields: [restauranteId], references: [id])
-  restauranteId String
-  reservas     Reservacion[]
+model Usuario {
+  id             String        @id @default(uuid())
+  email          String        @unique
+  password       String
+  nombre         String?
+  rol            String        @default("CLIENTE") // ADMIN, CLIENTE, MESERO, COCINA
+  reservaciones  Reservacion[]
+  ordenes        Orden[]
+  fecha_creacion DateTime      @default(now())
+
+  @@map("usuarios")
 }
 
-// Modelo para la gestión de Reservaciones
 model Reservacion {
-  id          String   @id @default(uuid())
-  cliente     String
-  fechaHora   DateTime
-  personas    Int
-  mesa        Mesa     @relation(fields: [mesaId], references: [id])
-  mesaId      String
-  createdAt   DateTime @default(now())
+  id               String   @id @default(uuid())
+  usuario          Usuario  @relation(fields: [usuarioId], references: [id])
+  usuarioId        String   @map("usuario_id")
+  mesa             Mesa?    @relation(fields: [mesaId], references: [id])
+  mesaId           String?  @map("mesa_id")
+  fecha_principal  DateTime
+  hora_principal   String
+  fecha_plan_b     DateTime @map("fecha_plan_b")
+  hora_plan_b      String   @map("hora_plan_b")
+  num_personas     Int
+  ocasion          String?
+  estado           String   @default("PENDIENTE") // PENDIENTE, CONFIRMADA, CANCELADA, COMPLETADA
+
+  @@map("reservaciones")
+}
+
+model Mesa {
+  id            String        @id @default(uuid())
+  numero_mesa   Int           @unique @map("numero_mesa")
+  capacidad     Int
+  estado        String        @default("LIBRE") // LIBRE, OCUPADA, SUCIA, RESERVADA
+  zona          String        @default("SALON") // TERRAZA, SALON, VIP
+  reservaciones Reservacion[]
+  ordenes       Orden[]
+
+  @@map("mesas")
+}
+
+model MenuItem {
+  id              String         @id @default(uuid())
+  nombre          String
+  descripcion     String?
+  precio          Float
+  categoria       String // ENTRADAS, PLATOS_FUERTES, BEBIDAS, POSTRES
+  esta_disponible Boolean        @default(true)
+  detalles_orden  DetalleOrden[]
+  receta          Receta[]
+
+  @@map("menu_items")
+}
+
+model Orden {
+  id         String         @id @default(uuid())
+  mesa       Mesa           @relation(fields: [mesaId], references: [id])
+  mesaId     String         @map("mesa_id")
+  usuario    Usuario        @relation(fields: [usuarioId], references: [id])
+  usuarioId  String         @map("usuario_id")
+  estado     String         @default("EN_PREPARACION") // EN_PREPARACION, LISTO, SERVIDO, PAGADO
+  total      Float          @default(0)
+  fecha      DateTime       @default(now())
+  detalles   DetalleOrden[]
+
+  @@map("ordenes")
+}
+
+model DetalleOrden {
+  id               String   @id @default(uuid())
+  orden            Orden    @relation(fields: [ordenId], references: [id])
+  ordenId          String   @map("orden_id")
+  menuItem         MenuItem @relation(fields: [menuItemId], references: [id])
+  menuItemId       String   @map("menu_item_id")
+  cantidad         Int
+  subtotal         Float
+  notas_especiales String?  @map("notas_especiales")
+
+  @@map("detalles_orden")
+}
+
+model Ingrediente {
+  id                  String   @id @default(uuid())
+  nombre              String
+  stock_actual        Float
+  unidad              String // KG, LT, PZ
+  stock_minimo_alerta Float
+  recetas             Receta[]
+
+  @@map("ingredientes")
+}
+
+model Receta {
+  menuItem       MenuItem    @relation(fields: [menuItemId], references: [id])
+  menuItemId     String      @map("menu_item_id")
+  ingrediente    Ingrediente @relation(fields: [ingredienteId], references: [id])
+  ingredienteId  String      @map("ingrediente_id")
+  cantidad_usada Float
+
+  @@id([menuItemId, ingredienteId])
+  @@map("recetas")
 }
