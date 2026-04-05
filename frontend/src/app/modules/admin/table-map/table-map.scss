@@ -1,0 +1,253 @@
+/* Variables de Color Luxury Neon */
+$gold: #d4af37;
+$free: #00ff88;
+$busy: #ff3e3e;
+$res: #00bfff;
+$dirty: #ffaa00;
+$dark-bg: #050505;
+$glass-bg: rgba(20, 20, 20, 0.9);
+
+.map-mgmt-container {
+  padding: 2.5rem;
+  background: $dark-bg;
+  min-height: 100vh;
+}
+
+/* Header y Tabs */
+.map-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 20px;
+
+  h1 { 
+    color: white; 
+    font-weight: 300; 
+    letter-spacing: 2px; 
+    margin: 0; 
+    font-size: 1.8rem;
+  }
+
+  .floor-tabs {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    
+    button {
+      background: #111;
+      border: 1px solid #222;
+      color: #555;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      transition: 0.3s;
+      
+      &.active {
+        border-color: $gold;
+        color: $gold;
+        background: rgba($gold, 0.05);
+      }
+    }
+  }
+}
+
+/* Leyenda Flotante */
+.map-legend {
+  display: flex;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 12px 25px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #888;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+
+    .indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      
+      &.libre { background: $free; box-shadow: 0 0 10px $free; }
+      &.ocupada { background: $busy; box-shadow: 0 0 10px $busy; }
+      &.reservada { background: $res; box-shadow: 0 0 10px $res; }
+      &.sucia { background: $dirty; box-shadow: 0 0 10px $dirty; }
+    }
+  }
+}
+
+/* Botón Nuevo Ingrediente / Mesa */
+.btn-primary-gold {
+  background: white; // Blanco para contraste máximo
+  color: black;
+  border: none;
+  padding: 0 25px;
+  height: 50px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: 0.3s;
+  
+  &:hover {
+    background: $gold;
+    transform: translateY(-2px);
+  }
+}
+
+/* EL PLANO (Floor) */
+.restaurant-floor {
+  width: 100%;
+  height: 650px;
+  background: #080808;
+  border: 1px solid #151515;
+  border-radius: 15px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+
+  .grid-pattern {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(rgba($gold, 0.08) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .floor-watermark {
+    position: absolute;
+    bottom: 20px;
+    right: 40px;
+    font-size: 5rem;
+    font-weight: 900;
+    color: rgba(255,255,255,0.02);
+    pointer-events: none;
+    user-select: none;
+  }
+}
+
+/* Nodos de Mesa */
+.table-node {
+  position: absolute;
+  cursor: move;
+  transition: transform 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .table-body {
+    width: 80px;
+    height: 80px;
+    background: $glass-bg;
+    border: 2px solid #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+
+    .t-num { 
+      color: white; 
+      font-size: 1.4rem; 
+      font-weight: bold; 
+    }
+    
+    .t-icons { 
+      color: #666; 
+      font-size: 0.7rem; 
+      display: flex; 
+      align-items: center; 
+      gap: 4px; 
+      margin-top: 2px;
+      .material-icons { font-size: 14px; }
+    }
+  }
+
+  /* Formas */
+  &.cuadrada .table-body { border-radius: 10px; }
+  &.circular .table-body { border-radius: 50%; }
+
+  /* Iluminación por Estado */
+  &.libre .table-body { border-color: $free; box-shadow: 0 0 15px rgba($free, 0.2); .t-num { color: $free; } }
+  &.ocupada .table-body { border-color: $busy; box-shadow: 0 0 15px rgba($busy, 0.2); .t-num { color: $busy; } }
+  &.reservada .table-body { border-color: $res; box-shadow: 0 0 15px rgba($res, 0.2); .t-num { color: $res; } }
+  &.sucia .table-body { border-color: $dirty; box-shadow: 0 0 15px rgba($dirty, 0.2); .t-num { color: $dirty; } }
+
+  &:active { 
+    transform: scale(1.1); 
+    z-index: 100; 
+    cursor: grabbing; 
+  }
+}
+
+/* Formulario del Modal */
+.table-config-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    
+    label { 
+      color: #666; 
+      font-size: 0.7rem; 
+      text-transform: uppercase; 
+      letter-spacing: 1px;
+    }
+
+    input, select {
+      background: #111;
+      border: 1px solid #222;
+      color: white;
+      padding: 12px;
+      border-radius: 4px;
+      outline: none;
+      
+      &:focus { border-color: $gold; }
+    }
+
+    /* Estilo para Inputs Bloqueados (Automáticos) */
+    .disabled-input {
+      background: #080808 !important;
+      color: $gold !important;
+      border-color: #222 !important;
+      cursor: not-allowed;
+      opacity: 0.7;
+      font-weight: bold;
+    }
+  }
+
+  .btn-save-table {
+    background: $gold;
+    color: black;
+    border: none;
+    padding: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-top: 10px;
+    
+    &:hover { background: white; }
+  }
+}

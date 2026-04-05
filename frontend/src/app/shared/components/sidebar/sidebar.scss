@@ -1,0 +1,64 @@
+$gold: #d4af37;
+$sidebar-bg: #0a0a0a;
+
+.sidebar {
+  width: 260px;
+  height: 100vh;
+  background: $sidebar-bg;
+  border-right: 1px solid #1a1a1a;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  transition: all 0.3s ease;
+
+  .sidebar-logo {
+    padding: 0 25px 20px;
+    img { width: 150px; margin-bottom: 15px; }
+    .divider { width: 40px; height: 2px; background: $gold; }
+  }
+
+  .nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    li {
+      margin: 4px 15px;
+      
+      a {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        color: #666;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: 0.3s;
+        gap: 15px;
+
+        .material-icons { font-size: 20px; }
+        .link-text { font-size: 0.85rem; font-weight: 500; letter-spacing: 0.5px; }
+      }
+
+      &:hover a {
+        background: rgba(255, 255, 255, 0.03);
+        color: white;
+      }
+
+      &.active a {
+        background: rgba($gold, 0.1);
+        color: $gold;
+        .material-icons { color: $gold; }
+      }
+
+      /* Empuja la configuración al fondo */
+      &.nav-bottom {
+        margin-top: auto;
+        border-top: 1px solid #1a1a1a;
+        padding-top: 15px;
+      }
+    }
+  }
+}

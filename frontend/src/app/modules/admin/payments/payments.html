@@ -1,0 +1,49 @@
+<div class="payments-container">
+  
+  <header class="payments-header">
+    <div class="gold-line"></div>
+    <h1 class="text-white">PAGOS</h1>
+  </header>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <small>PAGOS PROCESADOS</small>
+      <div class="amount-wrap">
+        <span class="currency-symbol">$</span>
+        <p class="amount-val text-green">{{ procesados }}</p>
+      </div>
+      <span class="sub-label">2 transacciones</span>
+    </div>
+
+    <div class="summary-card">
+      <small>PAGOS PENDIENTES</small>
+      <div class="amount-wrap">
+        <span class="currency-symbol">$</span>
+        <p class="amount-val text-gold">{{ pendientes }}</p>
+      </div>
+      <span class="sub-label">3 órdenes abiertas</span>
+    </div>
+
+    <div class="summary-card">
+      <small>VENTAS DEL DÍA</small>
+      <div class="amount-wrap">
+        <span class="currency-symbol">$</span>
+        <p class="amount-val text-gold">{{ ventasDia }}</p>
+      </div>
+      <span class="sub-label">Hoy</span>
+    </div>
+  </div>
+
+  <div class="payments-list">
+    <div class="payment-row" *ngFor="let pago of historialPagos">
+      <div class="payment-info">
+        <h3 class="text-white">{{ pago.mesa }}</h3>
+        <span class="text-muted">{{ pago.metodo }} · {{ pago.hora }}</span>
+      </div>
+      <div class="payment-amount text-gold">
+        ${{ pago.monto }}
+      </div>
+    </div>
+  </div>
+
+</div>

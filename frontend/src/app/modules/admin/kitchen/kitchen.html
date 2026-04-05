@@ -1,0 +1,65 @@
+<div class="kitchen-container">
+  
+  <header class="kitchen-header">
+    <div class="gold-line"></div>
+    <h1 class="text-white">COCINA (SUPERVISOR)</h1>
+  </header>
+
+  <div class="kitchen-board">
+    
+    <div class="kitchen-col">
+      <div class="col-header">
+        <span class="text-gold">Pendientes</span>
+        <span class="badge">{{ pendientes.length }}</span>
+      </div>
+      <div class="cards-stack">
+        <div class="k-card clickable" *ngFor="let t of pendientes" (click)="avanzarEstado(t)">
+          <div class="k-card-top">
+            <span class="text-gold mesa-title">{{ t.mesa }}</span>
+            <span class="text-muted">{{ t.tiempo }} min</span>
+          </div>
+          <div class="k-card-body">
+            <p class="text-white" *ngFor="let p of t.platos">{{ p.cant }}x {{ p.nombre }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kitchen-col">
+      <div class="col-header">
+        <span class="text-blue">En Preparación</span>
+        <span class="badge">{{ preparacion.length }}</span>
+      </div>
+      <div class="cards-stack">
+        <div class="k-card clickable border-blue" *ngFor="let t of preparacion" (click)="avanzarEstado(t)">
+          <div class="k-card-top">
+            <span class="text-blue mesa-title">{{ t.mesa }}</span>
+            <span class="text-muted">{{ t.tiempo }} min</span>
+          </div>
+          <div class="k-card-body">
+            <p class="text-white" *ngFor="let p of t.platos">{{ p.cant }}x {{ p.nombre }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kitchen-col">
+      <div class="col-header">
+        <span class="text-green">Listos</span>
+        <span class="badge">{{ listos.length }}</span>
+      </div>
+      <div class="cards-stack">
+        <div class="k-card clickable border-green" *ngFor="let t of listos" (click)="avanzarEstado(t)">
+          <div class="k-card-top">
+            <span class="text-green mesa-title">{{ t.mesa }}</span>
+            <span class="text-muted">{{ t.tiempo }} min</span>
+          </div>
+          <div class="k-card-body">
+            <p class="text-white" *ngFor="let p of t.platos">{{ p.cant }}x {{ p.nombre }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

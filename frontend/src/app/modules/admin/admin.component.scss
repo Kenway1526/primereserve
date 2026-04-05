@@ -1,74 +1,52 @@
-.admin-dashboard, .staff-dashboard, .kitchen-dashboard {
-  min-height: 100vh;
-  background-color: #f1f5f9;
+/* Variables locales si no usas globales */
+$gold: #d4af37;
+
+.admin-wrapper {
   display: flex;
-  flex-direction: column;
+  height: 100vh;  /* Ocupa exactamente el alto de la ventana */
+  width: 100vw;   /* Ocupa exactamente el ancho de la ventana */
+  background: #000;
+  overflow: hidden; /* BLOQUEA el scroll global para evitar la doble barra */
 }
 
-header {
-  background: white;
-  padding: 1rem 3rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-
-  .brand-info {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    .nav-logo { height: 60px; }
-    .role-badge { font-weight: 800; color: #1e293b; font-size: 1.2rem; }
-  }
-}
-
-.dashboard-content {
+.main-content {
   flex: 1;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2rem;
-}
+  flex-direction: column;
+  height: 100vh;
+  min-width: 0; /* Evita que el contenido desborde horizontalmente */
+  
+  /* ESTE ES EL ÚNICO LUGAR CON SCROLL DE TODA LA APP */
+  overflow-y: auto; 
+  overflow-x: hidden;
 
-.menu-grid {
-  text-align: center;
-  width: 100%;
-  max-width: 1100px;
-  .main-title { font-size: 3.5rem; font-weight: 900; margin-bottom: 3rem; }
-}
-
-.actions-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 2.5rem;
-
-  .card-btn {
-    height: 250px;
-    background: white;
-    border: none;
-    border-radius: 30px;
-    font-size: 1.8rem;
-    font-weight: 900;
-    color: #1e293b;
-    cursor: pointer;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-    transition: all 0.3s ease;
-
+  /* Estética del Scrollbar estilo Prime Reserve */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #050505;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #1a1a1a;
+    border-radius: 10px;
     &:hover {
-      background: #1e293b;
-      color: white;
-      transform: translateY(-10px);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      background: $gold;
     }
   }
 }
 
-.btn-logout {
-  background: #334155;
-  color: white;
-  padding: 1rem 2rem;
-  border-radius: 12px;
-  font-weight: 800;
-  border: none;
-  cursor: pointer;
+.dashboard-viewport {
+  flex: 1;
+  width: 100%;
+  display: block;
+  /* Aquí es donde vive el router-outlet */
+}
+
+/* Ajuste para que el Header no se mueva al hacer scroll */
+app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
 }

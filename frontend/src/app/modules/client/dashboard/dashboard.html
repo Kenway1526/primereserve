@@ -1,0 +1,10 @@
+<div class="actions">
+  <a routerLink="/client/reserve">Hacer Reserva</a>
+  <a routerLink="/client/menu">Ver Menú</a>
+</div>
+
+<section *ngIf="activeReservations.length > 0">
+  <div *ngFor="let res of activeReservations">
+    {{res.date}} - {{res.status}}
+  </div>
+</section>

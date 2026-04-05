@@ -1,0 +1,90 @@
+<div class="dash-wrapper">
+  
+  <header class="dash-header">
+    <div class="title-info">
+      <h1>Panel Administrativo</h1>
+      <div class="gold-line"></div>
+    </div>
+    <button class="btn-export" (click)="generatePDF()">
+      <span class="material-icons">picture_as_pdf</span> 
+      EXPORTAR REPORTE
+    </button>
+  </header>
+
+  <section class="kpi-container">
+    <div class="card-kpi gold">
+      <div class="icon"><span class="material-icons">payments</span></div>
+      <div class="data">
+        <label>Ingresos del Día</label>
+        <span class="val">${{ metrics.ingresosDia | number:'1.2-2' }}</span>
+      </div>
+    </div>
+
+    <div class="card-kpi blue">
+      <div class="icon"><span class="material-icons">chair</span></div>
+      <div class="data">
+        <label>Ocupación Actual</label>
+        <span class="val">{{ metrics.ocupacionActual }}%</span>
+      </div>
+    </div>
+
+    <div class="card-kpi green">
+      <div class="icon"><span class="material-icons">analytics</span></div>
+      <div class="data">
+        <label>Ticket Promedio</label>
+        <span class="val">${{ metrics.ticketPromedio | number:'1.2-2' }}</span>
+      </div>
+    </div>
+
+    <div class="card-kpi orange">
+      <div class="icon"><span class="material-icons">schedule</span></div>
+      <div class="data">
+        <label>Rotación Promedio</label>
+        <span class="val">{{ metrics.tiempoPromedioMesa }}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="charts-grid">
+    
+    <div class="chart-card full">
+      <h3>Tendencia de Ingresos Semanales</h3>
+      <div class="chart-area">
+        <canvas #salesChart></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h3>Mix de Categorías (Ventas)</h3>
+      <div class="chart-area">
+        <canvas #categoryChart></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h3>Pronóstico de Reservas (Próx. 4 Semanas)</h3>
+      <div class="chart-area">
+        <canvas #forecastChart></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h3>Calidad de Servicio: PB vs Terraza</h3>
+      <div class="chart-area">
+        <canvas #efficiencyChart></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h3>Crecimiento de Clientes Recurrentes</h3>
+      <div class="chart-area">
+        <canvas #loyaltyChart></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card footer-msg full">
+      <p>Prime Reserve v2.0 • Sistema de Inteligencia de Negocios</p>
+    </div>
+
+  </section>
+</div>

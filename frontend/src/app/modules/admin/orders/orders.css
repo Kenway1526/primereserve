@@ -1,0 +1,92 @@
+.orders-page-container {
+  display: block !important;
+  background-color: #000000 !important;
+  min-height: 100vh;
+  padding: 50px;
+}
+
+.gold-line {
+  width: 50px;
+  height: 2px;
+  background-color: #d4af37 !important;
+  margin-bottom: 15px;
+}
+
+.title-main {
+  color: #ffffff !important;
+  font-weight: 200;
+  letter-spacing: 4px;
+  font-size: 2rem;
+  margin: 0 0 50px 0;
+}
+
+/* UTILIDADES DE COLOR */
+.text-white { color: #ffffff !important; }
+.text-gold { color: #d4af37 !important; }
+.text-muted { color: #444444 !important; font-size: 0.7rem; display: block; }
+
+/* TICKETS */
+.ticket-card {
+  background-color: #080808 !important;
+  border: 1px solid #d4af37 !important; /* RECUADRO DORADO */
+  padding: 30px;
+  margin-bottom: 25px;
+  max-width: 800px;
+  border-radius: 4px;
+}
+
+.ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 25px;
+}
+
+.ticket-header h2 {
+  font-size: 1.8rem;
+  font-weight: 300;
+  margin: 0;
+}
+
+.sub-text {
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+}
+
+.status-pill {
+  border: 1px solid #d4af37 !important;
+  color: #d4af37 !important;
+  padding: 8px 15px;
+  font-size: 0.65rem;
+  font-weight: 900;
+}
+
+/* CUERPO */
+.ticket-body {
+  border-top: 1px solid #1a1a1a;
+  padding-top: 20px;
+  margin-bottom: 25px;
+}
+
+.item-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.dots-spacer {
+  flex: 1;
+  border-bottom: 1px dotted #222;
+  margin: 0 15px;
+}
+
+/* FOOTER */
+.price-text {
+  font-size: 2.5rem;
+  font-weight: 200;
+  margin: 5px 0 0 0;
+}
+
+.logs-section {
+  text-align: right;
+}

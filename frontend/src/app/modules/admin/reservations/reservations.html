@@ -1,0 +1,87 @@
+<div class="res-container">
+  
+  <header class="res-header">
+    <div class="brand">
+      <div class="gold-accent"></div>
+      <h1>RESERVACIONES</h1>
+    </div>
+    <button class="btn-add-luxe" (click)="isModalOpen = true">
+      <span class="material-icons">add</span> NUEVA RESERVA
+    </button>
+  </header>
+
+  <nav class="res-tabs">
+    <button [class.active]="activeTab === 'proximas'" (click)="setTab('proximas')">Próximas</button>
+    <button [class.active]="activeTab === 'curso'" (click)="setTab('curso')">En Curso</button>
+    <button [class.active]="activeTab === 'espera'" (click)="setTab('espera')">Lista de Espera</button>
+    <button [class.active]="activeTab === 'canceladas'" (click)="setTab('canceladas')">Canceladas</button>
+  </nav>
+
+  <div class="res-grid" *ngIf="activeTab !== 'espera'">
+    <div class="res-card-premium" *ngFor="let res of filteredReservations">
+      <div class="res-card-header">
+        <div class="res-info">
+          <h3>{{ res.cliente }}</h3>
+          <span class="res-date">{{ res.fecha | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="res-time-badge">{{ res.hora }}</div>
+      </div>
+
+      <div class="res-card-body">
+        <div class="item"><span class="material-icons">groups</span> {{ res.personas }} Pers.</div>
+        <div class="item"><span class="material-icons">chair</span> {{ res.mesa || 'Sin mesa' }}</div>
+      </div>
+
+      <div class="res-card-footer">
+        <button class="btn-action-gold" *ngIf="activeTab === 'proximas'" (click)="sentarCliente(res)">SENTAR CLIENTE</button>
+        <button class="btn-action-gray" *ngIf="activeTab === 'proximas'" (click)="cancelarReserva(res)">CANCELAR</button>
+        <button class="btn-action-gray" *ngIf="activeTab === 'curso'">FINALIZAR</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="wait-list" *ngIf="activeTab === 'espera'">
+    <div class="wait-card" *ngFor="let wait of waitList">
+      <div class="wait-info">
+        <h4>{{ wait.cliente }}</h4>
+        <p>En cola para: {{ wait.fecha }} a las {{ wait.hora }}</p>
+        <span class="wait-tag">SOLICITUD DE SUSTITUCIÓN</span>
+      </div>
+      <button class="btn-add-luxe" (click)="promoverSustituto(wait)">ASIGNAR ESPACIO</button>
+    </div>
+  </div>
+
+  <app-modal [isOpen]="isModalOpen" [title]="'Registrar Reservación'" (close)="closeModal()">
+    <div class="modal-form">
+      <div class="form-group">
+        <label>Nombre del Titular</label>
+        <input type="text" [(ngModel)]="resForm.cliente">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fecha</label>
+          <input type="date" [(ngModel)]="resForm.fecha">
+        </div>
+        <div class="form-group">
+          <label>Hora</label>
+          <input type="time" [(ngModel)]="resForm.hora">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Comensales</label>
+          <input type="number" [(ngModel)]="resForm.personas">
+        </div>
+        <div class="form-group">
+          <label>Mesa Sugerida</label>
+          <input type="text" [(ngModel)]="resForm.mesa">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-submit-gold" (click)="saveReservation()">CONFIRMAR TITULAR</button>
+        <button class="btn-submit-border" (click)="addToWaitlist()">ENVIAR A LISTA DE ESPERA</button>
+      </div>
+    </div>
+  </app-modal>
+
+</div>

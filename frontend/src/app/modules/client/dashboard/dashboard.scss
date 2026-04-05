@@ -1,0 +1,84 @@
+// Variables de marca
+$gold: #d4af37;
+$dark-bg: #0a0a0a;
+$card-bg: #141414;
+$text-beige: #f5f5dc;
+$border-color: #2a2a2a;
+
+.dashboard-container {
+  background-color: $dark-bg;
+  color: $text-beige;
+  min-height: 100vh;
+  padding: 2rem;
+
+  .header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 300;
+      letter-spacing: 2px;
+      color: $gold;
+    }
+
+    .btn-pdf {
+      background: transparent;
+      border: 1px solid $gold;
+      color: $gold;
+      padding: 0.8rem 1.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+
+      &:hover {
+        background: $gold;
+        color: black;
+        box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+      }
+    }
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+
+    .stat-card {
+      background: $card-bg;
+      border: 1px solid $border-color;
+      padding: 1.5rem;
+      border-radius: 8px;
+      transition: border-color 0.3s ease;
+
+      &:hover {
+        border-color: $gold;
+      }
+
+      .label {
+        display: block;
+        color: #888;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+        letter-spacing: 1px;
+      }
+
+      .value {
+        font-size: 1.8rem;
+        font-weight: 500;
+        color: white;
+        
+        &.highlight {
+          color: $gold;
+        }
+      }
+    }
+  }
+}

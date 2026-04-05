@@ -1,0 +1,22 @@
+<header class="prime-header">
+  <div class="page-title">
+    <span>SISTEMA DE GESTIÓN OPERATIVA</span>
+  </div>
+
+  <div class="user-actions">
+    <div class="profile-info">
+      <div class="text">
+        <span class="name">Administrador</span>
+        <span class="email">{{ userEmail }}</span>
+      </div>
+      <div class="avatar">
+        {{ userEmail.charAt(0).toUpperCase() }}
+      </div>
+    </div>
+    
+    <button class="logout-btn" (click)="onLogout()">
+        <span class="material-icons">logout</span>
+        CERRAR SESIÓN
+    </button>
+  </div>
+</header>

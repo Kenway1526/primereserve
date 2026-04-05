@@ -1,68 +1,131 @@
 import { Routes } from '@angular/router';
+import { roleGuard } from './core/guards/role/role-guard';
+import { AdminComponent } from './modules/admin/admin.component';
 
-// Componentes de Acceso
-import { Dashboard2Component } from './modules/dashboard-2/dashboard-2.component';
-import { Login2Component } from './modules/auth/login-2/login-2.component';
-import { RegistroComponent } from './modules/auth/registro/registro.component';
-
-// Dashboards por Rol
-import { DashboardClienteComponent } from './modules/cliente/dashboard-cliente/dashboard-cliente.component';
-import { DashboardAdminComponent } from './modules/admin/dashboard-admin/dashboard-admin.component';
-import { DashboardMeserosComponent } from './modules/meseros/dashboard-meseros/dashboard-meseros.component';
-import { DashboardCocinaComponent } from './modules/cocina/dashboard-cocina/dashboard-cocina.component';
+// Importa aquí tus componentes principales (Home, Dashboards, etc.)
 
 export const routes: Routes = [
-  // --- ACCESO PÚBLICO ---
-  { 
-    path: 'dashboard-2', 
-    component: Dashboard2Component,
+  { path: '', redirectTo: 'home/login', pathMatch: 'full' },
+  
+  {
+    path: 'home',
     children: [
-      { path: 'registro', component: RegistroComponent } // Embebido en Dashboard 2
-    ]
-  },
-  { path: 'login-2', component: Login2Component },
-
-  // --- ÁREA CLIENTE ---
-  { 
-    path: 'cliente', 
-    component: DashboardClienteComponent,
-    children: [
-      { path: 'reservas', loadComponent: () => import('./modules/cliente/reservas/reservas.component').then(m => m.ReservasComponent) },
-      { path: 'menu', loadComponent: () => import('./modules/cliente/menu/menu.component').then(m => m.MenuComponent) },
-      { path: 'lista-espera', loadComponent: () => import('./modules/cliente/lista-espera/lista-espera.component').then(m => m.ListaEsperaComponent) }
-    ]
-  },
-
-  // --- ÁREA ADMINISTRADOR ---
-  { 
-    path: 'admin', 
-    component: DashboardAdminComponent,
-    children: [
-      { path: 'gestion', loadComponent: () => import('./modules/admin/gestion-reserva/gestion-reserva.component').then(m => m.GestionReservaComponent) },
-      { path: 'reportes', loadComponent: () => import('./modules/admin/reportes/reportes.component').then(m => m.ReportesComponent) }
+      { 
+        path: 'login', 
+        loadComponent: () => import('./modules/home/login/login').then(m => m.Login) 
+      },
+      { 
+        path: 'register', 
+        loadComponent: () => import('./modules/home/register/register').then(m => m.Register) 
+      },
+      { 
+        path: 'catalog', 
+        loadComponent: () => import('./modules/home/restaurant-catalog/restaurant-catalog').then(m => m.RestaurantCatalog) 
+      }
     ]
   },
 
-  // --- ÁREA MESEROS ---
-  { 
-    path: 'meseros', 
-    component: DashboardMeserosComponent,
+  {
+    path: 'client',
+    canActivate: [roleGuard],
+    data: { role: 'CLIENT' },
     children: [
-      { path: 'atender', loadComponent: () => import('./modules/meseros/atender-reservas/atender-reservas.component').then(m => m.AtenderReservasComponent) }
+      { 
+        path: 'dashboard', 
+        loadComponent: () => import('./modules/client/dashboard/dashboard').then(m => m.Dashboard) 
+      },
+      { 
+        path: 'reserve', 
+        loadComponent: () => import('./modules/client/reservation-stepper/reservation-stepper').then(m => m.ReservationStepper) 
+      },
+      { 
+        path: 'menu', 
+        loadComponent: () => import('./modules/client/menu-view/menu-view').then(m => m.MenuView) 
+      }
     ]
   },
 
-  // --- ÁREA COCINA ---
-  { 
-    path: 'cocina', 
-    component: DashboardCocinaComponent,
+  {
+    path: 'admin',
+    component: AdminComponent,
+    canActivate: [roleGuard],
+    data: { role: 'ADMIN' },
     children: [
-      { path: 'pedidos', loadComponent: () => import('./modules/cocina/lista-pedidos/lista-pedidos.component').then(m => m.ListaPedidosComponent) },
-      { path: 'actualizar-menu', loadComponent: () => import('./modules/cocina/actualizar-menu/actualizar-menu.component').then(m => m.ActualizarMenuComponent) }
+      { 
+        path: 'dashboard', 
+        loadComponent: () => import('./modules/admin/dashboard/dashboard').then(m => m.Dashboard) 
+      },
+      { 
+        path: 'inventory-mgmt', 
+        loadComponent: () => import('./modules/admin/inventory-mgmt/inventory-mgmt').then(m => m.InventoryMgmt) 
+      },
+      { 
+        path: 'table-map', 
+        loadComponent: () => import('./modules/admin/table-map/table-map').then(m => m.TableMap) 
+      },
+      { 
+        path: 'staff-mgmt', 
+        loadComponent: () => import('./modules/admin/staff-mgmt/staff-mgmt').then(m => m.StaffMgmt) 
+      },
+      { 
+        path: 'reservations', 
+        loadComponent: () => import('./modules/admin/reservations/reservations').then(m => m.Reservations) 
+      },
+      { 
+        path: 'orders', 
+        loadComponent: () => import('./modules/admin/orders/orders').then(m => m.Orders) 
+      },
+      { 
+        path: 'kitchen', 
+        loadComponent: () => import('./modules/admin/kitchen/kitchen').then(m => m.Kitchen) 
+      },
+      { 
+        path: 'payments', 
+        loadComponent: () => import('./modules/admin/payments/payments').then(m => m.Payments) 
+      },
+      { 
+        path: 'settings', 
+        loadComponent: () => import('./modules/admin/settings/settings').then(m => m.Settings) 
+      },
     ]
   },
 
-  // --- REDIRECCIONES ---
-  { path: '', redirectTo: '/dashboard-2', pathMatch: 'full' },
-  { path: '**', redirectTo: '/dashboard-2' }
+  {
+    path: 'waiter',
+    canActivate: [roleGuard],
+    data: { role: 'WAITER' },
+    children: [
+      { 
+        path: 'tables', 
+        loadComponent: () => import('./modules/waiter/table-map/table-map').then(m => m.TableMap) 
+      },
+      { 
+        path: 'order', 
+        loadComponent: () => import('./modules/waiter/order-entry/order-entry').then(m => m.OrderEntry) 
+      },
+      { 
+        path: 'billing', 
+        loadComponent: () => import('./modules/waiter/billing/billing').then(m => m.Billing) 
+      }
+    ]
+  },
+
+  {
+    path: 'kitchen',
+    canActivate: [roleGuard],
+    data: { role: 'KITCHEN' },
+    children: [
+      { 
+        path: 'orders', 
+        loadComponent: () => import('./modules/kitchen/order-monitor/order-monitor').then(m => m.OrderMonitor) 
+      },
+      { 
+        path: 'stock', 
+        loadComponent: () => import('./modules/kitchen/stock-control/stock-control').then(m => m.StockControl) 
+      }
+    ]
+  },
+
+  { path: '', redirectTo: 'admin/dashboard', pathMatch: 'full' },
+  { path: '**', redirectTo: 'home/login' }
 ];

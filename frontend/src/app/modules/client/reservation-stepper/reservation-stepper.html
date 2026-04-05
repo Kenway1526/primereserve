@@ -1,0 +1,35 @@
+<div class="stepper-container luxury-dark">
+  <div class="progress-bar">Paso {{step}} de 4</div>
+
+  <div *ngIf="step === 1" class="step-content">
+    <h3>Fecha Principal</h3>
+    <input type="date" [(ngModel)]="res.primaryDate">
+    <input type="time" [(ngModel)]="res.primaryTime">
+  </div>
+
+  <div *ngIf="step === 2" class="step-content">
+    <h3>Fecha Alternativa (Plan B)</h3>
+    <input type="date" [(ngModel)]="res.alternativeDate">
+    <input type="time" [(ngModel)]="res.alternativeTime">
+  </div>
+
+  <div *ngIf="step === 3" class="step-content">
+    <select [(ngModel)]="res.occasion">
+      <option value="Birthday">Cumpleaños</option>
+      <option value="Anniversary">Aniversario</option>
+    </select>
+    <textarea placeholder="Solicitudes especiales" [(ngModel)]="res.requests"></textarea>
+  </div>
+
+  <div *ngIf="step === 4" class="step-content">
+    <h3>Confirmar Reserva</h3>
+    <p>Principal: {{res.primaryDate}} a las {{res.primaryTime}}</p>
+    <p>Plan B: {{res.alternativeDate}} a las {{res.alternativeTime}}</p>
+    <button (click)="confirm()" class="btn-gold">Finalizar</button>
+  </div>
+
+  <div class="actions">
+    <button *ngIf="step > 1" (click)="prev()">Atrás</button>
+    <button *ngIf="step < 4" (click)="next()" class="btn-gold">Siguiente</button>
+  </div>
+</div>

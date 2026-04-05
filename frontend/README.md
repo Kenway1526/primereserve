@@ -109,7 +109,7 @@ Desarrollo local (habilitar el front)
 
    - netlify dev (entrar a http://localhost:4200 en el navegador)
 
-API´s -> http://localhost:8888/.netlify/functions/
+     API´s -> http://localhost:8888/.netlify/functions/
 
 ======================================================================================
 

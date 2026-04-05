@@ -1,41 +1,97 @@
-/* You can add global styles to this file, and also import other style files */
-// Variables de diseño
-$primary-dark: #1e293b;
-$font-large: 1.2rem;
-$title-xl: 3.2rem;
+/* ==========================================================================
+   GLOBAL STYLES - PRIME RESERVE SYSTEM
+   ========================================================================== */
 
-.btn-xl {
-  padding: 1.5rem 3rem;
-  font-size: 1.5rem;
-  font-weight: 800;
-  border-radius: 20px;
-  background: $primary-dark;
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    transform: translateY(-5px);
-    background: #0f172a;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+// 1. Reset Total y Configuración de Pantalla
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #000000 !important; // Negro absoluto
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  overflow-x: hidden;
+  color: #ffffff;
+}
+
+// 2. Eliminación de Bordes Fantasmas y Configuración de Box-Sizing
+* {
+  box-sizing: border-box;
+  outline: none;
+  border: none; // Quitamos bordes por defecto de todos los elementos
+}
+
+// 3. Forzar Visibilidad de Textos en Header y Gestión Operativa
+// Usamos selectores genéricos para atrapar cualquier texto en la parte superior
+header, 
+.header-container, 
+.top-bar, 
+.sidebar-header {
+  background-color: #050505 !important;
+  color: #ffffff !important;
+
+  // Forzamos que cualquier span, p o h dentro sea blanco
+  span, p, h1, h2, h3, h4, h5, h6, div {
+    color: #ffffff !important;
+  }
+
+  // Si hay algún texto específico de "Gestión Operativa" o títulos
+  .title, .brand-text, .logo-text {
+    color: #ffffff !important;
+    letter-spacing: 2px;
+    text-transform: uppercase;
   }
 }
 
-.input-field {
-  margin-bottom: 2rem;
-  label {
-    display: block;
-    font-weight: 800;
-    font-size: 1.3rem;
-    margin-bottom: 0.8rem;
-    color: #475569;
+// 4. Estilos de Usuario / Admin en el Header
+.user-profile, .admin-info {
+  .user-name {
+    color: #ffffff !important;
+    font-weight: 600 !important;
   }
-  input, select {
-    width: 100%;
-    padding: 1.2rem;
-    font-size: 1.2rem;
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
+  
+  .user-role, .email {
+    color: #d4af37 !important; // Dorado para resaltar el rango
+    font-size: 0.75rem;
   }
+}
+
+// 5. Ajuste de Iconos Material
+.material-icons {
+  color: #ffffff !important;
+  vertical-align: middle;
+}
+
+// 6. Scrollbars Estilo Luxury
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1a1a1a;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d4af37; // Se vuelve dorado al pasar el mouse
+}
+
+// 7. Botones Globales de Transición
+button {
+  cursor: pointer;
+  background: none;
+  transition: all 0.3s ease;
+}
+
+/* ELIMINAR BORDE BLANCO ESPECÍFICO: 
+   Si el borde blanco venía de un contenedor de Angular o un layout 
+*/
+.main-content, .router-container, .admin-layout {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }

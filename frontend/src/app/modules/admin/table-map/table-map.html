@@ -1,0 +1,90 @@
+<div class="map-mgmt-container">
+  
+  <header class="map-header">
+    <div class="title-area">
+      <h1>Layout de Restaurante</h1>
+      <div class="floor-tabs">
+        <button [class.active]="currentFloor === 'PB'" (click)="currentFloor = 'PB'">PLANTA BAJA</button>
+        <button [class.active]="currentFloor === 'TERRAZA'" (click)="currentFloor = 'TERRAZA'">TERRAZA</button>
+      </div>
+    </div>
+
+    <div class="map-legend">
+      <div class="legend-item"><span class="indicator libre"></span> Libre</div>
+      <div class="legend-item"><span class="indicator ocupada"></span> Ocupada</div>
+      <div class="legend-item"><span class="indicator reservada"></span> Reservada</div>
+      <div class="legend-item"><span class="indicator sucia"></span> Sucia</div>
+    </div>
+
+    <button class="btn-primary-gold" (click)="openAddModal()">
+      <span class="material-icons">add_circle</span> NUEVA MESA
+    </button>
+  </header>
+
+  <div class="restaurant-floor" (dragover)="$event.preventDefault()">
+    <div class="grid-pattern"></div>
+    <div class="floor-watermark">{{ currentFloor }}</div>
+    
+    <div *ngFor="let table of filteredTables" 
+         class="table-node" 
+         [ngClass]="[table.estado.toLowerCase(), table.forma]"
+         [style.left.px]="table.x"
+         [style.top.px]="table.y"
+         draggable="true"
+         (dragend)="onDragEnd($event, table)"
+         (click)="openEditModal(table)">
+      
+      <div class="table-body">
+        <span class="t-num">{{ table.num }}</span>
+        <div class="t-icons">
+          <span class="material-icons">groups</span>{{ table.cap }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-modal [isOpen]="isModalOpen" [title]="'Configurar Mesa'" (close)="isModalOpen = false">
+    <div class="table-config-form" *ngIf="selectedTable">
+      
+      <div class="form-row">
+        <div class="field">
+          <label>Identificador (Automático)</label>
+          <input type="text" [(ngModel)]="selectedTable.num" [disabled]="true" class="disabled-input">
+        </div>
+        <div class="field">
+          <label>Capacidad (Personas)</label>
+          <input type="number" [(ngModel)]="selectedTable.cap">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label>Forma de la Mesa</label>
+          <select [(ngModel)]="selectedTable.forma">
+            <option value="cuadrada">Cuadrada</option>
+            <option value="circular">Circular</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Estado Inicial</label>
+          <select [(ngModel)]="selectedTable.estado">
+            <option value="LIBRE">Libre</option>
+            <option value="OCUPADA">Ocupada</option>
+            <option value="RESERVADA">Reservada</option>
+            <option value="SUCIA">Sucia</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label>Ubicación (Piso Actual)</label>
+          <input type="text" [value]="selectedTable.floor" [disabled]="true" class="disabled-input">
+        </div>
+      </div>
+
+      <button class="btn-save-table" (click)="saveTable()">CONFIRMAR MESA</button>
+    </div>
+  </app-modal>
+
+</div>

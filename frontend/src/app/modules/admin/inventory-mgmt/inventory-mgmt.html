@@ -1,0 +1,97 @@
+<div class="inventory-wrapper">
+  <header class="view-header">
+    <div class="title-group">
+      <h1>Inventario de Insumos</h1>
+      <div class="underline"></div>
+    </div>
+    
+    <div class="inventory-stats">
+      <div class="i-stat">
+        <span class="label">Total Artículos</span>
+        <span class="val">{{ stats.totalItems }}</span>
+      </div>
+      <div class="i-stat warning" *ngIf="stats.lowStock > 0">
+        <span class="label">Stock Crítico</span>
+        <span class="val">{{ stats.lowStock }}</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="action-bar">
+    <div class="search-box">
+      <span class="material-icons">search</span>
+      <input type="text" [(ngModel)]="searchText" placeholder="Buscar insumo...">
+    </div>
+    <button class="btn-gold" (click)="openAddModal()">
+      <span class="material-icons">add_box</span> NUEVO INGREDIENTE
+    </button>
+  </div>
+
+  <div class="inventory-grid">
+    <div class="ingredient-card" 
+         *ngFor="let item of ingredients | filter:searchText:'nombre'"
+         [class.critical]="item.stock < item.min">
+      
+      <div class="card-body">
+        <div class="main-info">
+          <h3>{{ item.nombre }}</h3>
+          <span class="cat-tag">{{ item.categoria }}</span>
+        </div>
+        
+        <div class="stock-display">
+          <div class="circular-progress">
+            <span class="num">{{ item.stock }}</span>
+            <span class="unit">{{ item.unidad }}</span>
+          </div>
+          <div class="min-label">Mínimo: {{ item.min }}</div>
+        </div>
+      </div>
+
+      <div class="card-actions">
+        <button (click)="openEditModal(item)"><span class="material-icons">edit</span></button>
+        <div class="alert-icon" *ngIf="item.stock < item.min">
+          <span class="material-icons">warning</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-modal [isOpen]="isModalOpen" [title]="itemForm.id ? 'Editar Insumo' : 'Nuevo Insumo'" (close)="isModalOpen = false">
+    <div class="prime-form">
+      <div class="f-group">
+        <label>Nombre del Insumo</label>
+        <input type="text" [(ngModel)]="itemForm.nombre">
+      </div>
+      <div class="f-row">
+        <div class="f-group">
+          <label>Stock Actual</label>
+          <input type="number" [(ngModel)]="itemForm.stock">
+        </div>
+        <div class="f-group">
+          <label>Mínimo Alerta</label>
+          <input type="number" [(ngModel)]="itemForm.min">
+        </div>
+      </div>
+      <div class="f-row">
+        <div class="f-group">
+          <label>Unidad</label>
+          <select [(ngModel)]="itemForm.unidad">
+            <option value="KG">Kilogramos (KG)</option>
+            <option value="LT">Litros (LT)</option>
+            <option value="PZ">Piezas (PZ)</option>
+          </select>
+        </div>
+        <div class="f-group">
+          <label>Categoría</label>
+          <select [(ngModel)]="itemForm.categoria">
+            <option value="Carnes">Carnes</option>
+            <option value="Vinos">Vinos</option>
+            <option value="Pescados">Pescados</option>
+            <option value="Insumos">Insumos Grales</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-save-full" (click)="saveItem()">GUARDAR CAMBIOS</button>
+    </div>
+  </app-modal>
+</div>

@@ -1,0 +1,107 @@
+<div class="staff-mgmt-container">
+  
+  <div class="view-header">
+    <h1>Gestión de Personal</h1>
+    <div class="title-underline"></div>
+  </div>
+
+  <section class="stats-overview-full">
+    <div class="stat-card">
+      <span class="label">Total Empleados</span>
+      <span class="value">{{ stats.total }}</span>
+    </div>
+    <div class="stat-card success">
+      <span class="label">En Turno</span>
+      <span class="value">{{ stats.activos }}</span>
+    </div>
+    <div class="stat-card info">
+      <span class="label">Meseros</span>
+      <span class="value">{{ stats.meseros }}</span>
+    </div>
+    <div class="stat-card warning">
+      <span class="label">Cocina</span>
+      <span class="value">{{ stats.cocina }}</span>
+    </div>
+    <div class="stat-card warning">
+      <span class="label">Inactivos</span>
+      <span class="value">{{ stats.inactivos }}</span>
+    </div>
+  </section>
+
+  <div class="controls-row">
+    <div class="search-field">
+      <span class="material-icons">search</span>
+      <input type="text" [(ngModel)]="searchText" placeholder="Buscar por nombre o correo...">
+    </div>
+    <button class="btn-add-staff" (click)="openAddModal()">
+      <span class="material-icons">person_add</span>
+      NUEVO EMPLEADO
+    </button>
+  </div>
+
+  <div class="staff-cards-grid">
+    <div class="employee-card" *ngFor="let member of staff | filter:searchText:'nombre'">
+      
+      <div class="card-header">
+        <div class="avatar-group">
+          <img [src]="member.img" alt="User avatar">
+          <div class="status-dot" [class.online]="member.activo"></div>
+        </div>
+        <div class="name-group">
+          <h3>{{ member.nombre }}</h3>
+          <span class="role-badge">{{ member.rol }}</span>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <p class="contact-info">
+          <span class="material-icons">mail</span>
+          {{ member.email }}
+        </p>
+        <p class="contact-info">
+          <span class="material-icons">smartphone</span>
+          {{ member.telefono }}
+        </p>
+      </div>
+
+      <div class="card-actions">
+        <button class="btn-edit-action" (click)="openEditModal(member)">
+          <span class="material-icons">edit_note</span>
+          Editar
+        </button>
+        <button class="btn-status-action" (click)="toggleStatus(member)" [class.inactive]="!member.activo">
+          {{ member.activo ? 'Desactivar' : 'Activar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <app-modal [isOpen]="isModalOpen" [title]="modalTitle" (close)="isModalOpen = false">
+    <div class="prime-form-luxe">
+      <div class="form-group">
+        <label>Nombre Completo</label>
+        <input type="text" [(ngModel)]="memberForm.nombre" placeholder="Ej. Juan Pérez">
+      </div>
+      <div class="form-group">
+        <label>Correo Electrónico</label>
+        <input type="email" [(ngModel)]="memberForm.email" placeholder="juan@prime.com">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Rol</label>
+          <select [(ngModel)]="memberForm.rol">
+            <option value="Mesero">Mesero</option>
+            <option value="Cocina">Cocina</option>
+            <option value="Admin">Admin</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="text" [(ngModel)]="memberForm.telefono" placeholder="+52 55 ...">
+        </div>
+      </div>
+      <button class="btn-submit-form" (click)="saveMember()">GUARDAR EMPLEADO</button>
+    </div>
+  </app-modal>
+
+</div>
