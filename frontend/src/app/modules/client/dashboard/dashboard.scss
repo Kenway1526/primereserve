@@ -1,84 +1,191 @@
-// Variables de marca
-$gold: #d4af37;
+// Variables de diseño Luxe
+$gold-primary: #d4af37;
+$gold-light: #f9f1d0;
 $dark-bg: #0a0a0a;
-$card-bg: #141414;
-$text-beige: #f5f5dc;
-$border-color: #2a2a2a;
+$dark-card: #141414;
+$white-soft: #e0e0e0;
+$glass-border: rgba(212, 175, 55, 0.2);
 
-.dashboard-container {
-  background-color: $dark-bg;
-  color: $text-beige;
+.dashboard-luxe {
   min-height: 100vh;
-  padding: 2rem;
+  background-color: $dark-bg;
+  color: $white-soft;
+  padding: 2rem 1rem;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
-  .header-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2.5rem;
+  header {
+    text-align: center;
+    margin-bottom: 3rem;
+    animation: fadeInDown 0.8s ease-out;
 
     h1 {
-      font-size: 2rem;
+      font-size: 1.8rem;
+      letter-spacing: 4px;
+      color: $gold-primary;
+      margin-bottom: 0.5rem;
       font-weight: 300;
-      letter-spacing: 2px;
-      color: $gold;
     }
 
-    .btn-pdf {
-      background: transparent;
-      border: 1px solid $gold;
-      color: $gold;
-      padding: 0.8rem 1.5rem;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-family: 'Inter', sans-serif;
-      text-transform: uppercase;
-      font-size: 0.8rem;
-      letter-spacing: 1px;
-
-      &:hover {
-        background: $gold;
-        color: black;
-        box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
-      }
+    .folio {
+      font-size: 0.9rem;
+      color: rgba($white-soft, 0.6);
+      letter-spacing: 2px;
     }
   }
+}
 
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1.5rem;
+// Tarjeta de Estado Principal
+.status-card {
+  width: 100%;
+  max-width: 450px;
+  background: linear-gradient(145deg, $dark-card, #1a1a1a);
+  border: 1px solid $glass-border;
+  border-radius: 20px;
+  padding: 2.5rem;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
 
-    .stat-card {
-      background: $card-bg;
-      border: 1px solid $border-color;
-      padding: 1.5rem;
-      border-radius: 8px;
-      transition: border-color 0.3s ease;
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 4px;
+    background: $gold-primary;
+  }
 
-      &:hover {
-        border-color: $gold;
-      }
+  .status-badge {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    margin-bottom: 2rem;
+    text-transform: uppercase;
+    font-weight: bold;
 
-      .label {
-        display: block;
-        color: #888;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        margin-bottom: 0.5rem;
-        letter-spacing: 1px;
-      }
+    // Colores por estado
+    &.WAITLIST { background: rgba(212, 175, 55, 0.1); color: $gold-primary; border: 1px solid $gold-primary; }
+    &.CONFIRMADA { background: rgba(40, 167, 69, 0.1); color: #2ecc71; border: 1px solid #2ecc71; }
+    &.SENTADO { background: rgba(52, 152, 219, 0.1); color: #3498db; border: 1px solid #3498db; }
+  }
+}
 
-      .value {
-        font-size: 1.8rem;
-        font-weight: 500;
-        color: white;
-        
-        &.highlight {
-          color: $gold;
-        }
-      }
+// Información de la Mesa (cuando está listo)
+.mesa-info {
+  animation: scaleUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  
+  h3 {
+    font-size: 1rem;
+    color: $white-soft;
+    margin-bottom: 1rem;
+    font-weight: 300;
+    letter-spacing: 1px;
+  }
+
+  .mesa-number {
+    font-size: 4rem;
+    font-weight: 800;
+    color: $gold-primary;
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+    margin: 0;
+  }
+}
+
+// Detalles de la reserva
+.details-grid {
+  width: 100%;
+  max-width: 450px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 3rem;
+
+  .detail-item {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1.2rem;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+
+    .label {
+      font-size: 0.65rem;
+      color: rgba($gold-primary, 0.7);
+      margin-bottom: 0.4rem;
+      letter-spacing: 1px;
     }
+
+    .val {
+      font-size: 0.9rem;
+      color: $white-soft;
+      font-weight: 500;
+    }
+  }
+}
+
+// Botón de Cerrar Sesión
+.btn-outline {
+  background: transparent;
+  border: 1px solid rgba($white-soft, 0.2);
+  color: rgba($white-soft, 0.5);
+  padding: 0.8rem 2rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: $gold-primary;
+    color: $gold-primary;
+    background: rgba(212, 175, 55, 0.05);
+  }
+}
+
+// Pantalla de Carga
+.loading-screen {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: $dark-bg;
+  
+  p {
+    color: $gold-primary;
+    letter-spacing: 5px;
+    animation: pulse 1.5s infinite;
+  }
+}
+
+// Animaciones
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 1; }
+  100% { opacity: 0.4; }
+}
+
+// Responsivo
+@media (max-width: 480px) {
+  .dashboard-luxe {
+    padding: 1rem;
+    
+    header h1 { font-size: 1.4rem; }
+    .status-card { padding: 1.5rem; }
+    .mesa-info .mesa-number { font-size: 3rem; }
   }
 }

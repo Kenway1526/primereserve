@@ -1,0 +1,57 @@
+<div class="login-wrapper">
+  <a routerLink="/catalog" class="back-action">
+    <span class="icon">←</span>
+    <span class="txt">CATÁLOGO</span>
+  </a>
+
+  <div class="login-card fade-in">
+    <div class="mode-selector">
+      <button [class.active]="mode === 'client'" (click)="mode = 'client'">CLIENTE</button>
+      <button [class.active]="mode === 'staff'" (click)="mode = 'staff'">STAFF</button>
+    </div>
+
+    <div class="gold-divider"></div>
+
+    <div class="form-content" *ngIf="mode === 'client'">
+      <h1>MI MESA</h1>
+      <p class="res-subtitle">{{ restaurantName }}</p>
+
+      <div class="luxe-input">
+        <label>FOLIO DE ACCESO</label>
+        <input type="text" [(ngModel)]="clientAccess.folio" placeholder="EJ: PR-X9J2" autocomplete="off">
+      </div>
+
+      <div class="luxe-input">
+        <label>TELÉFONO REGISTRADO</label>
+        <input type="tel" [(ngModel)]="clientAccess.phone" placeholder="10 DÍGITOS">
+      </div>
+
+      <button class="btn-gold-main" (click)="onClientAccess()" [disabled]="isLoading" (onkeypress.enter)="onClientAccess()">
+        {{ isLoading ? 'VALIDANDO...' : 'ACCEDER' }}
+      </button>
+      
+      <a routerLink="/reservar" class="link-alt">¿NO TIENE RESERVA? CREE UNA AQUÍ</a>
+    </div>
+
+    <div class="form-content" *ngIf="mode === 'staff'">
+      <h1>OPERACIONES</h1>
+      <p class="res-subtitle">ACCESO RESTRINGIDO</p>
+
+      <div class="luxe-input">
+        <label>USUARIO / EMAIL</label>
+        <input type="text" [(ngModel)]="user" placeholder="nombre@primereserve.com">
+      </div>
+
+      <div class="luxe-input">
+        <label>CONTRASEÑA</label>
+        <input type="password" [(ngModel)]="password" placeholder="••••••••">
+      </div>
+
+      <div class="error-msg" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+      <button class="btn-gold-main" (click)="handleLogin()" [disabled]="isLoading" (onkeypress.enter)="handleLogin()">
+        {{ isLoading ? 'AUTENTICANDO...' : 'INICIAR SESIÓN' }}
+      </button>
+    </div>
+  </div>
+</div>

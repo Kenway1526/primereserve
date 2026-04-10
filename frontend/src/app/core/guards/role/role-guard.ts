@@ -1,23 +1,36 @@
-import { inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
-import { Router, CanActivateFn } from '@angular/router';
-import { Auth } from '../../services/auth/auth';
+import { inject } from '@angular/core';
+import { CanActivateFn, Router } from '@angular/router';
+import { Auth, UserRole } from '../../services/auth/auth';
 
-export const roleGuard: CanActivateFn = (route) => {
+// core/guards/role.guard.ts
+
+export const roleGuard: CanActivateFn = (route, state) => {
   const auth = inject(Auth);
   const router = inject(Router);
-  const platformId = inject(PLATFORM_ID);
 
-  // Si estamos en el servidor, permitimos el paso inicial para evitar el "Cannot GET"
-  if (!isPlatformBrowser(platformId)) return true;
+  // Verificación de autenticación
+  if (!auth.isAuthenticated()) {
+    console.warn('[RoleGuard] Bloqueado: Usuario no autenticado.');
+    router.navigate(['/auth/login']);
+    return false;
+  }
 
-  const expectedRole = route.data['role'];
   const userRole = auth.getRole();
+  const expectedRole = route.data['role'] as UserRole;
+
+  console.log(`%c [RoleGuard] Destino: ${state.url} | Esperado: ${expectedRole} | Usuario: ${userRole}`, 'color: #8e44ad; font-weight: bold;');
 
   if (userRole === expectedRole) {
     return true;
   }
 
-  router.navigate(['/home/login']);
+  // Si el rol es incorrecto
+  console.error(`[RoleGuard] Permiso insuficiente. Requerido: ${expectedRole}, Tienes: ${userRole}`);
+  
+  // Redirección de escape
+  if (userRole === 'ADMIN') router.navigate(['/admin/dashboard']);
+  else if (userRole === 'WAITER') router.navigate(['/mesero/mapa']);
+  else router.navigate(['/catalog']); // <--- Aquí es donde te mandaba por la asincronía
+  
   return false;
 };

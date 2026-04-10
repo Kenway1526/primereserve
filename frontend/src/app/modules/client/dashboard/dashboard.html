@@ -1,10 +1,38 @@
-<div class="actions">
-  <a routerLink="/client/reserve">Hacer Reserva</a>
-  <a routerLink="/client/menu">Ver Menú</a>
+<div class="dashboard-luxe" *ngIf="!isLoading && reservation">
+  <header>
+    <h1>BIENVENIDO, {{ reservation.nombreInvitado | uppercase }}</h1>
+    <p class="folio">FOLIO: {{ reservation.folio }}</p>
+  </header>
+
+  <div class="status-card">
+    <div class="status-badge" [ngClass]="reservation.estado">
+      {{ reservation.estado }}
+    </div>
+    
+    <div class="mesa-info" *ngIf="reservation.Mesa">
+      <h3>TU MESA ESTÁ LISTA</h3>
+      <p class="mesa-number">{{ reservation.Mesa.zona === 'PLANTA_BAJA' ? 'PB' : 'T' }}-{{ reservation.Mesa.numeroMesa }}</p>
+    </div>
+
+    <div class="wait-info" *ngIf="reservation.estado === 'WAITLIST'">
+      <p>Estamos preparando su mesa. Le notificaremos en breve.</p>
+    </div>
+  </div>
+
+  <div class="details-grid">
+    <div class="detail-item">
+      <span class="label">FECHA</span>
+      <span class="val">{{ reservation.fechaPrincipal | date:'fullDate' | uppercase }}</span>
+    </div>
+    <div class="detail-item">
+      <span class="label">PERSONAS</span>
+      <span class="val">{{ reservation.numPersonas }} Comensales</span>
+    </div>
+  </div>
+
+  <button (click)="logout()" class="btn-outline">CERRAR SESIÓN</button>
 </div>
 
-<section *ngIf="activeReservations.length > 0">
-  <div *ngFor="let res of activeReservations">
-    {{res.date}} - {{res.status}}
-  </div>
-</section>
+<div class="loading-screen" *ngIf="isLoading">
+  <p>CARGANDO TU EXPERIENCIA...</p>
+</div>

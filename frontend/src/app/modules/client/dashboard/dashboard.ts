@@ -1,24 +1,59 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
+import { Auth } from '../../../core/services/auth/auth';
+import { SupabaseService } from '../../../core/services/supabase';
 
 @Component({
-  selector: 'app-dashboard',
+  selector: 'app-client-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink], // RouterLink se queda aquí para los botones del HTML
+  imports: [CommonModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
 export class Dashboard implements OnInit {
-  // Estas son las variables que el HTML de Cliente NECESITA
-  public activeReservations = [
-    { date: '2026-04-10', time: '20:00', people: 4, status: 'Confirmada' }
-  ];
+  private router = inject(Router);
+  private auth = inject(Auth);
+  private supabaseSvc = inject(SupabaseService);
 
-  public lastVisits = [
-    { restaurant: 'Prime Steakhouse', date: '2026-03-15', items: 'Ribeye', total: 2450 }
-  ];
+  public restaurantName = 'PRIME RESERVE';
+  public reservation: any = null;
+  public isLoading = true;
+  private cdr = inject(ChangeDetectorRef);
 
-  constructor() {}
-  ngOnInit(): void {}
+  async ngOnInit() {
+    const reservaId = localStorage.getItem('client_reserva_id');
+    
+    if (!reservaId) {
+      this.router.navigate(['/auth/login']);
+      return;
+    }
+
+    this.isLoading = true;
+    try {
+      // LLAMADA AL SERVICIO (que ya tiene el fix del alias)
+      const { data, error } = await this.supabaseSvc.getReservaPorId(reservaId);
+
+      if (error) {
+        console.error('%c [Dashboard] Error de Supabase:', 'color: #ff4d4d', error);
+        throw error;
+      }
+
+      this.reservation = data;
+      console.log('%c [Dashboard] Reserva cargada con éxito:', 'color: #28a745', this.reservation);
+
+    } catch (err) {
+      console.error('Error al cargar reserva en Dashboard:', err);
+    } finally {
+      this.isLoading = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  logout() {
+    this.auth.logout();
+    localStorage.removeItem('client_reserva_id');
+    localStorage.setItem('client_folio', '');
+    this.router.navigate(['/auth/login']);
+  }
 }

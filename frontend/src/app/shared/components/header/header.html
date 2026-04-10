@@ -1,22 +1,29 @@
-<header class="prime-header">
-  <div class="page-title">
-    <span>SISTEMA DE GESTIÓN OPERATIVA</span>
+<header class="luxe-header" *ngIf="auth.user$ | async as user">
+  <div class="header-left">
+    <div class="brand">
+      <span class="gold-dot"></span>
+      <h1 routerLink="/">PRIME RESERVE</h1>
+    </div>
+    <div class="divider"></div>
+    <div class="context-info">
+      <span class="res-name" *ngIf="isStaff">LA MAISON DORÉE</span>
+      <span class="res-name" *ngIf="user.role === 'CLIENTE'">RESERVACIÓN: {{ user.identifier }}</span>
+    </div>
   </div>
 
-  <div class="user-actions">
-    <div class="profile-info">
-      <div class="text">
-        <span class="name">Administrador</span>
-        <span class="email">{{ userEmail }}</span>
+  <div class="header-right">
+    <div class="user-badge">
+      <div class="user-info">
+        <span class="user-role">{{ user.role }}</span>
+        <span class="user-id">{{ user.identifier }}</span>
       </div>
       <div class="avatar">
-        {{ userEmail.charAt(0).toUpperCase() }}
+        {{ user.identifier.charAt(0).toUpperCase() }}
       </div>
     </div>
-    
-    <button class="logout-btn" (click)="onLogout()">
-        <span class="material-icons">logout</span>
-        CERRAR SESIÓN
+
+    <button class="btn-logout" (click)="logout()">
+      <span class="material-icons">logout</span>
     </button>
   </div>
 </header>

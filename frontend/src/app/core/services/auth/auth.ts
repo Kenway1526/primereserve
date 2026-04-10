@@ -2,12 +2,19 @@ import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { BehaviorSubject } from 'rxjs';
 
+export type UserRole = 'ADMIN' | 'WAITER' | 'KITCHEN' | 'CLIENTE';
+
+interface UserData {
+  identifier: string;
+  role: UserRole;
+  token: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class Auth {
   private platformId = inject(PLATFORM_ID);
   
-  // El BehaviorSubject mantiene el estado del usuario en memoria
-  private userSubject = new BehaviorSubject<any>(null);
+  private userSubject = new BehaviorSubject<UserData | null>(null);
   public user$ = this.userSubject.asObservable();
 
   constructor() {
@@ -27,8 +34,12 @@ export class Auth {
     }
   }
 
-  public login(role: 'ADMIN' | 'CLIENTE', email: string): void {
-    const userData = { email, role, token: 'fake-jwt-' + Math.random() };
+  public login(role: UserRole, identifier: string): void {
+    const userData: UserData = {
+      role,
+      token: 'prime-jwt-' + Math.random().toString(36).substring(2),
+      identifier
+    };
     
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem('user', JSON.stringify(userData));
@@ -37,18 +48,19 @@ export class Auth {
     this.userSubject.next(userData);
   }
 
-  /**
-   * MÉTODO LOGOUT: Limpia el estado y el storage de forma segura
-   */
   public logout(): void {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem('user');
     }
-    // Notificamos a todos los componentes (como el Header) que el usuario es null
     this.userSubject.next(null);
   }
 
-  public getRole(): string | null {
+  // Métodos de verificación para los Guards
+  public isAuthenticated(): boolean {
+    return !!this.userSubject.value;
+  }
+
+  public getRole(): UserRole | null {
     return this.userSubject.value?.role || null;
   }
 }

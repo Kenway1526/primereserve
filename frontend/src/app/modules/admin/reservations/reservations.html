@@ -1,11 +1,10 @@
 <div class="res-container">
-  
   <header class="res-header">
     <div class="brand">
       <div class="gold-accent"></div>
       <h1>RESERVACIONES</h1>
     </div>
-    <button class="btn-add-luxe" (click)="isModalOpen = true">
+    <button class="btn-add-luxe" (click)="openAddModal()">
       <span class="material-icons">add</span> NUEVA RESERVA
     </button>
   </header>
@@ -21,33 +20,46 @@
     <div class="res-card-premium" *ngFor="let res of filteredReservations">
       <div class="res-card-header">
         <div class="res-info">
-          <h3>{{ res.cliente }}</h3>
-          <span class="res-date">{{ res.fecha | date:'dd/MM/yyyy' }}</span>
+          <h3>{{ res.nombreInvitado }}</h3>
+          <span class="res-date">{{ res.fechaPrincipal | date:'dd/MM/yyyy' }}</span>
         </div>
-        <div class="res-time-badge">{{ res.hora }}</div>
+        <div class="res-time-badge">{{ res.horaPrincipal }}</div>
       </div>
 
       <div class="res-card-body">
-        <div class="item"><span class="material-icons">groups</span> {{ res.personas }} Pers.</div>
-        <div class="item"><span class="material-icons">chair</span> {{ res.mesa || 'Sin mesa' }}</div>
+        <div class="item"><span class="material-icons">groups</span> {{ res.numPersonas }} Pers.</div>
+        <div class="item">
+          <span class="material-icons">chair</span> 
+          <span [style.color]="res.Mesa ? '#d4af37' : '#ff4d4d'">
+            {{ res.Mesa ? (res.Mesa.zona === 'PLANTA_BAJA' ? 'PB' : 'T') + '-' + (res.Mesa.numeroMesa | number:'2.0') : 'Sin mesa' }}
+          </span>
+        </div>
       </div>
 
       <div class="res-card-footer">
-        <button class="btn-action-gold" *ngIf="activeTab === 'proximas'" (click)="sentarCliente(res)">SENTAR CLIENTE</button>
-        <button class="btn-action-gray" *ngIf="activeTab === 'proximas'" (click)="cancelarReserva(res)">CANCELAR</button>
-        <button class="btn-action-gray" *ngIf="activeTab === 'curso'">FINALIZAR</button>
+        <button class="btn-action-gold" 
+                *ngIf="activeTab === 'proximas'" 
+                (click)="sentarCliente(res)"
+                [disabled]="isLoading">
+          {{ isLoading ? 'PROCESANDO...' : 'SENTAR CLIENTE' }}
+        </button>
+        <button class="btn-action-gray" *ngIf="activeTab === 'proximas'" (click)="cambiarEstado(res, 'CANCELADA')">CANCELAR</button>
+        <button class="btn-action-gray" 
+                *ngIf="activeTab === 'curso'" 
+                (click)="finalizarReserva(res)">
+          FINALIZAR
+        </button>
       </div>
     </div>
   </div>
 
   <div class="wait-list" *ngIf="activeTab === 'espera'">
-    <div class="wait-card" *ngFor="let wait of waitList">
+    <div class="wait-card" *ngFor="let wait of filteredReservations">
       <div class="wait-info">
-        <h4>{{ wait.cliente }}</h4>
-        <p>En cola para: {{ wait.fecha }} a las {{ wait.hora }}</p>
-        <span class="wait-tag">SOLICITUD DE SUSTITUCIÓN</span>
+        <h4>{{ wait.nombreInvitado }}</h4>
+        <p>En cola para: {{ wait.fechaPrincipal }} a las {{ wait.horaPrincipal }}</p>
       </div>
-      <button class="btn-add-luxe" (click)="promoverSustituto(wait)">ASIGNAR ESPACIO</button>
+      <button class="btn-add-luxe" (click)="cambiarEstado(wait, 'CONFIRMADA')">PROMOVER A RESERVA</button>
     </div>
   </div>
 
@@ -55,33 +67,34 @@
     <div class="modal-form">
       <div class="form-group">
         <label>Nombre del Titular</label>
-        <input type="text" [(ngModel)]="resForm.cliente">
+        <input type="text" [(ngModel)]="resForm.nombreInvitado" class="dark-input">
       </div>
       <div class="form-row">
         <div class="form-group">
           <label>Fecha</label>
-          <input type="date" [(ngModel)]="resForm.fecha">
+          <input type="date" [(ngModel)]="resForm.fechaPrincipal" class="dark-input">
         </div>
         <div class="form-group">
           <label>Hora</label>
-          <input type="time" [(ngModel)]="resForm.hora">
+          <input type="time" [(ngModel)]="resForm.horaPrincipal" class="dark-input">
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label>Comensales</label>
-          <input type="number" [(ngModel)]="resForm.personas">
+          <input type="number" [(ngModel)]="resForm.numPersonas" class="dark-input">
         </div>
         <div class="form-group">
-          <label>Mesa Sugerida</label>
-          <input type="text" [(ngModel)]="resForm.mesa">
+          <label>Teléfono</label>
+          <input type="text" [(ngModel)]="resForm.telefonoInvitado" class="dark-input">
         </div>
       </div>
       <div class="modal-actions">
-        <button class="btn-submit-gold" (click)="saveReservation()">CONFIRMAR TITULAR</button>
-        <button class="btn-submit-border" (click)="addToWaitlist()">ENVIAR A LISTA DE ESPERA</button>
+        <button class="btn-submit-gold" (click)="saveReservation()" [disabled]="isLoading">
+          {{ isLoading ? 'PROCESANDO...' : 'CONFIRMAR RESERVA' }}
+        </button>
+        <button class="btn-submit-border" (click)="addToWaitlist()" [disabled]="isLoading">LISTA DE ESPERA</button>
       </div>
     </div>
   </app-modal>
-
 </div>

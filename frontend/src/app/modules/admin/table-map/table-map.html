@@ -4,7 +4,7 @@
     <div class="title-area">
       <h1>Layout de Restaurante</h1>
       <div class="floor-tabs">
-        <button [class.active]="currentFloor === 'PB'" (click)="currentFloor = 'PB'">PLANTA BAJA</button>
+        <button [class.active]="currentFloor === 'PLANTA_BAJA'" (click)="currentFloor = 'PLANTA_BAJA'">PLANTA BAJA</button>
         <button [class.active]="currentFloor === 'TERRAZA'" (click)="currentFloor = 'TERRAZA'">TERRAZA</button>
       </div>
     </div>
@@ -21,23 +21,25 @@
     </button>
   </header>
 
-  <div class="restaurant-floor" (dragover)="$event.preventDefault()">
-    <div class="grid-pattern"></div>
-    <div class="floor-watermark">{{ currentFloor }}</div>
-    
-    <div *ngFor="let table of filteredTables" 
-         class="table-node" 
-         [ngClass]="[table.estado.toLowerCase(), table.forma]"
-         [style.left.px]="table.x"
-         [style.top.px]="table.y"
-         draggable="true"
-         (dragend)="onDragEnd($event, table)"
-         (click)="openEditModal(table)">
+      <div class="restaurant-floor" (dragover)="$event.preventDefault()">
+        <div class="grid-pattern"></div>
+        <div class="floor-watermark">{{ currentFloor === 'PLANTA_BAJA' ? 'PB' : 'T' }}</div>
+        
+        <div *ngFor="let table of filteredTables" 
+        class="table-node" 
+        [ngClass]="[table.estado.toLowerCase(), table.forma]"
+        [style.left.px]="table.x"
+        [style.top.px]="table.y"
+        (click)="openEditModal(table)" 
+        draggable="true"
+        (dragend)="onDragEnd($event, table)">
       
       <div class="table-body">
-        <span class="t-num">{{ table.num }}</span>
+        <span class="t-num">
+          {{ table.zona === 'PLANTA_BAJA' ? 'PB' : 'T' }}-{{ table.numeroMesa | number:'2.0' }}
+        </span>
         <div class="t-icons">
-          <span class="material-icons">groups</span>{{ table.cap }}
+          <span class="material-icons">groups</span>{{ table.capacidad }}
         </div>
       </div>
     </div>
@@ -48,26 +50,34 @@
       
       <div class="form-row">
         <div class="field">
-          <label>Identificador (Automático)</label>
-          <input type="text" [(ngModel)]="selectedTable.num" [disabled]="true" class="disabled-input">
+          <label>Número de Mesa (ID Visual)</label>
+          <input type="number" [(ngModel)]="selectedTable.numeroMesa" class="dark-input">
         </div>
         <div class="field">
-          <label>Capacidad (Personas)</label>
-          <input type="number" [(ngModel)]="selectedTable.cap">
+          <label>Capacidad (Máx. 10 PAX)</label>
+          <input type="number" 
+                 [(ngModel)]="selectedTable.capacidad" 
+                 min="1" 
+                 max="10" 
+                 onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                 class="dark-input">
+          <small *ngIf="selectedTable.capacidad > 10" style="color: #d4af37; font-size: 10px; margin-top: 5px;">
+            El límite máximo es 10 personas.
+          </small>
         </div>
       </div>
 
       <div class="form-row">
         <div class="field">
           <label>Forma de la Mesa</label>
-          <select [(ngModel)]="selectedTable.forma">
+          <select [(ngModel)]="selectedTable.forma" class="dark-input">
             <option value="cuadrada">Cuadrada</option>
             <option value="circular">Circular</option>
           </select>
         </div>
         <div class="field">
-          <label>Estado Inicial</label>
-          <select [(ngModel)]="selectedTable.estado">
+          <label>Estado Actual</label>
+          <select [(ngModel)]="selectedTable.estado" class="dark-input">
             <option value="LIBRE">Libre</option>
             <option value="OCUPADA">Ocupada</option>
             <option value="RESERVADA">Reservada</option>
@@ -78,12 +88,24 @@
 
       <div class="form-row">
         <div class="field">
-          <label>Ubicación (Piso Actual)</label>
-          <input type="text" [value]="selectedTable.floor" [disabled]="true" class="disabled-input">
+          <label>Ubicación (Zona)</label>
+          <input type="text" [value]="selectedTable.zona === 'PLANTA_BAJA' ? 'Planta Baja' : 'Terraza'" [disabled]="true" class="disabled-input">
         </div>
       </div>
 
-      <button class="btn-save-table" (click)="saveTable()">CONFIRMAR MESA</button>
+      <button class="btn-save-table" 
+              (click)="saveTable()" 
+              [disabled]="isLoading">
+        <span *ngIf="!isLoading">{{ selectedTable?.id ? 'ACTUALIZAR' : 'CONFIRMAR' }}</span>
+        <span *ngIf="isLoading">PROCESANDO...</span>
+      </button>
+
+      <button *ngIf="selectedTable.id" 
+              class="btn-delete-table" 
+              (click)="deleteTable()"
+              [disabled]="isLoading">
+        <span class="material-icons">delete</span> ELIMINAR MESA
+      </button>
     </div>
   </app-modal>
 

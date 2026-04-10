@@ -44,7 +44,7 @@
       
       <div class="card-header">
         <div class="avatar-group">
-          <img [src]="member.img" alt="User avatar">
+          <img [src]="member.avatarUrl || 'assets/placeholder-user.png'" alt="User avatar">
           <div class="status-dot" [class.online]="member.activo"></div>
         </div>
         <div class="name-group">
@@ -78,29 +78,41 @@
 
   <app-modal [isOpen]="isModalOpen" [title]="modalTitle" (close)="isModalOpen = false">
     <div class="prime-form-luxe">
+      
+      <div class="avatar-upload-section" style="text-align: center; margin-bottom: 1rem;">
+        <div class="preview-circle" (click)="fileInput.click()" style="cursor:pointer">
+          <img [src]="imagePreview || memberForm.avatarUrl || 'assets/placeholder-user.png'" 
+               style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #d4af37;">
+        </div>
+        <input type="file" #fileInput (change)="onFileSelected($event)" hidden accept="image/*">
+        <small style="color: #d4af37">Click para cambiar foto</small>
+      </div>
+
       <div class="form-group">
         <label>Nombre Completo</label>
         <input type="text" [(ngModel)]="memberForm.nombre" placeholder="Ej. Juan Pérez">
       </div>
       <div class="form-group">
         <label>Correo Electrónico</label>
-        <input type="email" [(ngModel)]="memberForm.email" placeholder="juan@prime.com">
+        <input type="email" [(ngModel)]="memberForm.email" placeholder="juan@prime.com" pattern="^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$">
       </div>
       <div class="form-row">
         <div class="form-group">
           <label>Rol</label>
           <select [(ngModel)]="memberForm.rol">
-            <option value="Mesero">Mesero</option>
-            <option value="Cocina">Cocina</option>
-            <option value="Admin">Admin</option>
+            <option value="WAITER">Mesero</option>
+            <option value="KITCHEN">Cocina</option>
+            <option value="ADMIN">Admin</option>
           </select>
         </div>
         <div class="form-group">
           <label>Teléfono</label>
-          <input type="text" [(ngModel)]="memberForm.telefono" placeholder="+52 55 ...">
+          <input type="text" [(ngModel)]="memberForm.telefono" placeholder="+52 55 ..." pattern="^[0-9]+$" minlength="10" maxlength="10">
         </div>
       </div>
-      <button class="btn-submit-form" (click)="saveMember()">GUARDAR EMPLEADO</button>
+      <button class="btn-submit-form" (click)="saveMember()" [disabled]="isLoading">
+        {{ isLoading ? 'GUARDANDO...' : 'GUARDAR EMPLEADO' }}
+      </button>
     </div>
   </app-modal>
 

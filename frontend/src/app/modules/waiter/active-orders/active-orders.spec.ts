@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Register } from './register';
+import { ActiveOrders } from './active-orders';
 
-describe('Register', () => {
-  let component: Register;
-  let fixture: ComponentFixture<Register>;
+describe('ActiveOrders', () => {
+  let component: ActiveOrders;
+  let fixture: ComponentFixture<ActiveOrders>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Register]
+      imports: [ActiveOrders]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(Register);
+    fixture = TestBed.createComponent(ActiveOrders);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

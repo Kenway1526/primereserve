@@ -1,31 +1,30 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Auth } from '../../../core/services/auth/auth';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './header.html',
   styleUrl: './header.scss'
 })
 export class Header {
-  private auth = inject(Auth);
+  public auth = inject(Auth);
   private router = inject(Router);
-  
-  public userEmail: string = '';
 
-  constructor() {
-    // Escuchamos los cambios del usuario. 
-    // Cuando el servicio haga logout, user$ emitirá null.
-    this.auth.user$.subscribe(user => {
-      this.userEmail = user?.email || 'Invitado';
-    });
+  // Datos extraídos del observable del servicio Auth
+  // user$ contiene: { identifier, role, token }
+  
+  public logout() {
+    this.auth.logout();
+    this.router.navigate(['/auth/login']);
   }
 
-  public onLogout(): void {
-    this.auth.logout(); // Llama al método que acabamos de crear
-    this.router.navigate(['/home/login']);
+  // Helper para saber si mostrar el menú de staff
+  get isStaff(): boolean {
+    const role = this.auth.getRole();
+    return role !== 'CLIENTE' && role !== null;
   }
 }

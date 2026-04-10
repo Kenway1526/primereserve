@@ -6,15 +6,17 @@
     "module": "ES2022",
     "lib": ["ES2023", "dom"],
     "skipLibCheck": true,
-    "moduleResolution": "bundler",
+    "moduleResolution": "bundler", /* Resolución moderna para Angular 17/18 */
     "isolatedModules": true,
     "experimentalDecorators": true,
     "strict": true,
     "noImplicitAny": false,
-    "baseUrl": "./",
+    /* NO usamos baseUrl ni ignoreDeprecations */
     "paths": {
-      "rxjs": ["node_modules/rxjs"],
-      "rxjs/*": ["node_modules/rxjs/*"]
+      "@core/*": ["./src/app/core/*"],
+      "@modules/*": ["./src/app/modules/*"],
+      "rxjs": ["./node_modules/rxjs"],
+      "rxjs/*": ["./node_modules/rxjs/*"]
     }
   },
   "angularCompilerOptions": {

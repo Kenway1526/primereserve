@@ -8,106 +8,179 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Usuario {
-  id             String        @id @default(uuid())
-  email          String        @unique
-  password       String
-  nombre         String?
-  rol            String        @default("CLIENTE") // ADMIN, CLIENTE, MESERO, COCINA
-  reservaciones  Reservacion[]
-  ordenes        Orden[]
-  fecha_creacion DateTime      @default(now())
+model Restaurante {
+  id            String        @id @default(uuid())
+  nombre        String
+  slug          String        @unique
+  direccion     String?
+  configuracion Json?
+  fechaCreacion DateTime      @default(now())
+  ingredientes  Ingrediente[]
+  menuItems     MenuItem[]
+  mesas         Mesa[]
+  reservaciones Reservacion[]
+  usuarios      Usuario[]
+}
 
-  @@map("usuarios")
+model Usuario {
+  id            String        @id @default(uuid())
+  email         String        @unique
+  password      String
+  nombre        String
+  telefono      String?
+  rol           RolUsuario    @default(CLIENTE)
+  restauranteId String?
+  fechaCreacion DateTime      @default(now())
+  ordenes       Orden[]
+  reservaciones Reservacion[]
+  restaurante   Restaurante?  @relation(fields: [restauranteId], references: [id])
 }
 
 model Reservacion {
-  id               String   @id @default(uuid())
-  usuario          Usuario  @relation(fields: [usuarioId], references: [id])
-  usuarioId        String   @map("usuario_id")
-  mesa             Mesa?    @relation(fields: [mesaId], references: [id])
-  mesaId           String?  @map("mesa_id")
-  fecha_principal  DateTime
-  hora_principal   String
-  fecha_plan_b     DateTime @map("fecha_plan_b")
-  hora_plan_b      String   @map("hora_plan_b")
-  num_personas     Int
+  id               String        @id @default(uuid())
+  folio            String        @unique
+  fechaPrincipal   DateTime
+  horaPrincipal    String
+  fechaPlanB       DateTime
+  horaPlanB        String
+  numPersonas      Int           @default(2)
   ocasion          String?
-  estado           String   @default("PENDIENTE") // PENDIENTE, CONFIRMADA, CANCELADA, COMPLETADA
-
-  @@map("reservaciones")
+  notasEspeciales  String?
+  estado           EstadoReserva @default(WAITLIST)
+  isWaitlistActive Boolean       @default(false)
+  posicionEspera   Int?
+  usuarioId        String
+  restauranteId    String
+  mesaId           String?
+  fechaRegistro    DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  ordenes          Orden[]
+  mesa             Mesa?         @relation(fields: [mesaId], references: [id])
+  restaurante      Restaurante   @relation(fields: [restauranteId], references: [id])
+  usuario          Usuario       @relation(fields: [usuarioId], references: [id])
 }
 
 model Mesa {
   id            String        @id @default(uuid())
-  numero_mesa   Int           @unique @map("numero_mesa")
+  numeroMesa    BigInt
   capacidad     Int
-  estado        String        @default("LIBRE") // LIBRE, OCUPADA, SUCIA, RESERVADA
-  zona          String        @default("SALON") // TERRAZA, SALON, VIP
-  reservaciones Reservacion[]
+  zona          ZonaMesa      @default(PLANTA_BAJA)
+  estado        EstadoMesa    @default(LIBRE)
+  restauranteId String
+  restaurante   Restaurante   @relation(fields: [restauranteId], references: [id])
   ordenes       Orden[]
+  reservaciones Reservacion[]
 
-  @@map("mesas")
+  @@unique([restauranteId, numeroMesa])
 }
 
 model MenuItem {
-  id              String         @id @default(uuid())
-  nombre          String
-  descripcion     String?
-  precio          Float
-  categoria       String // ENTRADAS, PLATOS_FUERTES, BEBIDAS, POSTRES
-  esta_disponible Boolean        @default(true)
-  detalles_orden  DetalleOrden[]
-  receta          Receta[]
-
-  @@map("menu_items")
+  id             String         @id @default(uuid())
+  nombre         String
+  descripcion    String?
+  precio         Float
+  categoria      CategoriaMenu
+  estaDisponible Boolean        @default(true)
+  imagenUrl      String?
+  restauranteId  String
+  detallesOrden  DetalleOrden[]
+  restaurante    Restaurante    @relation(fields: [restauranteId], references: [id])
+  recetas        Receta[]
 }
 
 model Orden {
-  id         String         @id @default(uuid())
-  mesa       Mesa           @relation(fields: [mesaId], references: [id])
-  mesaId     String         @map("mesa_id")
-  usuario    Usuario        @relation(fields: [usuarioId], references: [id])
-  usuarioId  String         @map("usuario_id")
-  estado     String         @default("EN_PREPARACION") // EN_PREPARACION, LISTO, SERVIDO, PAGADO
-  total      Float          @default(0)
-  fecha      DateTime       @default(now())
-  detalles   DetalleOrden[]
-
-  @@map("ordenes")
+  id            String         @id @default(uuid())
+  estado        EstadoOrden    @default(ABIERTA)
+  total         Float          @default(0.0)
+  mesaId        String
+  usuarioId     String
+  reservacionId String?
+  fechaApertura DateTime       @default(now())
+  fechaCierre   DateTime?
+  detalles      DetalleOrden[]
+  mesa          Mesa           @relation(fields: [mesaId], references: [id])
+  reservacion   Reservacion?   @relation(fields: [reservacionId], references: [id])
+  usuario       Usuario        @relation(fields: [usuarioId], references: [id])
 }
 
 model DetalleOrden {
-  id               String   @id @default(uuid())
-  orden            Orden    @relation(fields: [ordenId], references: [id])
-  ordenId          String   @map("orden_id")
-  menuItem         MenuItem @relation(fields: [menuItemId], references: [id])
-  menuItemId       String   @map("menu_item_id")
-  cantidad         Int
-  subtotal         Float
-  notas_especiales String?  @map("notas_especiales")
-
-  @@map("detalles_orden")
+  id              String     @id @default(uuid())
+  cantidad        Int
+  precioHistorico Float
+  subtotal        Float
+  notasCocina     String?
+  estadoItem      EstadoItem @default(PENDIENTE)
+  ordenId         String
+  menuItemId      String
+  menuItem        MenuItem   @relation(fields: [menuItemId], references: [id])
+  orden           Orden      @relation(fields: [ordenId], references: [id])
 }
 
 model Ingrediente {
-  id                  String   @id @default(uuid())
-  nombre              String
-  stock_actual        Float
-  unidad              String // KG, LT, PZ
-  stock_minimo_alerta Float
-  recetas             Receta[]
-
-  @@map("ingredientes")
+  id                String      @id @default(uuid())
+  nombre            String
+  stockActual       Float
+  unidad            String
+  stockMinimoAlerta Float
+  restauranteId     String
+  restaurante       Restaurante @relation(fields: [restauranteId], references: [id])
+  recetas           Receta[]
 }
 
 model Receta {
-  menuItem       MenuItem    @relation(fields: [menuItemId], references: [id])
-  menuItemId     String      @map("menu_item_id")
-  ingrediente    Ingrediente @relation(fields: [ingredienteId], references: [id])
-  ingredienteId  String      @map("ingrediente_id")
-  cantidad_usada Float
+  menuItemId    String
+  ingredienteId String
+  cantidadUsada Float
+  ingrediente   Ingrediente @relation(fields: [ingredienteId], references: [id])
+  menuItem      MenuItem    @relation(fields: [menuItemId], references: [id])
 
   @@id([menuItemId, ingredienteId])
-  @@map("recetas")
+}
+
+enum RolUsuario {
+  ADMIN
+  CLIENTE
+  MESERO
+  COCINA
+}
+
+enum EstadoReserva {
+  WAITLIST
+  CONFIRMADA
+  SENTADO
+  CANCELADA
+  COMPLETADA
+}
+
+enum ZonaMesa {
+  TERRAZA
+  PLANTA_BAJA
+}
+
+enum EstadoMesa {
+  LIBRE
+  OCUPADA
+  SUCIA
+  RESERVADA
+}
+
+enum CategoriaMenu {
+  ENTRADAS
+  PLATOS_FUERTES
+  BEBIDAS
+  POSTRES
+}
+
+enum EstadoOrden {
+  ABIERTA
+  EN_PREPARACION
+  LISTO
+  SERVIDO
+  PAGADO
+}
+
+enum EstadoItem {
+  PENDIENTE
+  COCINANDO
+  LISTO
 }

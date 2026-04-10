@@ -1,0 +1,82 @@
+.waiter-container {
+  background: #000;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 30px 15px;
+}
+
+.waiter-card {
+  width: 100%;
+  max-width: 600px;
+  background: #080808;
+  border: 1px solid #1a1a1a;
+  padding: 30px;
+  border-radius: 4px;
+}
+
+.waiter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 40px;
+  border-bottom: 1px solid #1a1a1a;
+  padding-bottom: 20px;
+}
+
+.gold-text { color: #d4af37; font-size: 9px; letter-spacing: 2px; font-weight: 800; }
+.header-info h1 { color: #fff; font-size: 1.2rem; letter-spacing: 2px; margin: 5px 0 0; }
+
+.filter-pills { display: flex; gap: 10px; }
+.filter-pills button {
+  background: #111; border: 1px solid #222; color: #555;
+  padding: 6px 12px; font-size: 9px; font-weight: 800; cursor: pointer;
+}
+.filter-pills button.active { border-color: #d4af37; color: #fff; }
+
+/* Filas de Reservación */
+.reservation-row {
+  display: flex;
+  align-items: center;
+  background: #0f0f0f;
+  border: 1px solid #1a1a1a;
+  padding: 15px;
+  margin-bottom: 10px;
+  transition: 0.3s;
+}
+
+.reservation-row.seated { opacity: 0.4; }
+
+.res-time-box {
+  text-align: center;
+  padding-right: 20px;
+  border-right: 1px solid #222;
+  min-width: 60px;
+}
+.res-time-box .time { color: #d4af37; font-size: 1.2rem; font-weight: 200; display: block; }
+.res-time-box small { color: #444; font-size: 8px; }
+
+.res-details {
+  flex: 1;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.cust-info strong { color: #fff; font-size: 13px; letter-spacing: 1px; display: block; }
+.cust-info small { color: #444; font-size: 10px; }
+
+.status-tag {
+  font-size: 8px; font-weight: 900; color: #444;
+  border: 1px solid #222; padding: 4px 8px;
+}
+.status-tag.gold-tag { background: #d4af37; color: #000; border: none; }
+
+.res-actions { display: flex; align-items: center; gap: 15px; }
+.btn-action.seat {
+  background: #d4af37; color: #000; border: none;
+  padding: 10px 15px; font-size: 9px; font-weight: 900; cursor: pointer;
+}
+.btn-icon-del { background: none; border: none; color: #333; font-size: 18px; cursor: pointer; }
+
+.empty-state { text-align: center; padding: 40px; color: #333; font-size: 10px; letter-spacing: 2px; }

@@ -1,1 +1,51 @@
-<p>restaurant-catalog works!</p>
+<div class="catalog-wrapper">
+  <header class="main-header fade-in">
+    <span class="subtitle">EXPERIENCIAS EXCLUSIVAS</span>
+    <h1>PRIME RESERVE</h1>
+    <div class="divider"></div>
+  </header>
+
+  <div class="loader-box" *ngIf="isLoading">
+    <div class="gold-spinner"></div>
+    <p>Sincronizando con la colección...</p>
+  </div>
+
+  <main class="grid-container" *ngIf="!isLoading">
+    
+    <div class="empty-state" *ngIf="restaurantes.length === 0">
+      <p>No se encontraron restaurantes en la base de datos.</p>
+    </div>
+
+    <article class="res-card fade-in" *ngFor="let res of restaurantes">
+      <div class="card-media">
+        <div class="badge">{{ res.categoria || 'PREMIUM' }}</div>
+        
+        <img [src]="res.imageUrl || 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=1000'" 
+             [alt]="res.nombre">
+        <div class="overlay"></div>
+      </div>
+
+      <div class="card-body">
+        <header>
+          <h3>{{ res.nombre }}</h3>
+          <p class="tagline">{{ res.tagline || 'THE ART OF EXCELLENCE' }}</p>
+        </header>
+
+        <div class="info-row">
+          <span class="icon">📍</span>
+          <span class="text">{{ res.direccion }}</span>
+        </div>
+
+        <footer class="actions">
+            <button class="btn-primary" (click)="selectRestaurant(res)">
+                RESERVAR
+            </button>
+
+            <button class="btn-secondary" routerLink="/auth/login">
+                GESTIONAR
+            </button>   
+        </footer>
+      </div>
+    </article>
+  </main>
+</div>
