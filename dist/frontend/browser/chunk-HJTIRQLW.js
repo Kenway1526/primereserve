@@ -1,0 +1,1 @@
+var E={RESTAURANT_ID:"res_001",RESTAURANT_NAME:"PRIME RESERVE"};export{E as a};

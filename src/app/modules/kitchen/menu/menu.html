@@ -1,0 +1,170 @@
+<div class="menu-mgmt-container">
+  <header class="main-header">
+    <div class="title-block">
+      <h1>Gestión del Menú Operativo</h1>
+      <p>Configura los platillos, descripciones y recetas para la cocina.</p>
+    </div>
+    <button class="btn-create" (click)="openModal()">
+      <span class="material-icons">add_circle</span>
+      Nuevo Platillo
+    </button>
+  </header>
+
+  <div class="loader-container" *ngIf="isLoading">
+    <div class="prime-loader"></div>
+    <p>Cargando el menú de Prime Reserve...</p>
+  </div>
+
+  <div class="menu-grid" *ngIf="!isLoading">
+    <div class="menu-card" *ngFor="let item of menuItems" [class.archived]="!item.estaDisponible">
+      <div class="card-img-box">
+        <img [src]="item.imagenUrl || 'https://via.placeholder.com/300x200?text=Sin+Imagen'" [alt]="item.nombre">
+        <div class="card-status" [class.active]="item.estaDisponible" [title]="item.estaDisponible ? 'Disponible' : 'Agotado'"></div>
+      </div>
+      
+      <div class="card-body">
+        <span class="category-badge">{{ item.categoria }}</span>
+        <h3>{{ item.nombre }}</h3>
+        <p class="description-text">{{ item.descripcion || 'Sin descripción disponible.' }}</p>
+        <p class="price">{{ item.precio | currency:'USD':'symbol':'1.2-2' }}</p>
+        
+        <div class="recipe-summary">
+          <span class="ing-tag" *ngFor="let r of item.Receta | slice:0:3">
+            {{ r.Ingrediente?.nombre }}
+          </span>
+          <span class="more-tags" *ngIf="item.Receta && item.Receta.length > 3">
+            +{{ item.Receta.length - 3 }} más
+          </span>
+        </div>
+      </div>
+
+      <div class="card-actions">
+        <button class="btn-icon edit" (click)="openModal(item)" title="Editar">
+          <span class="material-icons">edit</span>
+        </button>
+        <button class="btn-icon delete" (click)="deletePlatillo(item.id!)" title="Eliminar">
+          <span class="material-icons">delete_forever</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-card premium-modal" (click)="$event.stopPropagation()">
+      <header class="modal-header">
+        <div class="header-title">
+          <span class="material-icons gold-icon">restaurant_menu</span>
+          <h2>{{ currentItem.id ? 'Editar' : 'Crear Nuevo' }} Platillo</h2>
+        </div>
+        <button class="btn-close" (click)="closeModal()">×</button>
+      </header>
+
+      <form (ngSubmit)="savePlatillo()" #menuForm="ngForm" class="modal-form">
+        <div class="form-content-scroll">
+          
+          <div class="image-setup">
+             <div class="img-preview-circle">
+                <img [src]="currentItem.imagenUrl || 'https://via.placeholder.com/150?text=Platillo'" alt="Preview">
+             </div>
+             <div class="form-group full-width">
+                <label>Enlace de la Imagen (URL)</label>
+                <input type="text" [(ngModel)]="currentItem.imagenUrl" name="img" placeholder="https://dominio.com/imagen.jpg">
+             </div>
+          </div>
+
+          <fieldset class="form-section">
+            <legend>Información General</legend>
+            <div class="form-grid-2">
+              <div class="form-group full-width">
+                <label for="pNombre">Nombre del Platillo</label>
+                <input type="text" id="pNombre" [(ngModel)]="currentItem.nombre" name="nombre" required placeholder="Ej: Wagyu A5 Ribeye">
+              </div>
+
+              <div class="form-group full-width">
+                <label for="pDesc">Descripción del Platillo</label>
+                <textarea id="pDesc" [(ngModel)]="currentItem.descripcion" name="desc" rows="2" placeholder="Describe brevemente el platillo..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="pPrecio">Precio de Venta ($)</label>
+                <div class="input-with-icon">
+                  <span class="icon">$</span>
+                  <input type="number" id="pPrecio" [(ngModel)]="currentItem.precio" name="precio" required step="0.5" placeholder="0.00">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="pCategoria">Categoría</label>
+                <select id="pCategoria" [(ngModel)]="currentItem.categoria" name="categoria" required>
+                  <option *ngFor="let cat of categorias" [value]="cat">{{ cat }}</option>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="form-section recipe-section">
+            <legend>Composición de Receta y Escandallo</legend>
+            <p class="section-help">Selecciona los ingredientes necesarios y define la cantidad por porción.</p>
+
+            <div class="recipe-search-container">
+              <div class="search-box">
+                <span class="material-icons">search</span>
+                <input type="text" [(ngModel)]="searchIngrediente" name="search" placeholder="Buscar ingrediente en catálogo...">
+              </div>
+              
+              <div class="search-results-dropdown" *ngIf="searchIngrediente">
+                <div class="result-item" *ngFor="let ing of filteredIngredientes" (click)="addIngrediente(ing)">
+                  <span class="ing-name">{{ ing.nombre }}</span>
+                  <span class="ing-stock">Stock: {{ ing.stockActual }} {{ ing.unidad }}</span>
+                  <span class="material-icons add-icon">add_circle</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="recipe-list-container">
+              <div class="recipe-header-row">
+                <span class="col-name">Ingrediente</span>
+                <span class="col-cant">Cantidad</span>
+                <span class="col-action"></span>
+              </div>
+              <div class="recipe-items-scroll">
+                <div class="recipe-item-row" *ngFor="let r of currentItem.receta; let i = index">
+                  <div class="col-name"><span class="material-icons ing-icon">inventory_2</span> {{ r.nombre }}</div>
+                  <div class="col-cant">
+                    <input type="number" [(ngModel)]="r.cantidadUsada" [name]="'cant_'+i" step="0.01" min="0.01" required>
+                    <span class="unidad">{{ r.unidad }}</span>
+                  </div>
+                  <div class="col-action">
+                    <button type="button" class="btn-remove" (click)="removeIngrediente(i)"><span class="material-icons">remove_circle</span></button>
+                  </div>
+                </div>
+                <div class="empty-recipe" *ngIf="currentItem.receta.length === 0">
+                  <span class="material-icons">scale</span>
+                  <p>Usa el buscador de arriba para añadir ingredientes a la receta.</p>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+
+        <footer class="modal-footer">
+          <div class="status-group">
+            <label class="switch-label">
+              <input type="checkbox" [(ngModel)]="currentItem.estaDisponible" name="disponible">
+              <span class="slider"></span>
+            </label>
+            <span>{{ currentItem.estaDisponible ? 'Disponible en Carta' : 'Marcar como Agotado' }}</span>
+          </div>
+          <div class="action-group">
+            <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
+            <button type="submit" class="btn-save-prime" [disabled]="menuForm.invalid || isSaving">
+              <span class="material-icons" *ngIf="!isSaving">save</span>
+              <div class="spinner-small" *ngIf="isSaving"></div>
+              {{ isSaving ? 'Guardando...' : 'Guardar Platillo' }}
+            </button>
+          </div>
+        </footer>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,91 @@
+<div class="dashboard-container">
+  <header class="db-header no-print">
+    <div class="title">
+      <h1>Prime Analytics</h1>
+      <p>Centro de Comando Administrativo</p>
+    </div>
+    <button class="btn-export" (click)="generatePDF()">
+      <span class="material-icons">picture_as_pdf</span> EXPORTAR REPORTE
+    </button>
+  </header>
+
+  <div class="metrics-grid no-print">
+    <div class="m-card gold">
+      <span class="label">INGRESOS (PAGADOS)</span>
+      <span class="value">{{ metrics.ingresosDia | currency:'MXN' }}</span>
+    </div>
+    <div class="m-card">
+      <span class="label">MESAS OCUPADAS</span>
+      <span class="value">{{ metrics.mesasOcupadas }}</span>
+    </div>
+    <div class="m-card">
+      <span class="label">TICKETS COCINA</span>
+      <span class="value">{{ metrics.ticketsCocina }}</span>
+    </div>
+  </div>
+
+  <div class="charts-grid no-print">
+    <div class="chart-box wide">
+      <h3>Ocupación vs Tiempo</h3>
+      <canvas #salesChart></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>Distribución</h3>
+      <canvas #categoryChart></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>Eficiencia Operativa</h3>
+      <canvas #efficiencyChart></canvas>
+    </div>
+  </div>
+
+  <div id="printable-report" class="print-only">
+    <div class="report-header">
+      <h2 class="brand">Prime Reserve</h2>
+      <h1>Reporte del Día</h1>
+      <p class="timestamp">Generado: {{ reportDate }}</p>
+    </div>
+
+    <section class="report-section">
+      <h3>Resumen Operativo (KPIs)</h3>
+      <table class="report-table">
+        <thead><tr><th>KPI</th><th>Valor</th></tr></thead>
+        <tbody>
+          <tr><td>Ingresos totales (pagados)</td><td>{{ metrics.ingresosDia | currency:'MXN' }}</td></tr>
+          <tr><td>Pagos pendientes</td><td>{{ metrics.pagosPendientes | currency:'MXN' }}</td></tr>
+          <tr><td>Reservaciones confirmadas</td><td>{{ metrics.reservaciones }}</td></tr>
+          <tr><td>Mesas ocupadas</td><td>{{ metrics.mesasOcupadas }}</td></tr>
+          <tr><td>Tickets en cocina</td><td>{{ metrics.ticketsCocina }}</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="report-section">
+      <h3>Platillos Estrella</h3>
+      <table class="report-table">
+        <thead><tr><th>#</th><th>Platillo</th><th>Unidades vendidas</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let p of topPlatillos; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ p.nombre }}</td>
+            <td>{{ p.unidades }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="report-section">
+      <h3>Estado de Inventario</h3>
+      <table class="report-table">
+        <thead><tr><th>Platillo</th><th>Precio</th><th>Stock</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let p of topPlatillos">
+            <td>{{ p.nombre }}</td>
+            <td>{{ p.precio | currency }}</td>
+            <td>Disponible</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</div>

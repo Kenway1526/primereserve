@@ -1,0 +1,146 @@
+// src/app/shared/components/sidebar/sidebar.scss
+
+.sidebar {
+  width: 260px;
+  height: 100vh;
+  background-color: #121212; // Un tono más profundo para resaltar el dorado
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(212, 175, 55, 0.15);
+  transition: all 0.3s ease;
+  position: sticky;
+  top: 0;
+
+  .sidebar-logo {
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column; // Para que el logo y el divider se apilen
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+
+    .img-logo {
+      width: 100%;
+      max-width: 160px; // Aumentado ligeramente para mejor visibilidad
+      height: auto;
+      object-fit: contain;
+      filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.5));
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(212, 175, 55, 0.5), transparent);
+      width: 80%;
+    }
+  }
+
+  .nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    flex: 1; // Toma el espacio disponible
+
+    li {
+      margin: 0.3rem 1rem;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.2s ease;
+
+      a {
+        display: flex;
+        align-items: center;
+        padding: 0.9rem 1.2rem;
+        text-decoration: none;
+        color: #a0a0a0;
+        transition: all 0.3s ease;
+
+        .material-icons {
+          margin-right: 14px;
+          font-size: 24px;
+        }
+
+        .link-text {
+          font-size: 0.9rem;
+          font-weight: 500;
+          letter-spacing: 0.4px;
+          white-space: nowrap;
+        }
+      }
+
+      // Estado Hover
+      &:hover:not(.active) {
+        background-color: rgba(212, 175, 55, 0.08);
+        a {
+          color: #d4af37;
+          transform: translateX(5px);
+        }
+      }
+
+      // Estado Activo (Dorado)
+      &.active {
+        background: linear-gradient(135deg, #d4af37 0%, #b8962e 100%);
+        box-shadow: 0 8px 20px rgba(184, 150, 46, 0.25);
+        
+        a {
+          color: #000000;
+          font-weight: 700;
+          
+          .material-icons {
+            color: #000000;
+          }
+        }
+      }
+
+      // 🚀 Envía elementos (como Configuración) al final del sidebar
+      &.nav-bottom {
+        margin-top: auto;
+        margin-bottom: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        padding-top: 1rem;
+      }
+    }
+  }
+}
+
+// Responsividad para tablets/móviles
+@media (max-width: 992px) {
+  .sidebar {
+    width: 80px;
+    
+    .sidebar-logo {
+      padding: 1.5rem 0.5rem;
+      .img-logo {
+        max-width: 50px;
+      }
+      .divider {
+        width: 60%;
+      }
+    }
+
+    .nav-list {
+      li {
+        margin: 0.4rem auto;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        justify-content: center;
+        
+        a {
+          padding: 0;
+          justify-content: center;
+          
+          .material-icons {
+            margin-right: 0;
+          }
+          
+          .link-text {
+            display: none; // Oculta texto en modo colapsado
+          }
+        }
+      }
+    }
+  }
+}

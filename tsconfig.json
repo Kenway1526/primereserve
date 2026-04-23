@@ -1,0 +1,28 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": false,
+    "module": "ES2022",
+    "lib": ["ES2023", "dom"],
+    "skipLibCheck": true,
+    "moduleResolution": "bundler", /* Resolución moderna para Angular 17/18 */
+    "isolatedModules": true,
+    "experimentalDecorators": true,
+    "strict": true,
+    "noImplicitAny": false,
+    /* NO usamos baseUrl ni ignoreDeprecations */
+    "paths": {
+      "@core/*": ["./src/app/core/*"],
+      "@modules/*": ["./src/app/modules/*"],
+      "rxjs": ["./node_modules/rxjs"],
+      "rxjs/*": ["./node_modules/rxjs/*"]
+    }
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  }
+}

@@ -1,0 +1,197 @@
+/* Contenedor Principal */
+.login-wrapper {
+  min-height: 100vh;
+  background-color: #0a0a0a;
+  background-image: radial-gradient(circle at center, #1a1a1a 0%, #050505 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  position: relative;
+}
+
+/* Botón Regresar */
+.back-action {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  color: #d4af37;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: opacity 0.3s;
+}
+
+.back-action:hover { opacity: 0.7; }
+
+/* Card de Login */
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  background: #121212;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+/* Selector de Modo */
+.mode-selector {
+  display: flex;
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 4px;
+  margin-bottom: 25px;
+}
+
+.mode-selector button {
+  flex: 1;
+  background: none;
+  border: none;
+  color: #888;
+  padding: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.8rem;
+  transition: all 0.3s;
+  border-radius: 6px;
+}
+
+.mode-selector button.active {
+  background: #d4af37;
+  color: #000;
+}
+
+.gold-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #d4af37, transparent);
+  margin-bottom: 30px;
+  opacity: 0.5;
+}
+
+/* Encabezados */
+.header-section {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.header-section h1 {
+  color: #fff;
+  font-size: 1.8rem;
+  letter-spacing: 2px;
+  margin: 0;
+}
+
+.res-subtitle {
+  color: #d4af37;
+  font-size: 0.8rem;
+  margin: 5px 0 0;
+  font-weight: 600;
+}
+
+/* Inputs de Lujo */
+.luxe-input {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.luxe-input label {
+  color: #666;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.luxe-input input {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 14px;
+  color: #fff;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.luxe-input input:focus {
+  outline: none;
+  border-color: #d4af37;
+}
+
+/* Botón Principal */
+.btn-gold-main {
+  width: 100%;
+  background: linear-gradient(135deg, #d4af37, #b8952e);
+  border: none;
+  padding: 16px;
+  border-radius: 8px;
+  color: #000;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-gold-main:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+}
+
+.btn-gold-main:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Mensajes y Enlaces */
+.error-msg {
+  color: #ff5252;
+  font-size: 0.8rem;
+  text-align: center;
+  margin-bottom: 15px;
+  background: rgba(255, 82, 82, 0.1);
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.link-alt {
+  display: block;
+  text-align: center;
+  color: #888;
+  font-size: 0.75rem;
+  margin-top: 20px;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.link-alt:hover { color: #d4af37; }
+
+/* Animaciones */
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Spinner */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(0,0,0,0.1);
+  border-top-color: #000;
+  border-radius: 50%;
+  display: inline-block;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

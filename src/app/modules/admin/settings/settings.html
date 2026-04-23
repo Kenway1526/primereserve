@@ -1,0 +1,64 @@
+<div class="settings-container">
+  <header class="settings-header">
+    <div class="gold-line"></div>
+    <h1 class="text-white">Configuración</h1>
+  </header>
+
+  <div class="settings-content">
+    <section class="settings-card">
+      <h3 class="card-title">Horarios por Día</h3>
+      <div class="horarios-list">
+        <div class="horario-row" *ngFor="let h of horarios">
+          <span class="dia-label">{{ h.dia }}</span>
+          <div class="time-pickers">
+            <input type="time" [(ngModel)]="h.apertura">
+            <span class="to-text">a</span>
+            <input type="time" [(ngModel)]="h.cierre">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="settings-card">
+      <h3 class="card-title">Información del Restaurante</h3>
+      <div class="form-grid">
+        <div class="input-group">
+          <label>Nombre</label>
+          <input type="text" [(ngModel)]="restaurantInfo.nombre">
+        </div>
+        <div class="input-group">
+          <label>Dirección</label>
+          <input type="text" [(ngModel)]="restaurantInfo.direccion">
+        </div>
+        <div class="input-group">
+          <label>Teléfono</label>
+          <input type="text" [(ngModel)]="restaurantInfo.telefono">
+        </div>
+        <div class="input-group">
+          <label>Sitio Web</label>
+          <input type="text" [(ngModel)]="restaurantInfo.sitioWeb">
+        </div>
+      </div>
+    </section>
+
+    <section class="settings-card">
+      <h3 class="card-title">
+        <span class="material-icons" style="font-size: 18px; color: #d4af37;">palette</span> 
+        Cambiar Apariencia
+      </h3>
+      <div class="appearance-box">
+        <label>Color de Acento</label>
+        <div class="color-picker-wrapper">
+          <input type="color" [(ngModel)]="restaurantInfo.colorAcento" class="color-dot">
+          <input type="text" [(ngModel)]="restaurantInfo.colorAcento" readonly class="color-code">
+          <div class="color-preview" [style.background]="restaurantInfo.colorAcento"></div>
+        </div>
+        <p class="helper-text">El color se aplica a botones, acentos e indicadores del sistema.</p>
+      </div>
+    </section>
+
+    <button class="btn-save-all" (click)="saveConfig()">
+      <span class="material-icons">save</span> GUARDAR CAMBIOS
+    </button>
+  </div>
+</div>

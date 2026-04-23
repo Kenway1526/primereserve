@@ -1,0 +1,116 @@
+<div class="staff-container">
+  <header class="staff-header">
+    <div class="brand">
+      <div class="gold-accent"></div>
+      <h1>GESTIÓN DE PERSONAL</h1>
+    </div>
+    <button class="btn-add-luxe" (click)="openAddModal()">
+      <span class="material-icons">person_add</span> REGISTRAR TALENTO
+    </button>
+  </header>
+
+  <section class="staff-stats">
+    <div class="stat-card">
+      <span class="label">Total</span>
+      <span class="value">{{ stats.total }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="label">Meseros</span>
+      <span class="value gold">{{ stats.meseros }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="label">Cocina</span>
+      <span class="value gold">{{ stats.cocina }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="label">Administradores</span>
+      <span class="value gold">{{ stats.admin }}</span>
+    </div>
+  </section>
+
+  <div class="search-bar">
+    <span class="material-icons">search</span>
+    <input type="text" [(ngModel)]="searchText" placeholder="Buscar por nombre o correo...">
+  </div>
+
+  <div class="staff-grid">
+    <div class="staff-card" *ngFor="let member of staff | filter: searchText : 'nombre'">
+      <div class="card-options">
+        <button (click)="openEditModal(member)"><span class="material-icons">edit</span></button>
+        <button (click)="deleteMember(member.id)" class="delete"><span class="material-icons">delete</span></button>
+      </div>
+      
+      <div class="avatar-container">
+        <img [src]="member.avatarUrl || 'assets/default-avatar.png'" alt="Avatar">
+        <div class="role-badge" [ngClass]="member.rol.toLowerCase()">
+          {{ member.rol }}
+        </div>
+      </div>
+
+      <div class="staff-info">
+        <h3>{{ member.nombre }}</h3>
+        <p class="email">{{ member.email }}</p>
+        <p class="phone" *ngIf="member.telefono">
+          <span class="material-icons">phone</span> {{ member.telefono }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <app-modal [isOpen]="isModalOpen" [title]="modalTitle" (close)="closeModal()">
+    <div class="modal-form">
+      <div class="avatar-upload">
+        <label for="avatarFile">
+          <div class="preview-circle">
+            <img *ngIf="imagePreview" [src]="imagePreview" class="avatar-img">
+            
+            <img *ngIf="!imagePreview && memberForm.avatarUrl" 
+                [src]="memberForm.avatarUrl" 
+                (error)="memberForm.avatarUrl = null" 
+                class="avatar-img">
+            
+            <div *ngIf="!imagePreview && !memberForm.avatarUrl" class="default-avatar">
+              <span class="material-icons">account_circle</span>
+            </div>
+            
+            <div class="overlay-camera">
+              <span class="material-icons">photo_camera</span>
+            </div>
+          </div>
+        </label>
+        <input type="file" id="avatarFile" (change)="onFileSelected($event)" hidden accept="image/*">
+      </div>
+
+      <div class="form-group">
+        <label>Nombre Completo</label>
+        <input type="text" [(ngModel)]="memberForm.nombre" class="dark-input" placeholder="Nombre del empleado">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Correo Electrónico</label>
+          <input type="email" [(ngModel)]="memberForm.email" class="dark-input" placeholder="correo@ejemplo.com">
+        </div>
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="text" [(ngModel)]="memberForm.telefono" class="dark-input" placeholder="10 dígitos">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Rol en el Restaurante</label>
+        <select [(ngModel)]="memberForm.rol" class="dark-input">
+          <option value="MESERO">Mesero</option>
+          <option value="COCINA">Cocina</option>
+          <option value="ADMIN">Administrador</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-submit-gold" (click)="saveMember()" [disabled]="isLoading">
+          {{ isLoading ? 'GUARDANDO...' : 'GUARDAR CAMBIOS' }}
+        </button>
+      </div>
+    </div>
+  </app-modal>
+</div>

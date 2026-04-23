@@ -1,0 +1,17 @@
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <img src="assets/logo.jpg" alt="Prime Reserve" class="img-logo">
+    <div class="divider"></div>
+  </div>
+
+  <ul class="nav-list">
+    <li *ngFor="let item of menuItems" 
+        [routerLinkActive]="'active'" 
+        [ngClass]="{'nav-bottom': item.isBottom}">
+      <a [routerLink]="item.path">
+        <span class="material-icons">{{ item.icon }}</span>
+        <span class="link-text">{{ item.label }}</span>
+      </a>
+    </li>
+  </ul>
+</nav>

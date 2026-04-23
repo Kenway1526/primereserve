@@ -1,0 +1,121 @@
+.payments-wrapper {
+  padding: 2rem;
+  background-color: #000;
+  min-height: 90vh;
+  color: #fff;
+}
+
+.payments-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+  border-bottom: 1px solid #1a1a1a;
+  padding-bottom: 1.5rem;
+}
+
+.header-title h1 {
+  font-size: 1.8rem;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.header-title p {
+  color: #666;
+  margin: 5px 0 0 0;
+}
+
+.stat-pill {
+  background: #0a0a0a;
+  padding: 1rem 2rem;
+  border: 1px solid #d4af37;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.stat-pill .label { font-size: 0.7rem; color: #888; letter-spacing: 1px; }
+.stat-pill .value { font-size: 1.5rem; font-weight: bold; color: #d4af37; }
+
+/* Grid de Pagos */
+.payments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+}
+
+.payment-card {
+  background: #080808;
+  border: 1px solid #222;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-header {
+  padding: 1.2rem;
+  background: #111;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mesa-number { font-weight: 800; color: #fff; }
+.order-id { font-size: 0.7rem; color: #555; margin-left: 10px; }
+.status-chip { background: #d4af37; color: #000; padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: bold; }
+
+.card-body {
+  padding: 1.5rem;
+  flex-grow: 1;
+}
+
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+.card-footer {
+  padding: 1.5rem;
+  background: #050505;
+  border-top: 1px dotted #333;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.total-row span:first-child { font-size: 0.8rem; color: #666; }
+.total-amount { font-size: 1.6rem; font-weight: bold; color: #d4af37; }
+
+/* Botones */
+.action-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.btn-pay {
+  padding: 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #333;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.btn-pay.cash:hover { background: #2ecc71; color: #000; border-color: #2ecc71; }
+.btn-pay.card:hover { background: #3498db; color: #000; border-color: #3498db; }

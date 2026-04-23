@@ -1,0 +1,45 @@
+<div class="dashboard-container">
+  <div *ngIf="isLoading" class="loader">
+    <div class="spinner"></div>
+    <p>Sincronizando con tu mesa...</p>
+  </div>
+
+  <div *ngIf="!isLoading && reserva" class="fade-in">
+    <header class="card-header">
+      <span class="folio-tag">FOLIO: {{ reserva.folio }}</span>
+      <h2>¡Mesa Lista!</h2>
+      <p>Bienvenido al restaurante</p>
+    </header>
+
+    <div class="stats-grid">
+      <div class="stat-item">
+        <span class="label">Estado</span>
+        <strong [class]="reserva.estado">{{ reserva.estado }}</strong>
+      </div>
+      <div class="stat-item">
+        <span class="label">Personas</span>
+        <strong>{{ reserva.numPersonas }}</strong>
+      </div>
+    </div>
+
+    <div class="waiting-info" *ngIf="reserva.isWaitlistActive">
+      <p>Tu posición en la fila:</p>
+      <div class="pos-number">{{ reserva.posicionEspera || '1' }}</div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-main">
+        <i class="material-icons">menu_book</i>
+        Ver Menú Digital
+      </button>
+      <button class="btn-secondary">
+        <i class="material-icons">notifications</i>
+        Llamar Mesero
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && !reserva" class="error-msg">
+    <p>No se encontró información de la reserva.</p>
+  </div>
+</div>

@@ -1,0 +1,368 @@
+// src/app/modules/kitchen/menu/menu.scss
+
+// Variables de diseño Prime
+$gold-primary: #d4af37;
+$gold-dark: #b8952e;
+$bg-dark: #121212;
+$bg-card: #1e1e1e;
+$bg-modal: #181818;
+$text-main: #ffffff;
+$text-muted: #a0a0a0;
+$border-color: rgba(255, 255, 255, 0.08);
+$shadow-premium: 0 10px 30px rgba(0, 0, 0, 0.5);
+
+.menu-mgmt-container {
+  padding: 2rem;
+  background-color: $bg-dark;
+  min-height: 100vh;
+  color: $text-main;
+
+  .main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid $border-color;
+
+    .title-block {
+      h1 { margin: 0; font-size: 2.2rem; color: $gold-primary; font-weight: 700; letter-spacing: -0.5px; }
+      p { margin: 5px 0 0; color: $text-muted; font-size: 1rem; }
+    }
+
+    .btn-create {
+      background: linear-gradient(135deg, $gold-primary, $gold-dark);
+      color: #000;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+      }
+    }
+  }
+}
+
+// Rejilla
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+// Tarjetas con Imagen
+.menu-card {
+  background-color: $bg-card;
+  border: 1px solid $border-color;
+  border-radius: 12px;
+  overflow: hidden; // Para que la imagen no se salga de los bordes redondeados
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    border-color: rgba($gold-primary, 0.5);
+    transform: translateY(-5px);
+    box-shadow: $shadow-premium;
+  }
+
+  &.archived { opacity: 0.6; filter: grayscale(50%); }
+
+  .card-img-box {
+    height: 160px;
+    width: 100%;
+    position: relative;
+    background-color: #000;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .card-status {
+      position: absolute; top: 10px; right: 10px;
+      width: 12px; height: 12px; border-radius: 50%;
+      background-color: #555;
+      z-index: 2;
+      border: 2px solid $bg-card;
+      &.active { background-color: #4caf50; box-shadow: 0 0 10px rgba(76, 175, 80, 0.7); }
+    }
+  }
+
+  &:hover .card-img-box img {
+    transform: scale(1.05);
+  }
+
+  .card-body {
+    padding: 1.2rem;
+
+    .category-badge {
+      display: inline-block;
+      background-color: rgba($gold-primary, 0.1);
+      color: $gold-primary;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.8rem;
+    }
+
+    h3 { margin: 0 0 0.4rem; font-size: 1.3rem; font-weight: 600; color: #fff; }
+
+    .description-text {
+      color: $text-muted;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      height: 38px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.4;
+    }
+
+    .price { margin: 0 0 1.2rem; font-size: 1.5rem; font-weight: 700; color: $gold-primary; }
+
+    .recipe-summary {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1rem;
+      .ing-tag {
+        background-color: #2a2a2a; color: #ccc;
+        font-size: 0.75rem; padding: 4px 8px; border-radius: 4px;
+        border: 1px solid #333;
+      }
+      .more-tags { color: $text-muted; font-size: 0.75rem; align-self: center; }
+    }
+  }
+
+  .card-actions {
+    display: flex; justify-content: flex-end; gap: 8px;
+    border-top: 1px solid $border-color;
+    padding: 1rem 1.2rem;
+    background-color: rgba(255,255,255,0.01);
+
+    .btn-icon {
+      background: none; border: none; color: $text-muted;
+      cursor: pointer; padding: 6px; border-radius: 6px;
+      transition: all 0.2s;
+      .material-icons { font-size: 22px; }
+
+      &:hover { background-color: rgba(255,255,255,0.05); color: #fff; }
+      &.delete:hover { color: #ff5252; background-color: rgba(255, 82, 82, 0.1); }
+      &.edit:hover { color: $gold-primary; background-color: rgba(212, 175, 85, 0.1); }
+    }
+  }
+}
+
+// ============================================
+// DISEÑO DEL MODAL PREMIUM
+// ============================================
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.3s ease;
+}
+
+.premium-modal {
+  background-color: $bg-modal;
+  border: 1px solid rgba($gold-primary, 0.4);
+  width: 90%;
+  max-width: 650px;
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow: hidden;
+  animation: slideUp 0.4s ease-out;
+
+  .modal-header {
+    padding: 1.2rem 2rem;
+    border-bottom: 1px solid $border-color;
+    display: flex; justify-content: space-between; align-items: center;
+    background-color: rgba(255,255,255,0.02);
+
+    .header-title {
+      display: flex; align-items: center; gap: 12px;
+      h2 { margin: 0; font-size: 1.4rem; color: #fff; font-weight: 600; }
+      .gold-icon { color: $gold-primary; font-size: 24px; }
+    }
+
+    .btn-close {
+      background: none; border: none; color: $text-muted;
+      font-size: 1.8rem; cursor: pointer;
+      &:hover { color: #ff5252; }
+    }
+  }
+
+  .form-content-scroll {
+    padding: 2rem;
+    overflow-y: auto;
+    flex-grow: 1;
+
+    &::-webkit-scrollbar { width: 6px; }
+    &::-webkit-scrollbar-thumb { background: rgba($gold-primary, 0.2); border-radius: 3px; }
+  }
+}
+
+// Previsualización de Imagen en Modal
+.image-setup {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1.2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+
+  .img-preview-circle {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 2px solid $gold-primary;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #000;
+    
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .form-group { flex-grow: 1; margin: 0; }
+}
+
+// Secciones del Formulario
+.form-section {
+  border: none; padding: 0; margin: 0 0 2.5rem;
+  legend {
+    color: $gold-primary; font-size: 1.05rem; font-weight: 600;
+    margin-bottom: 1.2rem; text-transform: uppercase; letter-spacing: 1px;
+  }
+  .form-grid-2 {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem;
+    .full-width { grid-column: span 2; }
+  }
+}
+
+// Inputs
+.form-group {
+  display: flex; flex-direction: column; gap: 8px;
+  label { color: $text-muted; font-size: 0.85rem; font-weight: 500; }
+
+  input[type="text"], input[type="number"], select, textarea {
+    background-color: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 0.95rem; transition: 0.2s;
+    
+    &:focus {
+      outline: none; border-color: $gold-primary;
+      background-color: rgba($gold-primary, 0.05);
+    }
+  }
+
+  textarea { resize: none; font-family: inherit; }
+
+  .input-with-icon {
+    position: relative;
+    .icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: $gold-primary; font-weight: bold; }
+    input { padding-left: 30px; width: 100%; box-sizing: border-box; }
+  }
+}
+
+// Receta
+.recipe-section {
+  .section-help { color: $text-muted; font-size: 0.85rem; margin: -0.8rem 0 1.2rem; }
+  
+  .recipe-search-container {
+    position: relative; margin-bottom: 1.2rem;
+    .search-box {
+      position: relative;
+      .material-icons { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: $gold-primary; font-size: 20px; }
+      input {
+        width: 100%; box-sizing: border-box; padding: 12px 12px 12px 40px;
+        background: #222; border: 1px solid rgba($gold-primary, 0.2); border-radius: 25px;
+        color: #fff;
+      }
+    }
+  }
+
+  .recipe-list-container {
+    background: rgba(0,0,0,0.15); border-radius: 8px; border: 1px solid #2a2a2a;
+    .recipe-header-row {
+      display: grid; grid-template-columns: 1fr 140px 50px;
+      padding: 8px 15px; background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid #2a2a2a; color: #666; font-size: 0.75rem; font-weight: 600;
+    }
+    .recipe-item-row {
+      display: grid; grid-template-columns: 1fr 140px 50px; align-items: center;
+      padding: 10px 15px; border-bottom: 1px solid #2a2a2a;
+      .col-name { display: flex; align-items: center; gap: 8px; color: #fff; .ing-icon { font-size: 16px; color: #555; } }
+      .col-cant {
+        display: flex; align-items: center; gap: 5px;
+        input { width: 65px; background: #2a2a2a; border: 1px solid #333; color: $gold-primary; text-align: center; border-radius: 4px; padding: 4px; }
+        .unidad { color: #888; font-size: 0.8rem; }
+      }
+      .btn-remove { background: none; border: none; color: #555; cursor: pointer; &:hover { color: #ff5252; } }
+    }
+  }
+}
+
+// Dropdown
+.search-results-dropdown {
+  position: absolute; top: 100%; left: 0; width: 100%; background: #252525;
+  border: 1px solid #333; border-radius: 10px; z-index: 10; max-height: 180px; overflow-y: auto;
+  .result-item {
+    display: flex; justify-content: space-between; padding: 10px 15px; cursor: pointer;
+    &:hover { background: rgba($gold-primary, 0.1); color: $gold-primary; }
+    .ing-stock { font-size: 0.75rem; color: #777; }
+  }
+}
+
+// Footer
+.modal-footer {
+  padding: 1.2rem 2rem; border-top: 1px solid $border-color;
+  background: rgba(255,255,255,0.02); display: flex; justify-content: space-between; align-items: center;
+
+  .status-group {
+    display: flex; align-items: center; gap: 10px; color: $text-muted; font-size: 0.85rem;
+    .switch-label {
+      position: relative; display: inline-block; width: 40px; height: 20px;
+      input { opacity: 0; width: 0; height: 0; }
+      .slider {
+        position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #333; border-radius: 20px; transition: .4s;
+        &:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background: #aaa; border-radius: 50%; transition: .4s; }
+      }
+      input:checked + .slider { background: #4caf50; }
+      input:checked + .slider:before { transform: translateX(20px); background: #fff; }
+    }
+  }
+
+  .action-group {
+    display: flex; gap: 10px;
+    .btn-secondary { background: none; border: 1px solid #333; color: $text-muted; padding: 8px 18px; border-radius: 6px; cursor: pointer; }
+    .btn-save-prime { background: linear-gradient(135deg, $gold-primary, $gold-dark); color: #000; border: none; padding: 8px 22px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  }
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }

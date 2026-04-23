@@ -1,0 +1,48 @@
+<div class="waiter-container">
+  <div class="waiter-card">
+    
+    <header class="waiter-header">
+      <div class="header-info">
+        <small class="gold-text">CONTROL DE PISO</small>
+        <h1>{{ restaurantName }}</h1>
+      </div>
+      <div class="filter-pills">
+        <button [class.active]="filterStatus === 'TODOS'" (click)="filterStatus = 'TODOS'">TODOS</button>
+        <button [class.active]="filterStatus === 'ESPERA'" (click)="filterStatus = 'ESPERA'">EN ESPERA</button>
+      </div>
+    </header>
+
+    <div class="list-container">
+      <div class="reservation-row" *ngFor="let res of filteredReservations; let i = index" [class.seated]="res.status === 'SENTADO'">
+        
+        <div class="res-time-box">
+          <span class="time">{{ res.time }}</span>
+          <small>HRS</small>
+        </div>
+
+        <div class="res-details">
+          <div class="cust-info">
+            <strong>{{ res.customer }}</strong>
+            <small>{{ res.folio }} • {{ res.guests }} PAX</small>
+          </div>
+          <div class="status-tag" [class.gold-tag]="res.status === 'SENTADO'">
+            {{ res.status }}
+          </div>
+        </div>
+
+        <div class="res-actions">
+          <button class="btn-action seat" *ngIf="res.status === 'ESPERA'" (click)="seatCustomer(i)">
+            ASIGNAR MESA
+          </button>
+          <button class="btn-icon-del" (click)="removeRes(i)">×</button>
+        </div>
+
+      </div>
+
+      <div class="empty-state" *ngIf="filteredReservations.length === 0">
+        <p>NO HAY RESERVACIONES EN ESTA CATEGORÍA</p>
+      </div>
+    </div>
+
+  </div>
+</div>

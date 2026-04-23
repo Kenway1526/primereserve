@@ -1,0 +1,31 @@
+<div class="container-map">
+  <h2>Mapa de Mesas</h2>
+  <div class="legend">
+    <span class="dot libre"></span> Disponible
+    <span class="dot ocupada"></span> Ocupada
+    <span class="dot sucia"></span> Sucia
+  </div>
+
+  <div class="canvas-mesas">
+    <div *ngFor="let m of mesas" 
+         class="mesa-icon" 
+         [ngClass]="m.estado"
+         [style.left.px]="m.x" 
+         [style.top.px]="m.y"
+         (click)="abrirOpciones(m)">
+      {{ m.numeroMesa }}
+      <small>{{ m.capacidad }}p</small>
+    </div>
+  </div>
+
+  <div class="overlay" *ngIf="mesaSeleccionada" (click)="mesaSeleccionada = null">
+    <div class="modal-mesero" (click)="$event.stopPropagation()">
+      <h3>Mesa {{ mesaSeleccionada.numeroMesa }}</h3>
+      <div class="actions">
+        <button class="btn-primary" (click)="irAPedido()">Tomar Pedido</button>
+        <button class="btn-secondary" *ngIf="mesaSeleccionada.estado === 'OCUPADA'">Cobrar</button>
+        <button class="btn-accent" *ngIf="mesaSeleccionada.estado === 'SUCIA'">Limpiar</button>
+      </div>
+    </div>
+  </div>
+</div>
