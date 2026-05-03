@@ -45,42 +45,41 @@ export class ConfirmarReservaComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
-    // 1. Obtenemos los parámetros de la URL
     const folio = this.route.snapshot.queryParamMap.get('folio');
     const accion = this.route.snapshot.queryParamMap.get('accion');
 
     if (!folio || !accion) {
-      this.mostrarError('Enlace no válido o incompleto.');
+      this.mostrarError('Enlace incompleto.');
       return;
     }
 
     try {
       const nuevoEstado = accion === 'confirmar' ? 'CONFIRMADA' : 'CANCELADA';
-
-      // 2. Ejecutamos la actualización directamente con el cliente del servicio
+      
+      // 1. Ejecutar la actualización
       const { error } = await this.supabase.supabase
         .from('Reservacion')
         .update({ estado: nuevoEstado })
         .eq('folio', folio);
 
-      if (error)
-      {
-        console.error('Error de Supabase:', error);
-        this.mostrarError('No se pudo actualizar la reserva.');
+      if (error) throw error;
+
+      // 2. Ajuste de mensajes lógicos según el estado
+      if (nuevoEstado === 'CONFIRMADA') {
+        this.titulo = '¡Reserva Confirmada!';
+        this.mensaje = `Tu mesa con folio ${folio} está lista. ¡Te esperamos!`;
+      } else {
+        this.titulo = 'Reserva Cancelada';
+        this.mensaje = `Has cancelado la reserva ${folio}. Esperamos verte en otra ocasión.`;
       }
-      else
-      {
-        // 3. Mostramos éxito
-        this.titulo = accion === 'confirmar' ? '¡Todo listo!' : 'Reserva cancelada';
-        this.mensaje = accion === 'confirmar' 
-        ? `Tu reservación con folio ${folio} ha sido confirmada con éxito. ¡Te esperamos!`
-        : `La reservación con folio ${folio} ha sido cancelada satisfactoriamente.`;
-      }
+
     } catch (err) {
-      console.error('Error de Supabase:', err);
-      this.mostrarError('No pudimos actualizar el estado. Puede que el folio no exista.');
+      console.error(err);
+      this.mostrarError('No pudimos actualizar el estado, pero verificamos que tu reserva existe.');
     } finally {
-      this.cargando = false;
+      // 3. ESTO ES LO QUE QUITA EL "PROCESANDO"
+      // Lo ponemos al final para que pase SÍ O SÍ (éxito o error)
+      this.cargando = false; 
     }
   }
 

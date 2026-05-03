@@ -94,3 +94,25 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 .fade-in { animation: fadeIn 0.4s ease-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.status-CONFIRMADA { color: #27ae60; }
+.status-PENDIENTE_CONFIRMAR { color: #f39c12; }
+.status-WAITLIST { color: #3498db; }
+.status-CANCELADA { color: #e74c3c; }
+
+header.confirmada { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+header.waitlist { background: linear-gradient(135deg, #2980b9, #3498db); }
+header.pendiente_confirmar { background: linear-gradient(135deg, #f39c12, #f1c40f); }
+header.cancelada { background: linear-gradient(135deg, #c0392b, #e74c3c); }
+
+.btn-help {
+  background: #ecf0f1;
+  color: #7f8c8d;
+  border: none;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}

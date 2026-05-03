@@ -21,28 +21,32 @@ export class Dashboard implements OnInit, OnDestroy {
   public isLoading = true;
 
   ngOnInit() {
-    console.log('🚀 [Dashboard] Iniciado');
-    
     this.authSub = this.auth.user$.subscribe(user => {
-      console.log('👤 [Dashboard] Usuario detectado:', user);
-      
       if (user?.reservaId) {
         this.fetchReserva(user.reservaId);
       } else {
-        console.warn('⚠️ [Dashboard] No hay reservaId. Cancelando carga.');
         this.isLoading = false;
         this.cdr.detectChanges();
       }
     });
 
-    // Seguridad: Si en 5 segundos no carga nada, quitamos el spinner
     setTimeout(() => {
       if (this.isLoading) {
-        console.error('⏳ [Dashboard] Tiempo de espera agotado');
         this.isLoading = false;
         this.cdr.detectChanges();
       }
-    }, 5000);
+    }, 6000); // Un segundo extra por latencia
+  }
+
+  // Helper para mensajes del Header
+  getStatusMessage(estado: string): string {
+    const messages: { [key: string]: string } = {
+      'CONFIRMADA': 'Bienvenido al restaurante, disfruta tu estancia.',
+      'PENDIENTE_CONFIRMAR': 'Por favor, confirma tu asistencia desde tu correo.',
+      'WAITLIST': 'Estamos preparando un lugar especial para ti.',
+      'CANCELADA': 'Esta reservación ya no es válida.'
+    };
+    return messages[estado] || 'Cargando detalles de tu visita...';
   }
 
   private async fetchReserva(id: string) {
@@ -55,9 +59,9 @@ export class Dashboard implements OnInit, OnDestroy {
 
       if (error) throw error;
       this.reserva = data;
-      console.log('✅ [Dashboard] Datos de reserva cargados:', data);
     } catch (err) {
-      console.error('❌ [Dashboard] Error en fetch:', err);
+      console.error('❌ [Dashboard] Error:', err);
+      this.reserva = null;
     } finally {
       this.isLoading = false;
       this.cdr.detectChanges();
