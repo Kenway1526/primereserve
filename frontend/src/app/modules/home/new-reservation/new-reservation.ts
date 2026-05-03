@@ -3,6 +3,7 @@ import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { SupabaseService } from '../../../core/services/supabase';
+import { APP_CONFIG } from '../../../core/constants/config';
 
 @Component({
   selector: 'app-new-reservation',
@@ -20,7 +21,7 @@ export class NewReservation implements OnInit {
   public step = 1; 
   public isLoading = false;
   public restaurante: any = null;
-  public restauranteId = ''; 
+  public restauranteId = APP_CONFIG.RESTAURANT_ID; 
   
   public showDateModal = false;
   public showTimeModal = false;
@@ -136,7 +137,7 @@ export class NewReservation implements OnInit {
         folio: this.generatedFolio,
         restauranteId: this.restauranteId,
         mesaId: mesaIdAsignada,
-        fechaPrincipal: fechaStr,
+        fechaPrincipal: this.reservationData.primaryDate.toISOString(),
         horaPrincipal: horaStr,
         fechaPlanB: this.reservationData.altDate?.toISOString().split('T')[0] || null,
         horaPlanB: this.reservationData.altTime || null,

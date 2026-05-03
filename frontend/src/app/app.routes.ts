@@ -5,6 +5,7 @@ import { KitchenComponent } from '@modules/kitchen/kitchen.component';
 import { ClientLayout } from '@modules/client/client-layout/client-layout';
 import { Dashboard } from './modules/client/dashboard/dashboard';
 import { WaiterComponent } from '@modules/waiter/waiter.component';
+import { ConfirmarReservaComponent } from './modules/confirmar-reserva/confirmar-reserva';
 
 export const routes: Routes = [
   // 1. REDIRECCIÓN INICIAL
@@ -110,6 +111,8 @@ export const routes: Routes = [
       { path: 'menu', loadComponent: () => import('./modules/kitchen/menu/menu').then(m => m.MenuMgmt) },
     ]
   },
+
+  { path: 'confirmar-reserva', component: ConfirmarReservaComponent },
 
   // 8. COMODÍN FINAL (Evita el bucle de redirecciones)
   { 

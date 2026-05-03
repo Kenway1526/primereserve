@@ -49,7 +49,6 @@ model Reservacion {
   estado           EstadoReserva @default(WAITLIST)
   isWaitlistActive Boolean       @default(false)
   posicionEspera   Int?
-  usuarioId        String
   restauranteId    String
   mesaId           String?
   fechaRegistro    DateTime      @default(now())

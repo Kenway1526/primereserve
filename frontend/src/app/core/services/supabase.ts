@@ -89,7 +89,11 @@ export class SupabaseService {
   }
 
   async createReservacion(data: any) {
-    return await this.supabase.from('Reservacion').insert([data]);
+    return await this.supabase
+      .from('Reservacion')
+      .insert([data]) // Mantenemos el array para asegurar consistencia
+      .select()       // Esto obliga a retornar la fila creada
+      .single();      // Indica que esperamos un solo objeto, no un array
   }
 
 //==================================== reservaciones ====================================
