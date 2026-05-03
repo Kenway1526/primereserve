@@ -1,0 +1,19 @@
+[build]
+  # Aquí le dices a Netlify que debe "entrar" a la carpeta frontend
+  base = "frontend"
+  
+  # El comando se ejecutará dentro de la carpeta frontend
+  command = "npm run build"
+  
+  # La ruta de publicación también es relativa a la carpeta frontend
+  publish = "dist/frontend/browser"
+
+[build.environment]
+  # Saltamos el plugin de Angular que dio error para usar un build estándar
+  NETLIFY_SKIP_ANGULAR_RUNTIME = "true"
+  NODE_VERSION = "18"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
