@@ -146,7 +146,7 @@ export class NewReservation implements OnInit {
         nombreInvitado: this.reservationData.name,
         telefonoInvitado: this.reservationData.phone,
         emailInvitado: this.reservationData.email,
-        estado: (this.step === 7 || !mesaIdAsignada) ? 'WAITLIST' : 'CONFIRMADA',
+        estado: (this.step === 7 || !mesaIdAsignada) ? 'WAITLIST' : 'PENDIENTE_CONFIRMAR',
         isWaitlistActive: (this.step === 7 || !mesaIdAsignada),
         notasEspeciales: this.reservationData.notes
       };
