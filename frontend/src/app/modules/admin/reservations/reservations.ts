@@ -1,8 +1,9 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Modal } from '../../../shared/components/modal/modal';
 import { SupabaseService } from '../../../core/services/supabase';
+import { APP_CONFIG } from '../../../core/constants/config'; // 👈 Tu constante res_001
 
 export interface Reserva {
   id?: string;
@@ -32,17 +33,27 @@ export interface Reserva {
 export class Reservations implements OnInit {
   private supabaseSvc = inject(SupabaseService);
   private cdr = inject(ChangeDetectorRef);
+  private platformId = inject(PLATFORM_ID); // 🛡️ Detector de plataforma
 
   public activeTab: 'proximas' | 'curso' | 'espera' | 'canceladas' = 'proximas';
   public isModalOpen = false;
   public isLoading = false;
-  public restaurantId = localStorage.getItem('active_restaurant_id') || '';
+  public restaurantId = ''; // 👈 Iniciar vacío para seguridad
 
   public allReservations: Reserva[] = [];
   public resForm: Reserva = this.initForm();
 
   async ngOnInit() {
-    if (this.restaurantId) await this.fetchReservations();
+    // 🛡️ Solo ejecutamos si estamos en el Navegador
+    if (isPlatformBrowser(this.platformId)) {
+      const storedId = APP_CONFIG.RESTAURANT_ID; // Usamos tu constante directamente
+      if (storedId) {
+        this.restaurantId = storedId;
+        await this.fetchReservations();
+      } else {
+        console.warn('[Reservations] No se encontró restaurantId en Storage');
+      }
+    }
   }
 
   private initForm(): Reserva {
@@ -60,12 +71,15 @@ export class Reservations implements OnInit {
   }
 
   async fetchReservations() {
+    if (!this.restaurantId) return; // Seguridad extra
+    
     this.isLoading = true;
     try {
       const data = await this.supabaseSvc.getReservations(this.restaurantId);
       this.allReservations = data || [];
+      console.log('✅ Reservas sincronizadas');
     } catch (err) {
-      console.error('Error:', err);
+      console.error('Error al obtener reservas:', err);
     } finally {
       this.isLoading = false;
       this.cdr.detectChanges();
@@ -77,7 +91,6 @@ export class Reservations implements OnInit {
       case 'proximas': 
         return this.allReservations.filter(r => r.estado === 'CONFIRMADA');
       case 'curso': 
-        // Ahora filtramos por SENTADO para que aparezcan aquí las tarjetas
         return this.allReservations.filter(r => r.estado === 'SENTADO'); 
       case 'espera': 
         return this.allReservations.filter(r => r.estado === 'WAITLIST' || r.isWaitlistActive);
@@ -93,6 +106,9 @@ export class Reservations implements OnInit {
     this.isLoading = true;
 
     try {
+      // Usar el ID actual del componente
+      this.resForm.restauranteId = this.restaurantId;
+
       const mesaId = await this.supabaseSvc.asignarMesaAutomatica(this.restaurantId, this.resForm.numPersonas);
       
       if (mesaId) {
@@ -107,22 +123,18 @@ export class Reservations implements OnInit {
       await this.fetchReservations();
       this.closeModal();
     } catch (err) {
-      alert('Error al guardar');
+      if (isPlatformBrowser(this.platformId)) alert('Error al guardar');
     } finally {
       this.isLoading = false;
+      this.cdr.detectChanges();
     }
-  }
-
-  async addToWaitlist() {
-    this.resForm.estado = 'WAITLIST';
-    this.resForm.isWaitlistActive = true;
-    await this.saveReservation();
   }
 
   async cambiarEstado(res: Reserva, nuevoEstado: Reserva['estado']) {
     if (!res.id) return;
     try {
       await this.supabaseSvc.updateReservationStatus(res.id, nuevoEstado);
+      // Lógica de liberación de mesa
       if ((nuevoEstado === 'CANCELADA' || nuevoEstado === 'FINALIZADA') && res.mesaId) {
         await this.supabaseSvc.updateTableStatus(res.mesaId, 'LIBRE');
       }
@@ -133,51 +145,19 @@ export class Reservations implements OnInit {
   }
 
   async sentarCliente(res: Reserva) {
-    if (!res.id) return;
-    
-    if (!res.mesaId) {
-      alert('Esta reserva no tiene una mesa asignada.');
+    if (!res.id || !res.mesaId) {
+      if (isPlatformBrowser(this.platformId)) alert('Esta reserva no tiene una mesa asignada.');
       return;
     }
 
     this.isLoading = true;
     try {
-      // 1. Actualizamos el estado de la RESERVACIÓN a 'SENTADO' (Valor real de tu Enum)
       await this.supabaseSvc.updateReservationStatus(res.id, 'SENTADO');
-
-      // 2. Actualizamos el estado de la MESA a 'OCUPADA'
       await this.supabaseSvc.updateTableStatus(res.mesaId, 'OCUPADA');
-
-      // 3. Refrescamos la lista para obtener los datos actualizados
       await this.fetchReservations();
-      
-      // 4. CAMBIO DE PESTAÑA: Movemos la vista a "En Curso" automáticamente
-      this.activeTab = 'curso';
-      
-      console.log(`Cliente ${res.nombreInvitado} sentado con éxito.`);
+      this.activeTab = 'curso'; // 🏎️ Salto automático a la pestaña activa
     } catch (err) {
       console.error('Error al sentar cliente:', err);
-      alert('Error al sentar al cliente. Verifica la conexión.');
-    } finally {
-      this.isLoading = false;
-      this.cdr.detectChanges();
-    }
-  }
-
-  // Para el botón de finalizar (si lo tienes)
-  async finalizarReserva(res: Reserva) {
-    if (!res.id || !res.mesaId) return;
-    
-    this.isLoading = true;
-    try {
-      // Estado RESERVA -> COMPLETADA
-      await this.supabaseSvc.updateReservationStatus(res.id, 'COMPLETADA');
-      // Estado MESA -> SUCIA (para que el staff sepa que hay que limpiar)
-      await this.supabaseSvc.updateTableStatus(res.mesaId, 'SUCIA');
-      
-      await this.fetchReservations();
-    } catch (err) {
-      console.error(err);
     } finally {
       this.isLoading = false;
       this.cdr.detectChanges();
@@ -185,10 +165,46 @@ export class Reservations implements OnInit {
   }
 
   setTab(tab: any) { this.activeTab = tab; this.cdr.detectChanges(); }
-  openAddModal() { this.isModalOpen = true; }
+  
+  openAddModal() { 
+    this.resForm = this.initForm(); // Reiniciamos con el restaurantId cargado
+    this.isModalOpen = true; 
+  }
+
   closeModal() {
     this.isModalOpen = false;
     this.resForm = this.initForm();
     this.cdr.detectChanges();
+  }
+
+  // --- Método para añadir a lista de espera desde el modal ---
+  async addToWaitlist() {
+    this.resForm.estado = 'WAITLIST';
+    this.resForm.isWaitlistActive = true;
+    await this.saveReservation(); // Reutiliza la lógica de guardado
+  }
+
+  // --- Método para finalizar el servicio (libera la mesa) ---
+  async finalizarReserva(res: Reserva) {
+    if (!res.id || !res.mesaId) return;
+    
+    this.isLoading = true;
+    try {
+      // 1. Cambiamos estado de la reserva a FINALIZADA
+      await this.supabaseSvc.updateReservationStatus(res.id, 'FINALIZADA');
+      
+      // 2. Liberamos la mesa para que aparezca disponible en el mapa
+      await this.supabaseSvc.updateTableStatus(res.mesaId, 'SUCIA');
+      
+      // 3. Refrescamos la lista
+      await this.fetchReservations();
+      
+      console.log('Servicio finalizado y mesa liberada.');
+    } catch (err) {
+      console.error('Error al finalizar reserva:', err);
+    } finally {
+      this.isLoading = false;
+      this.cdr.detectChanges();
+    }
   }
 }

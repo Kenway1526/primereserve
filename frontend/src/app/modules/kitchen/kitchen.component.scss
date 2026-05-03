@@ -1,0 +1,22 @@
+/* Copia íntegra de admin.component.scss */
+.kitchen-wrapper {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: #0a0a0a; // Un poco más oscuro que admin si deseas
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.content-viewport {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  background-color: #121212; // Fondo para el área de tickets/inventario
+}

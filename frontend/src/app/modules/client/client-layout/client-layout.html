@@ -1,0 +1,29 @@
+<div class="client-shell">
+  <header class="top-nav">
+    <div class="logo">PRIME RESERVE</div>
+    <button class="exit-icon" (click)="logout()">
+      <i class="material-icons">logout</i>
+    </button>
+  </header>
+
+  <main class="content-area">
+    <router-outlet></router-outlet>
+  </main>
+
+  <nav class="bottom-tabs">
+    <a routerLink="/client/dashboard" routerLinkActive="active" class="tab-item">
+      <i class="material-icons">home</i>
+      <span>Inicio</span>
+    </a>
+
+    <a routerLink="/client/menu" routerLinkActive="active" class="tab-item">
+      <i class="material-icons">restaurant_menu</i>
+      <span>Menú</span>
+    </a>
+
+    <a routerLink="/client/order-status" routerLinkActive="active" class="tab-item">
+      <i class="material-icons">receipt_long</i>
+      <span>Mi Orden</span>
+    </a>
+  </nav>
+</div>

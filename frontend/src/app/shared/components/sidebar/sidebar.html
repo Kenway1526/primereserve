@@ -1,70 +1,17 @@
 <nav class="sidebar">
   <div class="sidebar-logo">
-    <img src="assets/img/logo-gold.png" alt="Prime Reserve">
+    <img src="assets/logo.jpg" alt="Prime Reserve" class="img-logo">
     <div class="divider"></div>
   </div>
 
   <ul class="nav-list">
-    <li routerLinkActive="active">
-      <a routerLink="/admin/dashboard">
-        <span class="material-icons">dashboard</span>
-        <span class="link-text">Dashboard</span>
-      </a>
-    </li>
-
-    <li routerLinkActive="active">
-      <a routerLink="/admin/reservations">
-        <span class="material-icons">event_available</span>
-        <span class="link-text">Reservaciones</span>
-      </a>
-    </li>
-
-    <li routerLinkActive="active">
-      <a routerLink="/admin/table-map">
-        <span class="material-icons">layers</span>
-        <span class="link-text">Mapa de Mesas</span>
-      </a>
-    </li>
-
-    <li routerLinkActive="active">
-      <a routerLink="/admin/orders">
-        <span class="material-icons">receipt_long</span>
-        <span class="link-text">Órdenes</span>
-      </a>
-    </li>
-
-    <li routerLinkActive="active">
-      <a routerLink="/admin/kitchen">
-        <span class="material-icons">restaurant</span>
-        <span class="link-text">Cocina</span>
-      </a>
-    </li>
-
-    <li routerLinkActive="active">
-      <a routerLink="/admin/payments">
-        <span class="material-icons">account_balance_wallet</span>
-        <span class="link-text">Pagos y Ventas</span>
-      </a>
-    </li>
-
-    <li routerLinkActive="active">
-      <a routerLink="/admin/inventory-mgmt">
-        <span class="material-icons">inventory_2</span>
-        <span class="link-text">Inventario</span>
-      </a>
-    </li>
-
-    <li routerLinkActive="active">
-      <a routerLink="/admin/staff-mgmt">
-        <span class="material-icons">badge</span>
-        <span class="link-text">Personal</span>
-      </a>
-    </li>
-
-    <li routerLinkActive="active" class="nav-bottom">
-      <a routerLink="/admin/settings">
-        <span class="material-icons">settings</span>
-        <span class="link-text">Configuración</span>
+    <li *ngFor="let item of menuItems" 
+        [routerLinkActive]="'active'" 
+        [routerLinkActiveOptions]="{exact: true}"
+        [ngClass]="{'nav-bottom': item.isBottom}">
+      <a [routerLink]="item.path">
+        <span class="material-icons">{{ item.icon }}</span>
+        <span class="link-text">{{ item.label }}</span>
       </a>
     </li>
   </ul>

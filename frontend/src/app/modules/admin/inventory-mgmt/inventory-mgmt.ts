@@ -1,56 +1,131 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Modal } from '../../../shared/components/modal/modal';
-import { FilterPipe } from '../../../shared/pipes/filter-pipe';
+import { SupabaseService } from '../../../core/services/supabase';
+import { APP_CONFIG } from '../../../core/constants/config'; // 🚀 Sincronización con la constante
 
 @Component({
-  selector: 'app-inventory-mgmt',
+  selector: 'app-inventory',
   standalone: true,
-  imports: [CommonModule, FormsModule, Modal, FilterPipe],
+  imports: [CommonModule, FormsModule],
   templateUrl: './inventory-mgmt.html',
   styleUrl: './inventory-mgmt.scss'
 })
 export class InventoryMgmt implements OnInit {
-  public isModalOpen = false;
-  public searchText = '';
-  public itemForm: any = { id: '', nombre: '', stock: 0, min: 0, unidad: 'PZ', categoria: 'Insumos' };
+  private supabaseSvc = inject(SupabaseService);
+  private cdr = inject(ChangeDetectorRef);
+  private platformId = inject(PLATFORM_ID);
 
-  public ingredients = [
-    { id: '1', nombre: 'Ribeye Prime', stock: 12, min: 15, unidad: 'KG', categoria: 'Carnes' },
-    { id: '2', nombre: 'Vino Tinto Reserva', stock: 45, min: 20, unidad: 'PZ', categoria: 'Vinos' },
-    { id: '3', nombre: 'Salmón Atlántico', stock: 5, min: 10, unidad: 'KG', categoria: 'Pescados' },
-    { id: '4', nombre: 'Harina de Trigo', stock: 100, min: 50, unidad: 'KG', categoria: 'Insumos' },
-  ];
+  public items: any[] = [];
+  public criticalCount: number = 0;
+  public isLoading = true;
 
-  public stats = { totalItems: 0, lowStock: 0 };
+  public showModal = false;
+  public isEditing = false;
+  public selectedIngrediente: any = {};
 
-  ngOnInit(): void { this.updateStats(); }
-
-  updateStats() {
-    this.stats.totalItems = this.ingredients.length;
-    this.stats.lowStock = this.ingredients.filter(i => i.stock < i.min).length;
-  }
-
-  openAddModal() {
-    this.itemForm = { id: '', nombre: '', stock: 0, min: 10, unidad: 'PZ', categoria: 'Insumos' };
-    this.isModalOpen = true;
-  }
-
-  openEditModal(item: any) {
-    this.itemForm = { ...item };
-    this.isModalOpen = true;
-  }
-
-  saveItem() {
-    if (this.itemForm.id) {
-      const idx = this.ingredients.findIndex(i => i.id === this.itemForm.id);
-      this.ingredients[idx] = { ...this.itemForm };
-    } else {
-      this.itemForm.id = Date.now().toString();
-      this.ingredients.push({ ...this.itemForm });
+  async ngOnInit() {
+    if (isPlatformBrowser(this.platformId)) {
+      // 🚀 Cargamos directamente usando la constante estática
+      await this.loadInventory();
     }
-    this.updateStats();
-    this.isModalOpen = false;
+  }
+
+  async loadInventory() {
+    this.isLoading = true;
+    this.cdr.detectChanges();
+
+    try {
+      const { data, error } = await this.supabaseSvc.supabase
+        .from('Ingrediente')
+        .select('*')
+        .eq('restauranteId', APP_CONFIG.RESTAURANT_ID) // 👈 Sincronizado para CARGAR
+        .order('nombre', { ascending: true });
+
+      if (error) throw error;
+      
+      this.items = data || [];
+      this.criticalCount = this.items.filter(i => i.stockActual <= i.stockMinimoAlerta).length;
+      
+    } catch (err) {
+      console.error('Error al cargar inventario:', err);
+    } finally {
+      this.isLoading = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  openModal() {
+    this.isEditing = false;
+    // 🛡️ Inicializamos con el ID estático y dejamos que Supabase genere el UUID si prefieres
+    this.selectedIngrediente = {
+      nombre: '',
+      stockActual: 0,
+      unidad: 'kg', // Valor por defecto común
+      stockMinimoAlerta: 0,
+      restauranteId: APP_CONFIG.RESTAURANT_ID // 👈 Sincronizado para NUEVOS
+    };
+    this.showModal = true;
+  }
+
+  editItem(item: any) {
+    this.isEditing = true;
+    this.selectedIngrediente = { ...item };
+    this.showModal = true;
+  }
+
+  closeModal() { 
+    this.showModal = false; 
+    this.cdr.detectChanges();
+  }
+
+  async saveIngrediente() {
+    if (!this.selectedIngrediente.nombre || this.isLoading) return;
+    
+    this.isLoading = true;
+    try {
+      // 🛡️ Forzamos que el restauranteId sea el correcto antes de enviar
+      this.selectedIngrediente.restauranteId = APP_CONFIG.RESTAURANT_ID;
+
+      const { error } = this.isEditing 
+        ? await this.supabaseSvc.supabase
+            .from('Ingrediente')
+            .update(this.selectedIngrediente)
+            .eq('id', this.selectedIngrediente.id)
+            .eq('restauranteId', APP_CONFIG.RESTAURANT_ID) // Seguridad extra
+        : await this.supabaseSvc.supabase
+            .from('Ingrediente')
+            .insert([this.selectedIngrediente]);
+
+      if (error) throw error;
+
+      console.log('📦 Inventario actualizado en:', APP_CONFIG.RESTAURANT_NAME);
+      this.closeModal();
+      await this.loadInventory();
+
+    } catch (err: any) {
+      alert('Error al guardar ingrediente: ' + (err.message || err));
+    } finally {
+      this.isLoading = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  // Opcional: Método para eliminar ingredientes
+  async deleteItem(id: string) {
+    if (!confirm('¿Seguro que deseas eliminar este insumo?')) return;
+    
+    try {
+      const { error } = await this.supabaseSvc.supabase
+        .from('Ingrediente')
+        .delete()
+        .eq('id', id)
+        .eq('restauranteId', APP_CONFIG.RESTAURANT_ID);
+
+      if (error) throw error;
+      await this.loadInventory();
+    } catch (err) {
+      console.error('Error al eliminar:', err);
+    }
   }
 }

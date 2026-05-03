@@ -1,92 +1,180 @@
-.orders-page-container {
-  display: block !important;
-  background-color: #000000 !important;
-  min-height: 100vh;
-  padding: 50px;
+.orders-wrapper {
+  padding: 2rem;
+  background-color: #000;
+  min-height: 90vh;
+  font-family: 'Inter', sans-serif;
 }
 
-.gold-line {
-  width: 50px;
-  height: 2px;
-  background-color: #d4af37 !important;
-  margin-bottom: 15px;
+/* Header de estadísticas */
+.summary-header {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
 }
 
-.title-main {
-  color: #ffffff !important;
-  font-weight: 200;
-  letter-spacing: 4px;
-  font-size: 2rem;
-  margin: 0 0 50px 0;
+.stat-box {
+  background: #0a0a0a;
+  padding: 1.2rem 2rem;
+  border-radius: 12px;
+  border: 1px solid #222;
+  display: flex;
+  flex-direction: column;
 }
 
-/* UTILIDADES DE COLOR */
-.text-white { color: #ffffff !important; }
-.text-gold { color: #d4af37 !important; }
-.text-muted { color: #444444 !important; font-size: 0.7rem; display: block; }
-
-/* TICKETS */
-.ticket-card {
-  background-color: #080808 !important;
-  border: 1px solid #d4af37 !important; /* RECUADRO DORADO */
-  padding: 30px;
-  margin-bottom: 25px;
-  max-width: 800px;
-  border-radius: 4px;
+.stat-box.highlight {
+  border-color: #d4af37;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.05);
 }
 
-.ticket-header {
+.stat-label { color: #666; font-size: 0.7rem; letter-spacing: 2px; margin-bottom: 0.5rem; }
+.stat-value { font-size: 1.8rem; font-weight: bold; color: #fff; }
+.gold-text { color: #d4af37; }
+
+/* Grid y Tarjetas */
+.orders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.order-luxe-card {
+  background: linear-gradient(145deg, #0f0f0f, #050505);
+  border: 1px solid #1a1a1a;
+  border-radius: 16px;
+  padding: 1.5rem;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.order-luxe-card:hover {
+  border-color: #d4af37;
+  transform: translateY(-5px);
+}
+
+.card-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 25px;
+  align-items: center;
+  margin-bottom: 1.5rem;
 }
 
-.ticket-header h2 {
-  font-size: 1.8rem;
-  font-weight: 300;
-  margin: 0;
+.table-tag { display: flex; flex-direction: column; }
+.table-tag .label { font-size: 0.6rem; color: #d4af37; font-weight: bold; }
+.table-tag .number { font-size: 1.5rem; color: #fff; font-weight: 800; }
+
+/* Badges de Estado del Enum */
+.status-badge {
+  font-size: 0.65rem;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  text-transform: uppercase;
 }
 
-.sub-text {
-  font-size: 0.7rem;
+.abierta { background: rgba(212, 175, 55, 0.1); color: #d4af37; border: 1px solid #d4af37; }
+.en_preparacion { background: rgba(52, 152, 219, 0.1); color: #3498db; border: 1px solid #3498db; }
+.listo { background: rgba(46, 204, 113, 0.1); color: #2ecc71; border: 1px solid #2ecc71; }
+.servido { background: rgba(155, 89, 182, 0.1); color: #9b59b6; border: 1px solid #9b59b6; }
+
+.card-content {
+  margin-bottom: 1.5rem;
+}
+
+.info-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.info-group .material-icons { font-size: 16px; color: #d4af37; }
+
+.total-display {
+  text-align: right;
+  border-top: 1px solid #1a1a1a;
+  padding-top: 1rem;
+}
+
+.total-display .amount { font-size: 1.4rem; font-weight: bold; color: #fff; }
+
+.btn-manage {
+  width: 100%;
+  padding: 0.8rem;
+  background: transparent;
+  border: 1px solid #333;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+.btn-manage:hover {
+  background: #fff;
+  color: #000;
+  border-color: #fff;
+}
+
+/* --- Estilos para Empty States --- */
+.empty-state-luxe, .empty-kitchen-msg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+  color: #444; /* Color tenue para que no distraiga */
+}
+
+.empty-state-luxe .icon-container {
+  background: rgba(212, 175, 55, 0.05);
+  padding: 2rem;
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+}
+
+.empty-state-luxe .material-icons {
+  font-size: 4rem;
+  color: #d4af37;
+}
+
+.empty-state-luxe h3 {
+  color: #fff;
+  letter-spacing: 2px;
+  margin-bottom: 0.5rem;
+}
+
+.empty-kitchen-msg .material-icons {
+  font-size: 2.5rem;
+  color: #2ecc71; /* Verde éxito */
+  margin-bottom: 0.5rem;
+  opacity: 0.5;
+}
+
+.empty-kitchen-msg p {
+  font-size: 0.8rem;
+  text-transform: uppercase;
   letter-spacing: 1px;
 }
 
-.status-pill {
-  border: 1px solid #d4af37 !important;
-  color: #d4af37 !important;
-  padding: 8px 15px;
-  font-size: 0.65rem;
-  font-weight: 900;
+.btn-outline-gold {
+  margin-top: 1.5rem;
+  background: transparent;
+  border: 1px solid #d4af37;
+  color: #d4af37;
+  padding: 0.6rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-/* CUERPO */
-.ticket-body {
-  border-top: 1px solid #1a1a1a;
-  padding-top: 20px;
-  margin-bottom: 25px;
-}
-
-.item-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.dots-spacer {
-  flex: 1;
-  border-bottom: 1px dotted #222;
-  margin: 0 15px;
-}
-
-/* FOOTER */
-.price-text {
-  font-size: 2.5rem;
-  font-weight: 200;
-  margin: 5px 0 0 0;
-}
-
-.logs-section {
-  text-align: right;
+.btn-outline-gold:hover {
+  background: #d4af37;
+  color: #000;
 }

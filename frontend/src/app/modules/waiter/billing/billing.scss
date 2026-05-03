@@ -1,0 +1,83 @@
+.billing-container {
+  height: 100%;
+  background: #000;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.billing-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.billing-header h2 span {
+  color: #d4af37;
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+}
+
+.billing-grid {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* TICKET DIGITAL */
+.invoice-paper {
+  background: #050505;
+  border: 1px solid #1a1a1a;
+  border-radius: 2px;
+  padding: 40px;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+}
+
+.invoice-paper::before { /* Efecto de papel cortado arriba */
+  content: "";
+  position: absolute; top: -10px; left: 0; right: 0; height: 10px;
+  background-image: linear-gradient(135deg, #050505 25%, transparent 25%), linear-gradient(225deg, #050505 25%, transparent 25%);
+  background-size: 10px 20px;
+}
+
+.invoice-head {
+  text-align: center; margin-bottom: 30px; border-bottom: 1px dashed #222; padding-bottom: 20px;
+}
+
+.items-list { margin-bottom: 30px; }
+.item-row {
+  display: flex; justify-content: space-between; padding: 10px 0; color: #888; border-bottom: 1px solid #0a0a0a;
+}
+.item-qty { color: #d4af37; font-weight: bold; margin-right: 10px; }
+
+.totals-area {
+  border-top: 2px solid #111; padding-top: 20px;
+}
+
+.total-row { display: flex; justify-content: space-between; margin-bottom: 8px; color: #555; font-size: 0.9rem; }
+.total-row.gold { color: #d4af37; }
+
+.grand-total {
+  text-align: right; margin-top: 30px; border-top: 1px solid #222; padding-top: 20px;
+}
+.grand-total h3 { font-size: 2.5rem; color: #fff; margin: 0; }
+
+/* ACCIONES */
+.method-group { display: grid; gap: 10px; margin-top: 15px; }
+.method-btn {
+  background: #0a0a0a; border: 1px solid #222; color: #444; padding: 15px;
+  border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.3s;
+}
+.method-btn.active { border-color: #d4af37; color: #d4af37; background: rgba(212,175,55,0.05); }
+
+.btn-luxe-pay {
+  width: 100%; margin-top: 40px; background: #00ffff; color: #000; border: none;
+  padding: 20px; border-radius: 15px; font-weight: 900; cursor: pointer;
+  box-shadow: 0 0 20px rgba(0,255,255,0.2); display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+
+.disclaimer { color: #333; font-size: 0.75rem; text-align: center; margin-top: 15px; }

@@ -1,1 +1,69 @@
-<p>active-orders works!</p>
+<div class="orders-page luxe-theme">
+  <header class="page-header">
+    <div class="title-group">
+      <h2 class="main-title">MIS <span class="gold-text">PEDIDOS</span></h2>
+      <p class="subtitle">CONTROL DE COMANDAS EN TIEMPO REAL</p>
+    </div>
+    <div class="stats-badge">
+      <span class="stats-count">{{ activeOrders.length }}</span>
+      <span class="stats-label">MESAS</span>
+    </div>
+  </header>
+
+  <div class="orders-grid">
+    <div class="luxe-loader" *ngIf="isLoading">
+      <div class="neon-spinner"></div>
+      <p>CONSULTANDO COCINA...</p>
+    </div>
+
+    <div *ngFor="let order of activeOrders" 
+         class="order-card" 
+         [ngClass]="order.estado.toLowerCase().replace('_', '-')">
+      
+      <div class="card-body">
+        <div class="header-row">
+          <div class="table-info">
+            <span class="zone-label">{{ order.Mesa?.zona === 'PLANTA_BAJA' ? 'PB' : 'T' }}</span>
+            <span class="table-number">{{ order.Mesa?.numeroMesa }}</span>
+          </div>
+          <div class="status-info">
+            <span class="order-time">{{ order.fechaApertura | date:'HH:mm' }}</span>
+            <span class="status-text">{{ order.estado }}</span>
+          </div>
+        </div>
+
+        <div class="items-container">
+          <div *ngFor="let item of order.DetalleOrden" 
+               class="item-line" 
+               [ngClass]="item.estadoItem.toLowerCase()">
+            <div class="item-main">
+              <span class="item-qty">{{ item.cantidad }}x</span>
+              <div class="name-block">
+                <span class="item-name">{{ item.MenuItem?.nombre }}</span>
+                <small class="item-notes" *ngIf="item.notasCocina">"{{ item.notasCocina }}"</small>
+              </div>
+            </div>
+            <div class="item-status">
+              <span class="material-icons status-icon-ok" *ngIf="item.estadoItem === 'LISTO'">check_circle</span>
+              <span class="material-icons status-icon-wait" *ngIf="item.estadoItem === 'PENDIENTE'">timer</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-row">
+          <div class="price-total">TOTAL: <span class="white-text">{{ order.total | currency }}</span></div>
+          <button class="btn-luxe-serve" 
+                  *ngIf="order.estado === 'LISTO_PARA_SERVIR'"
+                  (click)="markAsServed(order.id)">
+            MARCAR SERVIDO
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!isLoading && activeOrders.length === 0">
+      <span class="material-icons empty-icon">auto_awesome</span>
+      <p class="empty-text">SIN COMANDAS PENDIENTES</p>
+    </div>
+  </div>
+</div>

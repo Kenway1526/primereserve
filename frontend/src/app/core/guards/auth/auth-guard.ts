@@ -2,17 +2,18 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { Auth } from '../../services/auth/auth';
 
-export const authGuard: CanActivateFn = (route, state) => {
+export const roleGuard: CanActivateFn = (route, state) => {
   const auth = inject(Auth);
   const router = inject(Router);
 
-  // Verificamos si el usuario está autenticado en el servicio
-  if (auth.isAuthenticated()) {
+  const userRole = auth.getRole(); // Asegúrate que tu servicio Auth tenga este método
+  const expectedRole = route.data['expectedRole'];
+
+  if (auth.isAuthenticated() && userRole === expectedRole) {
     return true;
   }
 
-  // Si no está autenticado, lo mandamos al login
-  console.warn('AuthGuard: Usuario no autenticado, redireccionando...');
+  console.error(`Acceso denegado: Se esperaba ${expectedRole} y se tiene ${userRole}`);
   router.navigate(['/auth/login']);
   return false;
 };

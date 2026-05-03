@@ -1,36 +1,47 @@
-import { inject } from '@angular/core';
+import { inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { CanActivateFn, Router } from '@angular/router';
-import { Auth, UserRole } from '../../services/auth/auth';
-
-// core/guards/role.guard.ts
+import { Auth } from '../../services/auth/auth';
 
 export const roleGuard: CanActivateFn = (route, state) => {
   const auth = inject(Auth);
   const router = inject(Router);
+  const platformId = inject(PLATFORM_ID);
 
-  // Verificación de autenticación
+  if (!isPlatformBrowser(platformId)) return true; 
+
+  const user = auth.getUser();
+  const userRole = user?.role?.toUpperCase();
+  const expectedRole = route.data['role'];
+
+  const allowedRoles = Array.isArray(expectedRole) 
+    ? expectedRole.map(r => r.toUpperCase()) 
+    : [expectedRole.toUpperCase()];
+
+  console.group('%c🛡️ DIAGNÓSTICO GUARD', 'background: #222; color: #bada55');
+  console.log('Ruta intentada:', state.url);
+  console.log('Rol en sesión:', userRole);
+  console.log('Rol esperado:', expectedRole);
+  console.groupEnd();
+
   if (!auth.isAuthenticated()) {
-    console.warn('[RoleGuard] Bloqueado: Usuario no autenticado.');
+    console.error('🚫 Guard: No autenticado, al login.');
     router.navigate(['/auth/login']);
     return false;
   }
 
-  const userRole = auth.getRole();
-  const expectedRole = route.data['role'] as UserRole;
-
-  console.log(`%c [RoleGuard] Destino: ${state.url} | Esperado: ${expectedRole} | Usuario: ${userRole}`, 'color: #8e44ad; font-weight: bold;');
-
-  if (userRole === expectedRole) {
-    return true;
+  if (userRole && allowedRoles.includes(userRole)) {
+    console.log('✅ Guard: Acceso PERMITIDO. Cargando componente...');
+    return true; 
   }
 
-  // Si el rol es incorrecto
-  console.error(`[RoleGuard] Permiso insuficiente. Requerido: ${expectedRole}, Tienes: ${userRole}`);
-  
-  // Redirección de escape
-  if (userRole === 'ADMIN') router.navigate(['/admin/dashboard']);
-  else if (userRole === 'WAITER') router.navigate(['/mesero/mapa']);
-  else router.navigate(['/catalog']); // <--- Aquí es donde te mandaba por la asincronía
-  
+  const redirectMap: Record<string, string> = {
+    'ADMIN': '/admin/dashboard',
+    'CLIENTE': '/client/dashboard'
+  };
+
+  const target = userRole ? (redirectMap[userRole] || '/catalog') : '/auth/login';
+  console.warn(`🔀 Guard: Rol incorrecto. Redirigiendo a: ${target}`);
+  router.navigate([target]);
   return false;
 };

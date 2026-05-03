@@ -1,1 +1,57 @@
-<p>billing works!</p>
+<div class="billing-container luxe-theme">
+  <header class="billing-header">
+    <button class="btn-back" (click)="goBack()">
+        <span class="material-icons">arrow_back</span>
+    </button>
+    <h2>CUENTA <span>MESA {{ order?.Mesa?.numeroMesa }}</span></h2>
+  </header>
+
+  <div class="billing-grid" *ngIf="!isLoading">
+    <!-- Lado Izquierdo: Detalle de Consumo -->
+    <section class="invoice-paper">
+      <div class="invoice-head">
+        <p>PRIME RESERVE - LA MAISON DORÉE</p>
+        <small>{{ order?.fechaApertura | date:'short' }}</small>
+      </div>
+
+      <div class="items-list">
+        <div class="item-row" *ngFor="let item of order?.DetalleOrden">
+          <div class="item-info">
+            <span class="qty">{{ item.cantidad }}x</span>
+            <span class="name">{{ item.MenuItem?.nombre }}</span>
+          </div>
+          <span class="price">{{ item.subtotal | currency }}</span>
+        </div>
+      </div>
+
+      <div class="totals-area">
+        <div class="total-row"><span>CONSUMO:</span> <span>{{ subtotal | currency }}</span></div>
+        <div class="total-row"><span>IVA (16%):</span> <span>{{ iva | currency }}</span></div>
+        <div class="total-row gold"><span>PROPINA (10%):</span> <span>{{ propina | currency }}</span></div>
+        <div class="grand-total">
+          <p>TOTAL A PAGAR</p>
+          <h3>{{ totalFinal | currency }}</h3>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lado Derecho: Acciones -->
+    <section class="billing-actions">
+      <div class="payment-methods">
+        <p class="label">MÉTODO DE PAGO</p>
+        <div class="method-group">
+          <button class="method-btn active"><span class="material-icons">payments</span> EFECTIVO</button>
+          <button class="method-btn"><span class="material-icons">credit_card</span> TARJETA</button>
+        </div>
+      </div>
+
+      <div class="final-steps">
+        <button class="btn-luxe-pay" (click)="processPayment()">
+          <span class="material-icons">check_circle</span>
+          CONFIRMAR PAGO Y CERRAR MESA
+        </button>
+        <p class="disclaimer">Al confirmar, la mesa cambiará automáticamente a estado <b>SUCIA</b>.</p>
+      </div>
+    </section>
+  </div>
+</div>

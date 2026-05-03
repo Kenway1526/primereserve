@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+/*import { Injectable } from '@angular/core';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable({
@@ -12,6 +12,35 @@ export class SupabaseService {
       'https://uzeyiwrxccmfcalbuynr.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6ZXlpd3J4Y2NtZmNhbGJ1eW5yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNjI5NDgsImV4cCI6MjA4NjgzODk0OH0.g-if5J361k1PJA5keyXCL_guKJ-3UrQd_wU6-jxptQs'
     );
+  }
+*/
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class SupabaseService {
+  public supabase!: SupabaseClient; // Usamos ! para decirle a TS que se inicializará
+  private platformId = inject(PLATFORM_ID);
+
+  constructor() {
+    // Definimos tus credenciales fijas aquí
+    const supabaseUrl = 'https://uzeyiwrxccmfcalbuynr.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6ZXlpd3J4Y2NtZmNhbGJ1eW5yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNjI5NDgsImV4cCI6MjA4NjgzODk0OH0.g-if5J361k1PJA5keyXCL_guKJ-3UrQd_wU6-jxptQs';
+
+    // Solo intentamos acceder a 'window' si estamos en el navegador
+    if (isPlatformBrowser(this.platformId)) {
+      // Si existiera una configuración dinámica en window, la tomaría, 
+      // si no, usa las de arriba.
+      const url = (window as any)._env?.supabaseUrl || supabaseUrl;
+      const key = (window as any)._env?.supabaseKey || supabaseKey;
+      this.supabase = createClient(url, key);
+    } else {
+      // Si estamos en el SERVIDOR (SSR), inicializamos con las fijas
+      this.supabase = createClient(supabaseUrl, supabaseKey);
+    }
   }
 
   // Las funciones aquí devolverán datos que coinciden con tus modelos de Prisma
@@ -331,5 +360,39 @@ export class SupabaseService {
       .eq('restauranteId', restauranteId)
       .neq('rol', 'CLIENTE') // <--- Discriminamos al cliente aquí
       .order('nombre', { ascending: true });
+  }
+
+//==================================== ordenes ====================================
+
+  async getActiveOrders(restauranteId: string) {
+    const { data, error } = await this.supabase
+      .from('Orden')
+      .select(`
+        *,
+        DetalleOrden (
+          id,
+          cantidad,
+          notasCocina,
+          estadoItem,
+          menuItemId,
+          MenuItem:menuItemId ( nombre )
+        )
+      `)
+      .eq('restauranteId', restauranteId)
+      .neq('estado', 'FINALIZADA') // Solo lo que está en proceso
+      .order('fechaApertura', { ascending: true });
+
+    if (error) throw error;
+    return data;
+  }
+
+  // Suscribirse a cambios en tiempo real
+  subscribeToOrders(restauranteId: string, callback: (payload: any) => void) {
+    return this.supabase
+      .channel('cocina-realtime')
+      .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'Orden' }, 
+          callback)
+      .subscribe();
   }
 }

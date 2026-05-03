@@ -1,49 +1,58 @@
-<div class="payments-container">
-  
+<div class="payments-wrapper">
   <header class="payments-header">
-    <div class="gold-line"></div>
-    <h1 class="text-white">PAGOS</h1>
+    <div class="header-title">
+      <h1>Cierre de Caja</h1>
+      <p>Liquidación de comandas activas</p>
+    </div>
+    <div class="header-stats">
+      <div class="stat-pill">
+        <span class="label">VENTAS ACTIVAS (POR COBRAR)</span>
+        <span class="value">{{ totalVentasDia | currency:'MXN':'symbol-narrow':'1.2-2' }}</span>
+      </div>
+    </div>
   </header>
 
-  <div class="summary-grid">
-    <div class="summary-card">
-      <small>PAGOS PROCESADOS</small>
-      <div class="amount-wrap">
-        <span class="currency-symbol">$</span>
-        <p class="amount-val text-green">{{ procesados }}</p>
+  <div class="payments-grid" *ngIf="pendingPayments.length > 0">
+    <div class="payment-card" *ngFor="let order of pendingPayments">
+      <div class="card-header">
+        <div class="mesa-info">
+          <span class="mesa-number">MESA {{ order.Mesa?.numeroMesa }}</span>
+          <span class="order-id">ID: {{ order.id.substring(0,8) }}</span>
+        </div>
+        <span class="status-chip">{{ order.estado }}</span>
       </div>
-      <span class="sub-label">2 transacciones</span>
-    </div>
 
-    <div class="summary-card">
-      <small>PAGOS PENDIENTES</small>
-      <div class="amount-wrap">
-        <span class="currency-symbol">$</span>
-        <p class="amount-val text-gold">{{ pendientes }}</p>
+      <div class="card-body">
+        <div class="items-list">
+          <div class="item-row" *ngFor="let item of order.DetalleOrden">
+            <span class="item-name">{{ item.cantidad }}x {{ item.MenuItem?.nombre }}</span>
+            <span class="item-price">{{ item.subtotal | currency:'MXN' }}</span>
+          </div>
+        </div>
       </div>
-      <span class="sub-label">3 órdenes abiertas</span>
-    </div>
 
-    <div class="summary-card">
-      <small>VENTAS DEL DÍA</small>
-      <div class="amount-wrap">
-        <span class="currency-symbol">$</span>
-        <p class="amount-val text-gold">{{ ventasDia }}</p>
-      </div>
-      <span class="sub-label">Hoy</span>
-    </div>
-  </div>
-
-  <div class="payments-list">
-    <div class="payment-row" *ngFor="let pago of historialPagos">
-      <div class="payment-info">
-        <h3 class="text-white">{{ pago.mesa }}</h3>
-        <span class="text-muted">{{ pago.metodo }} · {{ pago.hora }}</span>
-      </div>
-      <div class="payment-amount text-gold">
-        ${{ pago.monto }}
+      <div class="card-footer">
+        <div class="total-row">
+          <span>TOTAL A PAGAR</span>
+          <span class="total-amount">{{ order.total | currency:'MXN':'symbol-narrow':'1.2-2' }}</span>
+        </div>
+        <div class="action-buttons">
+          <button class="btn-pay cash" (click)="processPayment(order.id)">
+            <span class="material-icons">payments</span> EFECTIVO
+          </button>
+          <button class="btn-pay card" (click)="processPayment(order.id)">
+            <span class="material-icons">credit_card</span> TARJETA
+          </button>
+        </div>
       </div>
     </div>
   </div>
 
+  <div class="empty-state" *ngIf="pendingPayments.length === 0">
+    <div class="empty-icon">
+      <span class="material-icons">monetization_on</span>
+    </div>
+    <h2>SIN CUENTAS PENDIENTES</h2>
+    <p>Todas las órdenes activas han sido liquidadas.</p>
+  </div>
 </div>

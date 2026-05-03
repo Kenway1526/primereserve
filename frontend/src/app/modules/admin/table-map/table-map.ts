@@ -1,9 +1,12 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+
+// Shared & Core
 import { Modal } from '../../../shared/components/modal/modal';
 import { SupabaseService } from '../../../core/services/supabase';
-import { Router } from '@angular/router';
+import { APP_CONFIG } from '../../../core/constants/config'; // 👈 Asegúrate de que el nombre del archivo sea config.ts
 
 @Component({
   selector: 'app-table-map',
@@ -16,42 +19,51 @@ export class TableMap implements OnInit {
   private supabaseSvc = inject(SupabaseService);
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
+  private platformId = inject(PLATFORM_ID);
 
   public isModalOpen = false;
   public selectedTable: any = null;
-  public currentFloor = 'PLANTA_BAJA'; // 'PLANTA_BAJA' o 'TERRAZA'
-  public restaurantId = localStorage.getItem('active_restaurant_id') || ''; // Valor por defecto para evitar errores iniciales
+  public currentFloor = 'PLANTA_BAJA';
+  public restaurantId = APP_CONFIG.RESTAURANT_ID; // 🚀 Inicializamos con la constante
   
-  public allTables: any[] = []; // Ahora inicia vacío
+  public allTables: any[] = [];
   public isLoading = true;
 
   async ngOnInit() {
-    const storedId = localStorage.getItem('active_restaurant_id');
-    
-    if (!storedId || storedId === '1') {
-      console.warn('ID no válido detectado. Redirigiendo al catálogo para re-seleccionar.');
-      this.router.navigate(['/catalog']);
-      return;
+    if (isPlatformBrowser(this.platformId)) {
+      // Cargamos mesas directamente usando la constante
+      await this.loadTables();
+    } else {
+      this.isLoading = false;
     }
-
-    this.restaurantId = storedId; 
-    await this.loadTables();
   }
 
   async loadTables() {
+    // 🛡️ Usamos la constante directamente para evitar fallos de referencia
+    const targetId = APP_CONFIG.RESTAURANT_ID;
+
     this.isLoading = true;
-    this.allTables = []; // Limpiamos para evitar residuos
+    this.allTables = []; 
     this.cdr.detectChanges(); 
 
     try {
-      const data = await this.supabaseSvc.getTablesByRestaurant(this.restaurantId);
-      this.allTables = data || [];
-      console.log('Mesas cargadas:', this.allTables.length);
+      // 🚀 CORRECCIÓN: Asignamos el resultado a la variable de clase
+      const { data, error } = await this.supabaseSvc.supabase
+        .from('Mesa')
+        .select('*')
+        .eq('restauranteId', targetId);
+
+      if (error) throw error;
+
+      if (data) {
+        this.allTables = data;
+        console.log('✅ Mesas cargadas:', this.allTables.length);
+      }
+      
     } catch (err) {
-      console.error('Error:', err);
+      console.error('❌ Error al obtener mesas:', err);
     } finally {
       this.isLoading = false;
-      // IMPORTANTE: Forzamos a Angular a pintar los nuevos datos
       this.cdr.detectChanges(); 
     }
   }
@@ -60,21 +72,18 @@ export class TableMap implements OnInit {
     return this.allTables.filter(t => t.zona === this.currentFloor);
   }
 
-  // Al soltar la mesa, guardamos la nueva posición automáticamente
   async onDragEnd(event: DragEvent, table: any) {
     const floor = document.querySelector('.restaurant-floor') as HTMLElement;
     if (floor) {
       const rect = floor.getBoundingClientRect();
-      // Usamos Math.round para eliminar los decimales que causan el error 400
+      
       table.x = Math.round(event.clientX - rect.left - 40);
       table.y = Math.round(event.clientY - rect.top - 40);
       
       try {
-        // Ahora enviamos datos limpios a Supabase
         await this.supabaseSvc.upsertTable(table);
-        console.log(`Mesa ${table.numeroMesa} actualizada en posición entera:`, table.x, table.y);
       } catch (err) {
-        console.error('Error al guardar posición:', err);
+        console.error('Error al actualizar posición:', err);
       }
     }
   }
@@ -84,10 +93,10 @@ export class TableMap implements OnInit {
     const nextNumber = maxNumber + 1;
     
     this.selectedTable = { 
-      restauranteId: this.restaurantId,
+      restauranteId: APP_CONFIG.RESTAURANT_ID, // 👈 Forzado a la constante
       numeroMesa: nextNumber,
       capacidad: 2, 
-      zona: this.currentFloor, // PLANTA_BAJA o TERRAZA
+      zona: this.currentFloor,
       estado: 'LIBRE', 
       x: 150, 
       y: 150, 
@@ -109,34 +118,29 @@ export class TableMap implements OnInit {
     this.cdr.detectChanges();
 
     try {
-      // Enviamos la copia editada al servicio
+      // Aseguramos que el ID del restaurante vaya en el payload
+      this.selectedTable.restauranteId = APP_CONFIG.RESTAURANT_ID;
+
       const savedTable = await this.supabaseSvc.upsertTable(this.selectedTable);
 
       if (savedTable) {
-        // Buscamos la mesa original en el array local por su ID
-        const index = this.allTables.findIndex(t => t.id === savedTable.id);
-        
-        if (index !== -1) {
-          // ACTUALIZACIÓN: Reemplazamos los datos viejos por los nuevos de la DB
-          this.allTables[index] = { ...savedTable };
-        } else {
-          // CREACIÓN: Si no existía (raro en edición, común en nueva), la añadimos
-          this.allTables = [...this.allTables, savedTable];
-        }
+        // Recargamos todo para asegurar consistencia
+        await this.loadTables();
       }
 
-      this.closeModal(); // Cerramos y limpiamos
+      this.closeModal();
 
     } catch (err) {
-      console.error('Error al editar mesa:', err);
-      alert('No se pudieron actualizar los datos de la mesa.');
+      console.error('Error en saveTable:', err);
+      if (isPlatformBrowser(this.platformId)) {
+        alert('No se pudieron guardar los datos.');
+      }
     } finally {
       this.isLoading = false;
       this.cdr.detectChanges();
     }
   }
 
-  // Función para resetear el estado del modal de forma segura
   closeModal() {
     this.isModalOpen = false;
     this.selectedTable = null;
@@ -154,28 +158,21 @@ export class TableMap implements OnInit {
   async deleteTable() {
     if (!this.selectedTable?.id) return;
 
-    // Una confirmación nativa simple para evitar borrados accidentales
-    const confirmed = confirm(`¿Estás seguro de eliminar la mesa ${this.selectedTable.numeroMesa}?`);
-    
-    if (confirmed) {
-      this.isLoading = true;
-      try {
-        // 1. Llamada al servicio (debes tener este método en el SupabaseService)
-        await this.supabaseSvc.deleteTable(this.selectedTable.id);
-
-        // 2. Eliminarla del array local para que desaparezca del mapa de inmediato
-        this.allTables = this.allTables.filter(t => t.id !== this.selectedTable.id);
-        
-        // 3. Cerrar el modal
-        this.closeModal();
-        
-        console.log('Mesa eliminada con éxito');
-      } catch (err) {
-        console.error('Error al eliminar:', err);
-        alert('No se pudo eliminar la mesa. Inténtalo de nuevo.');
-      } finally {
-        this.isLoading = false;
-        this.cdr.detectChanges();
+    if (isPlatformBrowser(this.platformId)) {
+      const confirmed = confirm(`¿Estás seguro de eliminar la mesa ${this.selectedTable.numeroMesa}?`);
+      
+      if (confirmed) {
+        this.isLoading = true;
+        try {
+          await this.supabaseSvc.deleteTable(this.selectedTable.id);
+          this.allTables = this.allTables.filter(t => t.id !== this.selectedTable.id);
+          this.closeModal();
+        } catch (err) {
+          console.error('Error al eliminar:', err);
+        } finally {
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        }
       }
     }
   }

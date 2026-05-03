@@ -1,56 +1,84 @@
 <div class="login-wrapper">
   <a routerLink="/catalog" class="back-action">
-    <span class="icon">←</span>
-    <span class="txt">CATÁLOGO</span>
+    <span class="material-icons">arrow_back</span>
+    <span class="txt">REGRESAR</span>
   </a>
 
   <div class="login-card fade-in">
     <div class="mode-selector">
-      <button [class.active]="mode === 'client'" (click)="mode = 'client'">CLIENTE</button>
-      <button [class.active]="mode === 'staff'" (click)="mode = 'staff'">STAFF</button>
+      <button [class.active]="mode === 'client'" (click)="setMode('client')">CLIENTE</button>
+      <button [class.active]="mode === 'staff'" (click)="setMode('staff')">STAFF</button>
     </div>
 
     <div class="gold-divider"></div>
 
     <div class="form-content" *ngIf="mode === 'client'">
-      <h1>MI MESA</h1>
-      <p class="res-subtitle">{{ restaurantName }}</p>
+      <div class="header-section">
+        <h1>MI MESA</h1>
+        <p class="res-subtitle">{{ restaurantName }}</p>
+      </div>
 
       <div class="luxe-input">
         <label>FOLIO DE ACCESO</label>
-        <input type="text" [(ngModel)]="clientAccess.folio" placeholder="EJ: PR-X9J2" autocomplete="off">
+        <input type="text" 
+               [(ngModel)]="clientAccess.folio" 
+               name="folio"
+               placeholder="EJ: PR-X9J2" 
+               (keyup.enter)="onClientAccess()">
       </div>
 
       <div class="luxe-input">
         <label>TELÉFONO REGISTRADO</label>
-        <input type="tel" [(ngModel)]="clientAccess.phone" placeholder="10 DÍGITOS">
+        <input type="tel" 
+               [(ngModel)]="clientAccess.phone" 
+               name="phone"
+               placeholder="10 DÍGITOS" 
+               (keyup.enter)="onClientAccess()">
       </div>
 
-      <button class="btn-gold-main" (click)="onClientAccess()" [disabled]="isLoading" (onkeypress.enter)="onClientAccess()">
-        {{ isLoading ? 'VALIDANDO...' : 'ACCEDER' }}
+      <div class="error-msg" *ngIf="errorMessage && mode === 'client'">
+        {{ errorMessage }}
+      </div>
+
+      <button class="btn-gold-main" (click)="onClientAccess()" [disabled]="isLoading">
+        <span *ngIf="!isLoading">ACCEDER</span>
+        <span *ngIf="isLoading" class="spinner"></span>
       </button>
       
       <a routerLink="/reservar" class="link-alt">¿NO TIENE RESERVA? CREE UNA AQUÍ</a>
     </div>
 
     <div class="form-content" *ngIf="mode === 'staff'">
-      <h1>OPERACIONES</h1>
-      <p class="res-subtitle">ACCESO RESTRINGIDO</p>
+      <div class="header-section">
+        <h1>OPERACIONES</h1>
+        <p class="res-subtitle">ACCESO RESTRINGIDO</p>
+      </div>
 
       <div class="luxe-input">
-        <label>USUARIO / EMAIL</label>
-        <input type="text" [(ngModel)]="user" placeholder="nombre@primereserve.com">
+        <label>CORREO ELECTRÓNICO</label>
+        <input type="email" 
+               [(ngModel)]="userEmail" 
+               name="email"
+               placeholder="nombre@primereserve.com" 
+               (keyup.enter)="handleLogin()">
       </div>
 
       <div class="luxe-input">
         <label>CONTRASEÑA</label>
-        <input type="password" [(ngModel)]="password" placeholder="••••••••">
+        <input type="password" 
+               [(ngModel)]="password" 
+               name="pass"
+               placeholder="••••••••" 
+               (keyup.enter)="handleLogin()">
       </div>
 
-      <div class="error-msg" *ngIf="errorMessage">{{ errorMessage }}</div>
+      <div class="error-msg" *ngIf="errorMessage && mode === 'staff'">
+        {{ errorMessage }}
+      </div>
 
-      <button class="btn-gold-main" (click)="handleLogin()" [disabled]="isLoading" (onkeypress.enter)="handleLogin()">
-        {{ isLoading ? 'AUTENTICANDO...' : 'INICIAR SESIÓN' }}
+      <button class="btn-gold-main" (click)="handleLogin()" [disabled]="isLoading">
+        <span *ngIf="!isLoading">INICIAR SESIÓN</span>
+        <span *ngIf="isLoading" class="spinner"></span>
       </button>
     </div>
   </div>

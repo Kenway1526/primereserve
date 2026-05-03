@@ -1,63 +1,127 @@
-$gold: #d4af37;
-$sidebar-bg: #0a0a0a;
+// src/app/shared/components/sidebar/sidebar.scss
 
 .sidebar {
   width: 260px;
   height: 100vh;
-  background: $sidebar-bg;
-  border-right: 1px solid #1a1a1a;
+  background-color: #0d0d0d; // Un negro más puro para contraste Prime
+  color: #ffffff;
   display: flex;
   flex-direction: column;
-  padding: 20px 0;
-  transition: all 0.3s ease;
+  border-right: 1px solid rgba(212, 175, 55, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 
   .sidebar-logo {
-    padding: 0 25px 20px;
-    img { width: 150px; margin-bottom: 15px; }
-    .divider { width: 40px; height: 2px; background: $gold; }
+    padding: 2.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+
+    .img-logo {
+      width: 100%;
+      max-width: 150px;
+      height: auto;
+      object-fit: contain;
+      filter: drop-shadow(0px 4px 10px rgba(0, 0, 0, 0.8));
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(212, 175, 55, 0.3), transparent);
+      width: 70%;
+    }
   }
 
   .nav-list {
     list-style: none;
     padding: 0;
     margin: 0;
-    flex: 1;
     display: flex;
     flex-direction: column;
+    flex: 1;
 
     li {
-      margin: 4px 15px;
-      
+      margin: 0.2rem 1rem;
+      border-radius: 12px;
+      transition: background 0.2s ease;
+      position: relative;
+
       a {
         display: flex;
         align-items: center;
-        padding: 12px 15px;
-        color: #666;
+        padding: 0.85rem 1.2rem;
         text-decoration: none;
-        border-radius: 8px;
-        transition: 0.3s;
-        gap: 15px;
+        color: #888888; // Gris base más apagado
+        transition: all 0.2s ease;
 
-        .material-icons { font-size: 20px; }
-        .link-text { font-size: 0.85rem; font-weight: 500; letter-spacing: 0.5px; }
+        .material-icons {
+          margin-right: 14px;
+          font-size: 22px;
+          transition: color 0.2s ease;
+        }
+
+        .link-text {
+          font-size: 0.9rem;
+          font-weight: 500;
+          white-space: nowrap;
+        }
       }
 
-      &:hover a {
-        background: rgba(255, 255, 255, 0.03);
-        color: white;
+      // 1. Estado Hover (Solo si NO está activo)
+      &:hover:not(.active) {
+        background-color: rgba(255, 255, 255, 0.03);
+        a {
+          color: #d4af37; // Texto dorado en hover
+          .material-icons { color: #d4af37; }
+        }
       }
 
-      &.active a {
-        background: rgba($gold, 0.1);
-        color: $gold;
-        .material-icons { color: $gold; }
+      // 2. Estado Activo (Prioridad Máxima)
+      &.active {
+        background: #d4af37 !important; // Fondo oro sólido para evitar transparencias
+        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+        
+        a {
+          color: #000000 !important; // Texto negro obligatorio
+          font-weight: 700;
+          transform: none !important; // Evita el desplazamieto del hover
+          
+          .material-icons {
+            color: #000000 !important;
+          }
+        }
+
+        // Desactiva cualquier efecto de hover cuando ya está activo
+        &:hover {
+          background: #d4af37 !important;
+          cursor: default;
+        }
       }
 
-      /* Empuja la configuración al fondo */
       &.nav-bottom {
         margin-top: auto;
-        border-top: 1px solid #1a1a1a;
-        padding-top: 15px;
+        margin-bottom: 1.5rem;
+      }
+    }
+  }
+}
+
+// Mobile/Tablet
+@media (max-width: 992px) {
+  .sidebar {
+    width: 85px;
+    .nav-list li {
+      margin: 0.3rem auto;
+      width: 50px;
+      a {
+        padding: 0;
+        height: 50px;
+        justify-content: center;
+        .material-icons { margin-right: 0; }
+        .link-text { display: none; }
       }
     }
   }

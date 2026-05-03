@@ -1,191 +1,96 @@
-// Variables de diseño Luxe
-$gold-primary: #d4af37;
-$gold-light: #f9f1d0;
-$dark-bg: #0a0a0a;
-$dark-card: #141414;
-$white-soft: #e0e0e0;
-$glass-border: rgba(212, 175, 55, 0.2);
-
-.dashboard-luxe {
-  min-height: 100vh;
-  background-color: $dark-bg;
-  color: $white-soft;
-  padding: 2rem 1rem;
-  font-family: 'Inter', sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  header {
-    text-align: center;
-    margin-bottom: 3rem;
-    animation: fadeInDown 0.8s ease-out;
-
-    h1 {
-      font-size: 1.8rem;
-      letter-spacing: 4px;
-      color: $gold-primary;
-      margin-bottom: 0.5rem;
-      font-weight: 300;
-    }
-
-    .folio {
-      font-size: 0.9rem;
-      color: rgba($white-soft, 0.6);
-      letter-spacing: 2px;
-    }
-  }
+.dashboard-container {
+  padding: 1.5rem;
+  max-width: 480px;
+  margin: 0 auto;
 }
 
-// Tarjeta de Estado Principal
-.status-card {
-  width: 100%;
-  max-width: 450px;
-  background: linear-gradient(145deg, $dark-card, #1a1a1a);
-  border: 1px solid $glass-border;
-  border-radius: 20px;
-  padding: 2.5rem;
+.card-header {
+  background: linear-gradient(135deg, #1a1a1a 0%, #000 100%);
+  padding: 2.5rem 1.5rem;
+  border-radius: 24px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
   text-align: center;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-  margin-bottom: 2rem;
-  position: relative;
-  overflow: hidden;
+  margin-bottom: 1.5rem;
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 4px;
-    background: $gold-primary;
-  }
-
-  .status-badge {
-    display: inline-block;
-    padding: 0.5rem 1.5rem;
-    border-radius: 50px;
-    font-size: 0.75rem;
-    letter-spacing: 2px;
-    margin-bottom: 2rem;
-    text-transform: uppercase;
-    font-weight: bold;
-
-    // Colores por estado
-    &.WAITLIST { background: rgba(212, 175, 55, 0.1); color: $gold-primary; border: 1px solid $gold-primary; }
-    &.CONFIRMADA { background: rgba(40, 167, 69, 0.1); color: #2ecc71; border: 1px solid #2ecc71; }
-    &.SENTADO { background: rgba(52, 152, 219, 0.1); color: #3498db; border: 1px solid #3498db; }
-  }
-}
-
-// Información de la Mesa (cuando está listo)
-.mesa-info {
-  animation: scaleUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  
-  h3 {
-    font-size: 1rem;
-    color: $white-soft;
-    margin-bottom: 1rem;
-    font-weight: 300;
-    letter-spacing: 1px;
-  }
-
-  .mesa-number {
-    font-size: 4rem;
+  .folio-tag {
+    background: #d4af37;
+    color: #000;
+    padding: 4px 12px;
+    border-radius: 8px;
     font-weight: 800;
-    color: $gold-primary;
-    text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
-    margin: 0;
+    font-size: 0.75rem;
   }
+
+  h2 { color: #fff; margin: 15px 0 5px; font-size: 1.8rem; }
+  p { color: #888; margin: 0; }
 }
 
-// Detalles de la reserva
-.details-grid {
-  width: 100%;
-  max-width: 450px;
+.stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
-  margin-bottom: 3rem;
+  margin-bottom: 1.5rem;
 
-  .detail-item {
-    background: rgba(255, 255, 255, 0.03);
-    padding: 1.2rem;
-    border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-
-    .label {
-      font-size: 0.65rem;
-      color: rgba($gold-primary, 0.7);
-      margin-bottom: 0.4rem;
-      letter-spacing: 1px;
-    }
-
-    .val {
-      font-size: 0.9rem;
-      color: $white-soft;
-      font-weight: 500;
-    }
-  }
-}
-
-// Botón de Cerrar Sesión
-.btn-outline {
-  background: transparent;
-  border: 1px solid rgba($white-soft, 0.2);
-  color: rgba($white-soft, 0.5);
-  padding: 0.8rem 2rem;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  letter-spacing: 2px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover {
-    border-color: $gold-primary;
-    color: $gold-primary;
-    background: rgba(212, 175, 55, 0.05);
-  }
-}
-
-// Pantalla de Carga
-.loading-screen {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: $dark-bg;
-  
-  p {
-    color: $gold-primary;
-    letter-spacing: 5px;
-    animation: pulse 1.5s infinite;
-  }
-}
-
-// Animaciones
-@keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes scaleUp {
-  from { opacity: 0; transform: scale(0.8); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-@keyframes pulse {
-  0% { opacity: 0.4; }
-  50% { opacity: 1; }
-  100% { opacity: 0.4; }
-}
-
-// Responsivo
-@media (max-width: 480px) {
-  .dashboard-luxe {
+  .stat-item {
+    background: #121212;
     padding: 1rem;
-    
-    header h1 { font-size: 1.4rem; }
-    .status-card { padding: 1.5rem; }
-    .mesa-info .mesa-number { font-size: 3rem; }
+    border-radius: 16px;
+    text-align: center;
+    border: 1px solid #222;
+
+    .label { display: block; color: #666; font-size: 0.8rem; margin-bottom: 5px; }
+    strong { color: #fff; font-size: 1.1rem; }
+    strong.WAITLIST { color: #f1c40f; }
+    strong.CONFIRMED { color: #2ecc71; }
   }
 }
+
+.waiting-info {
+  background: rgba(212, 175, 55, 0.1);
+  padding: 1.5rem;
+  border-radius: 20px;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  border: 1px dashed #d4af37;
+
+  p { margin: 0 0 10px; color: #d4af37; }
+  .pos-number { font-size: 3rem; font-weight: 800; color: #fff; }
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  button {
+    padding: 1.2rem;
+    border-radius: 14px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-main { background: #d4af37; color: #000; }
+  .btn-secondary { background: transparent; color: #d4af37; border: 1px solid #d4af37; }
+}
+
+.loader {
+  text-align: center;
+  padding: 4rem 0;
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid rgba(212, 175, 55, 0.1);
+    border-top: 3px solid #d4af37;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+  }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.fade-in { animation: fadeIn 0.4s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }

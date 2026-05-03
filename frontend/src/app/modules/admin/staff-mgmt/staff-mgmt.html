@@ -1,119 +1,116 @@
-<div class="staff-mgmt-container">
-  
-  <div class="view-header">
-    <h1>Gestión de Personal</h1>
-    <div class="title-underline"></div>
-  </div>
+<div class="staff-container">
+  <header class="staff-header">
+    <div class="brand">
+      <div class="gold-accent"></div>
+      <h1>GESTIÓN DE PERSONAL</h1>
+    </div>
+    <button class="btn-add-luxe" (click)="openAddModal()">
+      <span class="material-icons">person_add</span> REGISTRAR TALENTO
+    </button>
+  </header>
 
-  <section class="stats-overview-full">
+  <section class="staff-stats">
     <div class="stat-card">
-      <span class="label">Total Empleados</span>
+      <span class="label">Total</span>
       <span class="value">{{ stats.total }}</span>
     </div>
-    <div class="stat-card success">
-      <span class="label">En Turno</span>
-      <span class="value">{{ stats.activos }}</span>
-    </div>
-    <div class="stat-card info">
+    <div class="stat-card">
       <span class="label">Meseros</span>
-      <span class="value">{{ stats.meseros }}</span>
+      <span class="value gold">{{ stats.meseros }}</span>
     </div>
-    <div class="stat-card warning">
+    <div class="stat-card">
       <span class="label">Cocina</span>
-      <span class="value">{{ stats.cocina }}</span>
+      <span class="value gold">{{ stats.cocina }}</span>
     </div>
-    <div class="stat-card warning">
-      <span class="label">Inactivos</span>
-      <span class="value">{{ stats.inactivos }}</span>
+    <div class="stat-card">
+      <span class="label">Administradores</span>
+      <span class="value gold">{{ stats.admin }}</span>
     </div>
   </section>
 
-  <div class="controls-row">
-    <div class="search-field">
-      <span class="material-icons">search</span>
-      <input type="text" [(ngModel)]="searchText" placeholder="Buscar por nombre o correo...">
-    </div>
-    <button class="btn-add-staff" (click)="openAddModal()">
-      <span class="material-icons">person_add</span>
-      NUEVO EMPLEADO
-    </button>
+  <div class="search-bar">
+    <span class="material-icons">search</span>
+    <input type="text" [(ngModel)]="searchText" placeholder="Buscar por nombre o correo...">
   </div>
 
-  <div class="staff-cards-grid">
-    <div class="employee-card" *ngFor="let member of staff | filter:searchText:'nombre'">
+  <div class="staff-grid">
+    <div class="staff-card" *ngFor="let member of staff | filter: searchText : 'nombre'">
+      <div class="card-options">
+        <button (click)="openEditModal(member)"><span class="material-icons">edit</span></button>
+        <button (click)="deleteMember(member.id)" class="delete"><span class="material-icons">delete</span></button>
+      </div>
       
-      <div class="card-header">
-        <div class="avatar-group">
-          <img [src]="member.avatarUrl || 'assets/placeholder-user.png'" alt="User avatar">
-          <div class="status-dot" [class.online]="member.activo"></div>
-        </div>
-        <div class="name-group">
-          <h3>{{ member.nombre }}</h3>
-          <span class="role-badge">{{ member.rol }}</span>
+      <div class="avatar-container">
+        <img [src]="member.avatarUrl || 'assets/default-avatar.png'" alt="Avatar">
+        <div class="role-badge" [ngClass]="member.rol.toLowerCase()">
+          {{ member.rol }}
         </div>
       </div>
 
-      <div class="card-body">
-        <p class="contact-info">
-          <span class="material-icons">mail</span>
-          {{ member.email }}
+      <div class="staff-info">
+        <h3>{{ member.nombre }}</h3>
+        <p class="email">{{ member.email }}</p>
+        <p class="phone" *ngIf="member.telefono">
+          <span class="material-icons">phone</span> {{ member.telefono }}
         </p>
-        <p class="contact-info">
-          <span class="material-icons">smartphone</span>
-          {{ member.telefono }}
-        </p>
-      </div>
-
-      <div class="card-actions">
-        <button class="btn-edit-action" (click)="openEditModal(member)">
-          <span class="material-icons">edit_note</span>
-          Editar
-        </button>
-        <button class="btn-status-action" (click)="toggleStatus(member)" [class.inactive]="!member.activo">
-          {{ member.activo ? 'Desactivar' : 'Activar' }}
-        </button>
       </div>
     </div>
   </div>
 
-  <app-modal [isOpen]="isModalOpen" [title]="modalTitle" (close)="isModalOpen = false">
-    <div class="prime-form-luxe">
-      
-      <div class="avatar-upload-section" style="text-align: center; margin-bottom: 1rem;">
-        <div class="preview-circle" (click)="fileInput.click()" style="cursor:pointer">
-          <img [src]="imagePreview || memberForm.avatarUrl || 'assets/placeholder-user.png'" 
-               style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #d4af37;">
-        </div>
-        <input type="file" #fileInput (change)="onFileSelected($event)" hidden accept="image/*">
-        <small style="color: #d4af37">Click para cambiar foto</small>
+  <app-modal [isOpen]="isModalOpen" [title]="modalTitle" (close)="closeModal()">
+    <div class="modal-form">
+      <div class="avatar-upload">
+        <label for="avatarFile">
+          <div class="preview-circle">
+            <img *ngIf="imagePreview" [src]="imagePreview" class="avatar-img">
+            
+            <img *ngIf="!imagePreview && memberForm.avatarUrl" 
+                [src]="memberForm.avatarUrl" 
+                (error)="memberForm.avatarUrl = null" 
+                class="avatar-img">
+            
+            <div *ngIf="!imagePreview && !memberForm.avatarUrl" class="default-avatar">
+              <span class="material-icons">account_circle</span>
+            </div>
+            
+            <div class="overlay-camera">
+              <span class="material-icons">photo_camera</span>
+            </div>
+          </div>
+        </label>
+        <input type="file" id="avatarFile" (change)="onFileSelected($event)" hidden accept="image/*">
       </div>
 
       <div class="form-group">
         <label>Nombre Completo</label>
-        <input type="text" [(ngModel)]="memberForm.nombre" placeholder="Ej. Juan Pérez">
+        <input type="text" [(ngModel)]="memberForm.nombre" class="dark-input" placeholder="Nombre del empleado">
       </div>
-      <div class="form-group">
-        <label>Correo Electrónico</label>
-        <input type="email" [(ngModel)]="memberForm.email" placeholder="juan@prime.com" pattern="^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$">
-      </div>
+
       <div class="form-row">
         <div class="form-group">
-          <label>Rol</label>
-          <select [(ngModel)]="memberForm.rol">
-            <option value="WAITER">Mesero</option>
-            <option value="KITCHEN">Cocina</option>
-            <option value="ADMIN">Admin</option>
-          </select>
+          <label>Correo Electrónico</label>
+          <input type="email" [(ngModel)]="memberForm.email" class="dark-input" placeholder="correo@ejemplo.com">
         </div>
         <div class="form-group">
           <label>Teléfono</label>
-          <input type="text" [(ngModel)]="memberForm.telefono" placeholder="+52 55 ..." pattern="^[0-9]+$" minlength="10" maxlength="10">
+          <input type="text" [(ngModel)]="memberForm.telefono" class="dark-input" placeholder="10 dígitos">
         </div>
       </div>
-      <button class="btn-submit-form" (click)="saveMember()" [disabled]="isLoading">
-        {{ isLoading ? 'GUARDANDO...' : 'GUARDAR EMPLEADO' }}
-      </button>
+
+      <div class="form-group">
+        <label>Rol en el Restaurante</label>
+        <select [(ngModel)]="memberForm.rol" class="dark-input">
+          <option value="MESERO">Mesero</option>
+          <option value="COCINA">Cocina</option>
+          <option value="ADMIN">Administrador</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-submit-gold" (click)="saveMember()" [disabled]="isLoading">
+          {{ isLoading ? 'GUARDANDO...' : 'GUARDAR CAMBIOS' }}
+        </button>
+      </div>
     </div>
   </app-modal>
-
 </div>

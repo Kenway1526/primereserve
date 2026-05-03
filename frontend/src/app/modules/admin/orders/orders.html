@@ -1,42 +1,55 @@
-<div class="orders-page-container">
-  
-  <header class="main-header">
-    <div class="gold-line"></div>
-    <h1 class="text-white title-main">GESTIÓN DE ÓRDENES</h1>
+<div class="orders-wrapper">
+  <header class="summary-header">
+    <div class="stat-box">
+      <span class="stat-label">MESAS ACTIVAS</span>
+      <span class="stat-value">{{ activeOrders.length }}</span>
+    </div>
+    <div class="stat-box highlight">
+      <span class="stat-label">TOTAL ACUMULADO</span>
+      <span class="stat-value gold-text">{{ totalVentasActivas | currency:'MXN':'symbol-narrow':'1.2-2' }}</span>
+    </div>
   </header>
 
-  <div class="orders-stack">
-    <div class="ticket-card" *ngFor="let orden of ordenes">
+  <div class="orders-grid" *ngIf="!isLoading">
+    <div class="order-luxe-card" *ngFor="let order of activeOrders">
+      <div class="card-glow"></div>
       
-      <div class="ticket-header">
-        <div class="table-info">
-          <h2 class="text-white">{{ orden.mesa }}</h2>
-          <span class="text-gold sub-text">{{ orden.pedidos }} PEDIDO(S) ACUMULADOS</span>
+      <div class="card-header">
+        <div class="table-tag">
+          <span class="label">MESA</span>
+          <span class="number">{{ order.mesald }}</span>
         </div>
-        <div class="status-pill" [attr.data-status]="orden.status">
-          {{ orden.status }}
+        <span class="status-badge" [ngClass]="order.estado.toLowerCase()">
+          {{ order.estado.replace('_', ' ') }}
+        </span>
+      </div>
+
+      <div class="card-content">
+        <div class="info-group">
+          <span class="material-icons">timer</span>
+          <span>Iniciada: {{ order.fechaApertura | date:'HH:mm' }}</span>
+        </div>
+        <div class="total-display">
+          <span class="total-label">Subtotal</span>
+          <span class="amount">{{ order.totalCalculado | currency:'MXN':'symbol-narrow':'1.2-2' }}</span>
         </div>
       </div>
 
-      <div class="ticket-body">
-        <div class="item-row" *ngFor="let item of orden.items">
-          <span class="text-white">{{ item.cant }}x {{ item.nombre }}</span>
-          <div class="dots-spacer"></div>
-          <span class="text-gold font-bold">${{ item.precio }}</span>
-        </div>
+      <div class="card-actions">
+        <button class="btn-manage" (click)="gestionarOrden(order.id)">
+          <span class="material-icons">edit_note</span>
+          GESTIONAR / COBRAR
+        </button>
       </div>
-
-      <div class="ticket-footer">
-        <div class="total-wrap">
-          <small class="text-gold label-total">TOTAL ACUMULADO</small>
-          <p class="text-gold amount-text">${{ orden.total }}</p>
-        </div>
-        <div class="logs-wrap">
-          <span class="text-muted" *ngFor="let log of orden.logs">{{ log }}</span>
-        </div>
-      </div>
-
     </div>
   </div>
 
+  <div class="empty-state-luxe" *ngIf="activeOrders.length === 0 && !isLoading">
+    <div class="icon-container">
+      <span class="material-icons">restaurant_menu</span>
+    </div>
+    <h3>SIN ÓRDENES ABIERTAS</h3>
+    <p>No hay mesas consumiendo en este momento.</p>
+    <button class="btn-outline-gold" (click)="loadOrders()">REFRESCAR DATOS</button>
+  </div>
 </div>

@@ -1,1 +1,76 @@
-<p>table-map works!</p>
+<div class="luxe-map-wrapper">
+  <header class="luxe-header">
+    <div class="floor-tabs">
+      <button [class.active]="currentFloor === 'PLANTA_BAJA'" (click)="currentFloor = 'PLANTA_BAJA'">
+        PLANTA BAJA
+      </button>
+      <button [class.active]="currentFloor === 'TERRAZA'" (click)="currentFloor = 'TERRAZA'">
+        TERRAZA
+      </button>
+    </div>
+    
+    <div class="luxe-legend">
+      <div class="leg-item"><span class="dot libre"></span> LIBRE</div>
+      <div class="leg-item"><span class="dot ocupada"></span> OCUPADA</div>
+      <div class="leg-item"><span class="dot sucia"></span> SUCIA</div>
+    </div>
+  </header>
+
+  <div class="luxe-canvas">
+    <div class="luxe-loader" *ngIf="isLoading">
+      <div class="neon-spinner"></div>
+      <p>SINCRONIZANDO...</p>
+    </div>
+
+    <div *ngFor="let table of filteredTables" 
+         class="neon-table" 
+         [ngClass]="[table.estado.toLowerCase(), table.forma]"
+         [style.left.px]="table.x" 
+         [style.top.px]="table.y"
+         (click)="openActions(table)">
+      
+      <div class="neon-inner">
+        <div class="content">
+          <span class="id-text">
+            {{ currentFloor === 'PLANTA_BAJA' ? 'PB' : 'T' }}-{{ table.numeroMesa | number:'2.0-0' }}
+          </span>
+          <div class="pax-info">
+            <span class="material-icons">groups</span>
+            {{ table.capacidad }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="luxe-overlay" *ngIf="isModalOpen" (click)="closeModal()">
+  <div class="luxe-modal-card" (click)="$event.stopPropagation()">
+    <header class="modal-head">
+      <div class="icon-glow"><span class="material-icons">restaurant</span></div>
+      <h3>MESA {{ selectedTable?.numeroMesa }}</h3>
+      <span class="status-pill" [ngClass]="selectedTable?.estado.toLowerCase()">
+        {{ selectedTable?.estado }}
+      </span>
+    </header>
+
+    <div class="actions-stack">
+      <button class="luxe-btn gold" (click)="handleAction('ORDER')">
+        <span class="material-icons">add_shopping_cart</span>
+        TOMAR PEDIDO
+      </button>
+      
+      <button class="luxe-btn border-gold" *ngIf="selectedTable?.estado === 'OCUPADA'" (click)="handleAction('BILL')">
+        <span class="material-icons">payments</span>
+        VER CUENTA
+      </button>
+
+      <button class="luxe-btn yellow" *ngIf="selectedTable?.estado === 'SUCIA'" (click)="handleAction('CLEAN')">
+        <span class="material-icons">cleaning_services</span>
+        MARCAR LIMPIA
+      </button>
+    </div>
+    
+    <button class="luxe-btn-cancel" (click)="closeModal()">CERRAR</button>
+  </div>
+</div>

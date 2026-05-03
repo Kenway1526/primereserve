@@ -1,1 +1,76 @@
-<p>stock-control works!</p>
+<div class="inventory-wrapper">
+  <header class="inventory-header">
+    <div class="header-info">
+      <h1>Inventario de Insumos</h1>
+      <div class="inventory-badges">
+        <span class="badge">TOTAL: <strong>{{ items.length }}</strong></span>
+        <span class="badge critical" *ngIf="criticalCount > 0">CRÍTICO: <strong>{{ criticalCount }}</strong></span>
+      </div>
+    </div>
+    <button class="btn-new" (click)="openModal()">
+      <span class="material-icons">add</span> NUEVO INGREDIENTE
+    </button>
+  </header>
+
+  <div class="inventory-grid" *ngIf="items.length > 0">
+    <div class="insumo-card" *ngFor="let item of items" [class.low-stock]="item.stockActual <= item.stockMinimoAlerta">
+      <div class="card-content">
+        <div class="card-top">
+          <div class="insumo-info">
+            <h3>{{ item.nombre }}</h3>
+            <span class="category">INGREDIENTE</span>
+          </div>
+          <span class="material-icons alert-icon" *ngIf="item.stockActual <= item.stockMinimoAlerta">warning</span>
+        </div>
+
+        <div class="stock-display">
+          <div class="main-qty">
+            <span class="number">{{ item.stockActual }}</span>
+            <span class="unit">{{ item.unidad }}</span>
+          </div>
+          <div class="min-qty">MÍNIMO ALERTA: {{ item.stockMinimoAlerta }}</div>
+        </div>
+
+        <div class="card-footer">
+          <button class="btn-edit" (click)="editItem(item)">
+            <span class="material-icons">edit</span> EDITAR
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="showModal">
+    <div class="modal-content-luxe">
+      <header class="modal-header">
+        <h2>{{ isEditing ? 'EDITAR' : 'NUEVO' }} INSUMO</h2>
+        <button class="close-btn" (click)="closeModal()">&times;</button>
+      </header>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>NOMBRE</label>
+          <input type="text" [(ngModel)]="selectedIngrediente.nombre">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>STOCK ACTUAL</label>
+            <input type="number" [(ngModel)]="selectedIngrediente.stockActual">
+          </div>
+          <div class="form-group">
+            <label>MÍNIMO ALERTA</label>
+            <input type="number" [(ngModel)]="selectedIngrediente.stockMinimoAlerta">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>UNIDAD</label>
+          <input type="text" [(ngModel)]="selectedIngrediente.unidad" placeholder="KG, PZ, LT">
+        </div>
+      </div>
+
+      <footer class="modal-footer">
+        <button class="btn-save" (click)="saveIngrediente()">GUARDAR INSUMO</button>
+      </footer>
+    </div>
+  </div>
+</div>

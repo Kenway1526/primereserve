@@ -1,38 +1,45 @@
-<div class="dashboard-luxe" *ngIf="!isLoading && reservation">
-  <header>
-    <h1>BIENVENIDO, {{ reservation.nombreInvitado | uppercase }}</h1>
-    <p class="folio">FOLIO: {{ reservation.folio }}</p>
-  </header>
+<div class="dashboard-container">
+  <div *ngIf="isLoading" class="loader">
+    <div class="spinner"></div>
+    <p>Sincronizando con tu mesa...</p>
+  </div>
 
-  <div class="status-card">
-    <div class="status-badge" [ngClass]="reservation.estado">
-      {{ reservation.estado }}
-    </div>
-    
-    <div class="mesa-info" *ngIf="reservation.Mesa">
-      <h3>TU MESA ESTÁ LISTA</h3>
-      <p class="mesa-number">{{ reservation.Mesa.zona === 'PLANTA_BAJA' ? 'PB' : 'T' }}-{{ reservation.Mesa.numeroMesa }}</p>
+  <div *ngIf="!isLoading && reserva" class="fade-in">
+    <header class="card-header">
+      <span class="folio-tag">FOLIO: {{ reserva.folio }}</span>
+      <h2>¡Mesa Lista!</h2>
+      <p>Bienvenido al restaurante</p>
+    </header>
+
+    <div class="stats-grid">
+      <div class="stat-item">
+        <span class="label">Estado</span>
+        <strong [class]="reserva.estado">{{ reserva.estado }}</strong>
+      </div>
+      <div class="stat-item">
+        <span class="label">Personas</span>
+        <strong>{{ reserva.numPersonas }}</strong>
+      </div>
     </div>
 
-    <div class="wait-info" *ngIf="reservation.estado === 'WAITLIST'">
-      <p>Estamos preparando su mesa. Le notificaremos en breve.</p>
+    <div class="waiting-info" *ngIf="reserva.isWaitlistActive">
+      <p>Tu posición en la fila:</p>
+      <div class="pos-number">{{ reserva.posicionEspera || '1' }}</div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-main">
+        <i class="material-icons">menu_book</i>
+        Ver Menú Digital
+      </button>
+      <button class="btn-secondary">
+        <i class="material-icons">notifications</i>
+        Llamar Mesero
+      </button>
     </div>
   </div>
 
-  <div class="details-grid">
-    <div class="detail-item">
-      <span class="label">FECHA</span>
-      <span class="val">{{ reservation.fechaPrincipal | date:'fullDate' | uppercase }}</span>
-    </div>
-    <div class="detail-item">
-      <span class="label">PERSONAS</span>
-      <span class="val">{{ reservation.numPersonas }} Comensales</span>
-    </div>
+  <div *ngIf="!isLoading && !reserva" class="error-msg">
+    <p>No se encontró información de la reserva.</p>
   </div>
-
-  <button (click)="logout()" class="btn-outline">CERRAR SESIÓN</button>
-</div>
-
-<div class="loading-screen" *ngIf="isLoading">
-  <p>CARGANDO TU EXPERIENCIA...</p>
 </div>

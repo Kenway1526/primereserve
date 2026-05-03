@@ -1,9 +1,11 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, ChangeDetectorRef, PLATFORM_ID, OnDestroy } from '@angular/core';
+import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FilterPipe } from '../../../shared/pipes/filter-pipe';
 import { Modal } from '../../../shared/components/modal/modal';
 import { SupabaseService } from '../../../core/services/supabase';
+import { Auth } from '../../../core/services/auth/auth'; 
+import { APP_CONFIG } from '../../../core/constants/config'; // 🚀 La fuente de la verdad
 
 @Component({
   selector: 'app-staff-mgmt',
@@ -14,41 +16,57 @@ import { SupabaseService } from '../../../core/services/supabase';
 })
 export class StaffMgmt implements OnInit {
   private supabaseSvc = inject(SupabaseService);
+  private auth = inject(Auth); 
   private cdr = inject(ChangeDetectorRef);
+  private platformId = inject(PLATFORM_ID);
 
   public searchText: string = '';
   public isModalOpen = false;
   public isLoading = false;
   public modalTitle: string = '';
-
-  // Modelo alineado a tu tabla 'Usuario'
-  public memberForm: any = { id: '', nombre: '', rol: 'WAITER', email: '', password: '', telefono: '', avatarUrl: '', activo: true };
-  public staff: any[] = [];
   
+  // 🚀 Usamos directamente la constante para evitar esperas asíncronas
+  public restaurantId: string = APP_CONFIG.RESTAURANT_ID;
+
+  public memberForm: any = { 
+    id: '', 
+    nombre: '', 
+    rol: 'MESERO', 
+    email: '', 
+    telefono: '', 
+    restauranteId: APP_CONFIG.RESTAURANT_ID,
+    avatarUrl: ''
+  };
+  
+  public staff: any[] = [];
   public selectedFile: File | null = null;
   public imagePreview: string | null = null;
-
-  public stats = { total: 0, activos: 0, meseros: 0, cocina: 0, inactivos: 0 };
+  public stats = { total: 0, activos: 0, meseros: 0, cocina: 0, admin: 0, inactivos: 0 };
 
   async ngOnInit() {
-    await this.loadStaff();
+    if (isPlatformBrowser(this.platformId)) {
+      // Cargamos el personal inmediatamente usando el ID estático
+      await this.loadStaff();
+    }
   }
 
   async loadStaff() {
     this.isLoading = true;
+    this.cdr.detectChanges();
+
     try {
-      const restauranteId = localStorage.getItem('active_restaurant_id');
-      // Filtramos para NO traer 'CLIENTE'
       const { data, error } = await this.supabaseSvc.supabase
         .from('Usuario')
         .select('*')
-        .eq('restauranteId', restauranteId)
-        .neq('rol', 'CLIENTE') 
+        .eq('restauranteId', APP_CONFIG.RESTAURANT_ID) // 👈 Filtrado Sincronizado
+        .neq('rol', 'CLIENTE')
         .order('nombre', { ascending: true });
-
+      
       if (error) throw error;
+      
       this.staff = data || [];
       this.calculateStats();
+      
     } catch (err) {
       console.error('Error al cargar personal:', err);
     } finally {
@@ -59,103 +77,133 @@ export class StaffMgmt implements OnInit {
 
   calculateStats() {
     this.stats.total = this.staff.length;
-    this.stats.meseros = this.staff.filter(s => s.rol === 'WAITER').length;
-    this.stats.cocina = this.staff.filter(s => s.rol === 'KITCHEN').length;
-    // Usamos 'activo' como booleano (asegúrate que exista en tu DB o manéjalo por rol)
-    this.stats.activos = this.staff.filter(s => s.activo !== false).length;
-    this.stats.inactivos = this.staff.filter(s => s.activo === false).length;
+    this.stats.meseros = this.staff.filter(s => s.rol === 'MESERO' || s.rol === 'WAITER').length;
+    this.stats.cocina = this.staff.filter(s => s.rol === 'COCINA' || s.rol === 'KITCHEN').length;
+    this.stats.admin = this.staff.filter(s => s.rol === 'ADMIN').length;
+    this.stats.activos = this.staff.length; 
+    this.stats.inactivos = 0; 
   }
 
-  // --- LOGICA DE IMAGEN ---
+  // --- MÉTODOS DE IMAGEN ---
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
       this.selectedFile = file;
       const reader = new FileReader();
-      reader.onload = () => this.imagePreview = reader.result as string;
+      reader.onload = () => {
+        this.imagePreview = reader.result as string;
+        this.cdr.detectChanges();
+      };
       reader.readAsDataURL(file);
     }
   }
 
-  async uploadAvatar(userId: string): Promise<string> {
-    if (!this.selectedFile) return this.memberForm.avatarUrl;
-    
-    const filePath = `avatars/${userId}_${Date.now()}`;
-    // Intento con Supabase Storage
-    const { error } = await this.supabaseSvc.supabase.storage
-      .from('avatars')
-      .upload(filePath, this.selectedFile);
+  async uploadImage(file: File): Promise<string | null> {
+    try {
+      const fileName = `${Date.now()}-${file.name}`;
+      const { data, error } = await this.supabaseSvc.supabase.storage
+        .from('avatars')
+        .upload(fileName, file);
 
-    if (error) {
-      console.warn('Fallo Storage Supabase, podrías implementar Cloudinary aquí.');
-      return this.memberForm.avatarUrl; 
+      if (error) throw error;
+      return this.supabaseSvc.supabase.storage.from('avatars').getPublicUrl(fileName).data.publicUrl;
+    } catch (err) {
+      console.error('Upload error:', err);
+      return null;
     }
-
-    const { data: urlData } = this.supabaseSvc.supabase.storage.from('avatars').getPublicUrl(filePath);
-    return urlData.publicUrl;
   }
 
   // --- CRUD ---
   async saveMember() {
-    if (!this.memberForm.nombre || !this.memberForm.email) return;
+    const idParaGuardar = APP_CONFIG.RESTAURANT_ID;
+
+    if (!this.memberForm.nombre || !this.memberForm.email || this.isLoading) return;
     this.isLoading = true;
+    this.cdr.detectChanges();
 
     try {
-      const restauranteId = localStorage.getItem('active_restaurant_id');
-      const tempId = this.memberForm.id || Math.random().toString(36).substring(7);
-      
-      const finalImg = await this.uploadAvatar(tempId);
+      let finalAvatarUrl = this.memberForm.avatarUrl;
+
+      if (this.selectedFile) {
+        const uploadedUrl = await this.uploadImage(this.selectedFile);
+        if (uploadedUrl) finalAvatarUrl = uploadedUrl;
+      }
 
       const payload = {
         nombre: this.memberForm.nombre,
         rol: this.memberForm.rol,
         email: this.memberForm.email,
         telefono: this.memberForm.telefono,
-        avatarUrl: finalImg,
-        activo: this.memberForm.activo,
-        restauranteId
+        restauranteId: idParaGuardar,
+        avatarUrl: finalAvatarUrl
       };
 
       if (this.memberForm.id) {
-        await this.supabaseSvc.supabase.from('Usuario').update(payload).eq('id', this.memberForm.id);
+        // ACTUALIZAR
+        const { error } = await this.supabaseSvc.supabase
+          .from('Usuario')
+          .update(payload)
+          .eq('id', this.memberForm.id);
+        if (error) throw error;
       } else {
-        await this.supabaseSvc.supabase.from('Usuario').insert({ ...payload, password: 'Prime' + Math.floor(Math.random()*1000) });
+        const newPassword = 'Prime' + Math.floor(1000 + Math.random() * 9000);
+        const { error } = await this.supabaseSvc.supabase
+          .from('Usuario')
+          .insert([{ ...payload, password: newPassword }]);
+        
+        if (error) throw error;
+        alert(`Empleado creado con éxito. Contraseña: ${newPassword}`);
       }
 
       await this.loadStaff();
-      this.isModalOpen = false;
-    } catch (err) {
+      this.closeModal();
+    } catch (err: any) {
       console.error('Error al guardar:', err);
+      alert(`Error de base de datos: ${err.message || 'Error en la operación'}`);
     } finally {
       this.isLoading = false;
+      this.cdr.detectChanges();
     }
   }
 
-  async toggleStatus(member: any) {
-    const nuevoEstado = !member.activo;
-    const { error } = await this.supabaseSvc.supabase
-      .from('Usuario')
-      .update({ activo: nuevoEstado })
-      .eq('id', member.id);
-    
-    if (!error) {
-      member.activo = nuevoEstado;
-      this.calculateStats();
-    }
+  async deleteMember(id: string) {
+    if (!isPlatformBrowser(this.platformId) || !confirm('¿Eliminar miembro?')) return;
+    try {
+      await this.supabaseSvc.supabase.from('Usuario').delete().eq('id', id);
+      await this.loadStaff();
+    } catch (err) { console.error(err); }
   }
 
+  // --- CONTROLES MODAL ---
   openAddModal() {
-    this.modalTitle = 'Nuevo Empleado';
-    this.memberForm = { id: '', nombre: '', rol: 'WAITER', email: '', telefono: '', activo: true, avatarUrl: '' };
+    this.modalTitle = 'Registrar Empleado';
+    this.memberForm = { 
+      id: '', 
+      nombre: '', 
+      rol: 'MESERO', 
+      email: '', 
+      telefono: '', 
+      restauranteId: APP_CONFIG.RESTAURANT_ID,
+      avatarUrl: ''
+    };
     this.imagePreview = null;
-    this.selectedFile = null;
     this.isModalOpen = true;
   }
 
   openEditModal(member: any) {
-    this.modalTitle = 'Editar Empleado';
+    this.modalTitle = 'Editar Perfil';
     this.memberForm = { ...member };
     this.imagePreview = member.avatarUrl;
     this.isModalOpen = true;
   }
+
+  closeModal() {
+    this.isModalOpen = false;
+    this.cdr.detectChanges();
+  }
+
+  ngOnDestroy() {
+    //if (this.authSub) this.authSub.unsubscribe();
+  }
 }
+  

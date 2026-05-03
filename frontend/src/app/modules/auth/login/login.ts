@@ -1,9 +1,10 @@
-import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Auth, UserRole } from '../../../core/services/auth/auth';
-import { SupabaseService } from '../../../core/services/supabase'; // Importante
+import { SupabaseService } from '../../../core/services/supabase';
+import { APP_CONFIG } from '../../../core/constants/config';  
 
 @Component({
   selector: 'app-login',
@@ -16,114 +17,136 @@ export class Login implements OnInit {
   private auth = inject(Auth);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
-  private supabaseSvc = inject(SupabaseService); // Inyectamos Supabase
+  private supabaseSvc = inject(SupabaseService);
+  private platformId = inject(PLATFORM_ID);
 
-  public mode: 'staff' | 'client' = 'client';
+  // El modo inicial es CLIENTE, pero no dispara lógica hasta que el usuario actúe
+  public mode: 'staff' | 'client' = 'client'; 
   public isLoading = false;
   public errorMessage = '';
-  public restaurantName = 'PRIME RESERVE';
+  public restaurantName = APP_CONFIG.RESTAURANT_NAME;
 
-  // Modelos
-  public user = '';
+  public userEmail = '';
   public password = '';
   public clientAccess = { folio: '', phone: '' };
 
   ngOnInit() {
-    const resData = localStorage.getItem('active_restaurant');
-    if (resData) {
-      this.restaurantName = JSON.parse(resData).name;
+    // 🛡️ Al entrar al Login, si hay algo raro en el storage, lo limpiamos
+    // para que "Gestionar" no herede basura de "Mi Mesa"
+    if (isPlatformBrowser(this.platformId) && !this.auth.isAuthenticated()) {
+      this.auth.logout(); 
     }
   }
 
-  // --- ACCESO STAFF (Sigue siendo simulación por ahora) ---
-  public handleLogin(): void {
-    if (!this.user || !this.password) {
-      this.errorMessage = 'Ingrese sus credenciales de personal.';
+  /**
+   * ACCESO STAFF
+   */
+  public async handleLogin(): Promise<void> {
+    if (!this.userEmail || !this.password) {
+      this.errorMessage = 'Credenciales obligatorias.';
       return;
     }
 
     this.isLoading = true;
+    this.errorMessage = '';
     this.cdr.detectChanges();
-
-    setTimeout(() => {
-      try {
-        let role: UserRole = 'WAITER';
-        if (this.user.toLowerCase().includes('admin')) role = 'ADMIN';
-        else if (this.user.toLowerCase().includes('cocina')) role = 'KITCHEN';
-
-        this.auth.login(role, this.user);
-
-        const redirectMap: Record<UserRole, string> = {
-          'ADMIN': '/admin/dashboard',
-          'WAITER': '/mesero/mapa',
-          'KITCHEN': '/kitchen/orders',
-          'CLIENTE': '/client/dashboard/dashboard'
-        };
-
-        this.router.navigate([redirectMap[role]]);
-      } catch (err) {
-        this.errorMessage = 'Error de autenticación. Intente de nuevo.';
-      } finally {
-        this.isLoading = false;
-        this.cdr.detectChanges();
-      }
-    }, 1500);
-  }
-
-  public async onClientAccess(): Promise<void> {
-    if (!this.clientAccess.folio || !this.clientAccess.phone) {
-      this.errorMessage = 'El folio y el teléfono son necesarios.';
-      return;
-    }
-
-    this.isLoading = true;
-    this.cdr.detectChanges();
-
-    console.log('%c [Login] Validando acceso cliente...', 'color: #d4af37; font-weight: bold;');
 
     try {
-      // 1. Validar en Supabase (llamada a tu método de servicio)
-      const { data, error } = await this.supabaseSvc.validarAccesoCliente(
-        this.clientAccess.folio, 
-        this.clientAccess.phone
-      );
+      const { data: authData, error: authError } = await this.supabaseSvc.supabase.auth.signInWithPassword({
+        email: this.userEmail,
+        password: this.password
+      });
 
-      if (error || !data) {
-        console.error('[Login] Credenciales inválidas:', error);
-        this.errorMessage = 'Acceso denegado. Verifique su folio y teléfono.';
-        return;
-      }
+      if (authError || !authData.user) throw new Error('Credenciales incorrectas.');
 
-      console.log('%c [Login] Datos encontrados:', 'color: #28a745;', data);
+      const { data: profile, error: profileError } = await this.supabaseSvc.supabase
+        .from('Usuario')
+        .select('rol, nombre')
+        .eq('id', authData.user.id)
+        .single();
 
-      // 2. Persistencia de datos de la reserva para el Dashboard
-      localStorage.setItem('client_reserva_id', data.id);
-      localStorage.setItem('client_folio', data.folio);
+      if (profileError || !profile) throw new Error('Perfil no encontrado.');
 
-      // 3. Login en el servicio Auth
-      // Importante: Esto actualiza el BehaviorSubject que el RoleGuard consulta vía getRole()
-      this.auth.login('CLIENTE', data.folio);
+      const roleMap: Record<string, UserRole> = {
+        'ADMIN': 'ADMIN',
+        'COCINA': 'KITCHEN',
+        'KITCHEN': 'KITCHEN',
+        'MESERO': 'MESERO'
+      };
 
-      console.log('%c [Login] Auth Service actualizado. Navegando...', 'color: #3498db;');
+      const normalizedRole = roleMap[profile.rol.toUpperCase()] || null;
+      if (!normalizedRole) throw new Error('Rol no autorizado.');
 
-      // 4. Navegación con Buffer de tiempo
-      // Usamos 200ms para dar tiempo a que los observables del Auth Service emitan el nuevo valor
-      setTimeout(() => {
-        this.router.navigate(['/client/dashboard'], { replaceUrl: true }).then(nav => {
-          if (nav) {
-            console.log('%c [Login] Navegación exitosa al Dashboard', 'color: #28a745');
-          } else {
-            console.error('%c [Login] Angular rechazó la ruta final', 'color: #ff4d4d');
-          }
-        });
-      }, 150);
+      // Login y Redirección Limpia
+      this.auth.login(normalizedRole, profile.nombre, APP_CONFIG.RESTAURANT_ID, undefined, authData.user.id ); 
+      this.redirectByUserRole();
 
-    } catch (err) {
-      console.error('[Login] Error fatal:', err);
-      this.errorMessage = 'Error de conexión con el servidor.';
+    } catch (err: any) {
+      this.errorMessage = err.message || 'Error de autenticación.';
     } finally {
       this.isLoading = false;
       this.cdr.detectChanges();
     }
+  }
+
+  /**
+   * ACCESO CLIENTE
+   */
+  public async onClientAccess(): Promise<void> {
+    const folio = this.clientAccess.folio.trim();
+    const phone = this.clientAccess.phone.trim();
+
+    if (!folio || !phone) {
+      this.errorMessage = 'Folio y teléfono requeridos.';
+      return;
+    }
+
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.cdr.detectChanges();
+
+    try {
+      const { data: reserva, error } = await this.supabaseSvc.supabase
+        .from('Reservacion')
+        .select('*')
+        .eq('folio', folio)
+        .eq('telefonoInvitado', phone) // 👈 Campo verificado en tu captura de Supabase
+        .single();
+
+      if (error || !reserva) throw new Error('Acceso denegado. Verifique sus datos.');
+
+      // Login Cliente
+      console.log('🔑 Login: Datos válidos. Guardando sesión...');
+      this.auth.login('CLIENTE', reserva.folio, APP_CONFIG.RESTAURANT_ID, reserva.id);
+      console.log('🏃 Login: Intentando navegar a /client/dashboard');
+      this.router.navigate(['/client/dashboard'], { replaceUrl: true });
+
+    } catch (err: any) {
+      this.errorMessage = err.message;
+    } finally {
+      this.isLoading = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  private redirectByUserRole() {
+    const role = this.auth.getRole();
+    const redirectMap: Record<string, string> = {
+      'ADMIN': '/admin/dashboard',
+      'KITCHEN': '/kitchen/order-monitor',
+      'MESERO': '/waiter/table-map',
+      'CLIENTE': '/client/dashboard'
+    };
+
+    if (role && redirectMap[role]) {
+      this.router.navigate([redirectMap[role]], { replaceUrl: true });
+    }
+  }
+
+  public setMode(newMode: 'staff' | 'client') {
+    this.mode = newMode;
+    this.errorMessage = '';
+    this.auth.logout(); // 🛡️ Limpiamos al cambiar de pestaña
+    this.cdr.detectChanges();
   }
 }

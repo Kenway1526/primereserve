@@ -1,6 +1,87 @@
-.menu-item.unavailable {
-  filter: grayscale(1);
-  opacity: 0.5;
-  pointer-events: none;
-  cursor: not-allowed;
+.menu-container {
+  padding: 1.2rem;
+  background-color: #0a0a0a;
+  min-height: 100vh;
+  padding-bottom: 100px;
 }
+
+.menu-header {
+  text-align: center;
+  margin-bottom: 25px;
+  h1 { color: #d4af37; font-size: 2rem; margin: 0; }
+  p { color: #888; font-size: 0.9rem; }
+}
+
+.category-nav {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  margin-bottom: 25px;
+  &::-webkit-scrollbar { display: none; }
+  button {
+    background: #1a1a1a;
+    color: #888;
+    border: 1px solid #333;
+    padding: 8px 20px;
+    border-radius: 20px;
+    white-space: nowrap;
+    &.active { background: #d4af37; color: #000; font-weight: bold; }
+  }
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.product-card {
+  background: #121212;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid #222;
+  .image-box {
+    height: 180px;
+    position: relative;
+    img { width: 100%; height: 100%; object-fit: cover; }
+    .price-tag {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: rgba(0,0,0,0.8);
+      color: #d4af37;
+      padding: 5px 15px;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+  }
+  .details {
+    padding: 15px;
+    h3 { margin: 0 0 10px; color: #fff; }
+    p { color: #888; font-size: 0.85rem; line-height: 1.4; }
+    .category-badge {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 0.7rem;
+      color: #d4af37;
+      border: 1px solid #d4af37;
+      padding: 2px 8px;
+      border-radius: 5px;
+    }
+  }
+}
+
+.loading-state {
+  text-align: center;
+  padding: 50px;
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid #222;
+    border-top: 3px solid #d4af37;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+  }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }

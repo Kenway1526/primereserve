@@ -1,65 +1,92 @@
-<div class="kitchen-container">
-  
-  <header class="kitchen-header">
-    <div class="gold-line"></div>
-    <h1 class="text-white">COCINA (SUPERVISOR)</h1>
-  </header>
-
-  <div class="kitchen-board">
+<div class="kds-container">
+  <div class="kds-column">
+    <div class="column-header">
+      <h2>PENDIENTES</h2>
+      <span class="count-badge">{{ pending.length }}</span>
+    </div>
     
-    <div class="kitchen-col">
-      <div class="col-header">
-        <span class="text-gold">Pendientes</span>
-        <span class="badge">{{ pendientes.length }}</span>
+    <div class="cards-list">
+      <div class="empty-kitchen-msg" *ngIf="pending.length === 0">
+        <span class="material-icons">check_circle_outline</span>
+        <p>SIN PEDIDOS NUEVOS</p>
       </div>
-      <div class="cards-stack">
-        <div class="k-card clickable" *ngFor="let t of pendientes" (click)="avanzarEstado(t)">
-          <div class="k-card-top">
-            <span class="text-gold mesa-title">{{ t.mesa }}</span>
-            <span class="text-muted">{{ t.tiempo }} min</span>
-          </div>
-          <div class="k-card-body">
-            <p class="text-white" *ngFor="let p of t.platos">{{ p.cant }}x {{ p.nombre }}</p>
+
+      <div class="order-card" *ngFor="let order of pending">
+        <div class="card-header">
+          <span class="table-label">MESA {{ order.mesald }}</span>
+          <span class="order-time">{{ order.fechaApertura | date:'HH:mm' }}</span>
+        </div>
+        <div class="order-items">
+          <div class="item" *ngFor="let item of order.DetalleOrden">
+            <span class="qty">{{ item.cantidad }}x</span>
+            <span class="name">{{ item.MenuItem?.nombre }}</span>
+            <p class="note" *ngIf="item.notasCocina">{{ item.notasCocina }}</p>
           </div>
         </div>
+        <button class="btn-action" (click)="updateStatus(order.id, 'EN_PREPARACION')">
+          EMPEZAR PREPARACIÓN
+        </button>
       </div>
     </div>
+  </div>
 
-    <div class="kitchen-col">
-      <div class="col-header">
-        <span class="text-blue">En Preparación</span>
-        <span class="badge">{{ preparacion.length }}</span>
+  <div class="kds-column active-column">
+    <div class="column-header">
+      <h2>EN PREPARACIÓN</h2>
+      <span class="count-badge">{{ cooking.length }}</span>
+    </div>
+    
+    <div class="cards-list">
+      <div class="empty-kitchen-msg" *ngIf="cooking.length === 0">
+        <span class="material-icons">restaurant</span>
+        <p>COCINA DESPEJADA</p>
       </div>
-      <div class="cards-stack">
-        <div class="k-card clickable border-blue" *ngFor="let t of preparacion" (click)="avanzarEstado(t)">
-          <div class="k-card-top">
-            <span class="text-blue mesa-title">{{ t.mesa }}</span>
-            <span class="text-muted">{{ t.tiempo }} min</span>
-          </div>
-          <div class="k-card-body">
-            <p class="text-white" *ngFor="let p of t.platos">{{ p.cant }}x {{ p.nombre }}</p>
+
+      <div class="order-card cooking" *ngFor="let order of cooking">
+        <div class="card-header">
+          <span class="table-label">MESA {{ order.mesald }}</span>
+          <span class="status-dot"></span>
+        </div>
+        <div class="order-items">
+          <div class="item" *ngFor="let item of order.DetalleOrden">
+            <span class="qty">{{ item.cantidad }}x</span>
+            <span class="name">{{ item.MenuItem?.nombre }}</span>
           </div>
         </div>
+        <button class="btn-action ready" (click)="updateStatus(order.id, 'LISTO')">
+          MARCAR COMO LISTO
+        </button>
       </div>
     </div>
+  </div>
 
-    <div class="kitchen-col">
-      <div class="col-header">
-        <span class="text-green">Listos</span>
-        <span class="badge">{{ listos.length }}</span>
+  <div class="kds-column">
+    <div class="column-header">
+      <h2>PARA SERVIR</h2>
+      <span class="count-badge">{{ ready.length }}</span>
+    </div>
+    
+    <div class="cards-list">
+      <div class="empty-kitchen-msg" *ngIf="ready.length === 0">
+        <span class="material-icons">hourglass_empty</span>
+        <p>ESPERANDO PLATILLOS</p>
       </div>
-      <div class="cards-stack">
-        <div class="k-card clickable border-green" *ngFor="let t of listos" (click)="avanzarEstado(t)">
-          <div class="k-card-top">
-            <span class="text-green mesa-title">{{ t.mesa }}</span>
-            <span class="text-muted">{{ t.tiempo }} min</span>
-          </div>
-          <div class="k-card-body">
-            <p class="text-white" *ngFor="let p of t.platos">{{ p.cant }}x {{ p.nombre }}</p>
+
+      <div class="order-card done" *ngFor="let order of ready">
+        <div class="card-header">
+          <span class="table-label">MESA {{ order.mesald }}</span>
+          <span class="material-icons check">check_circle</span>
+        </div>
+        <div class="order-items">
+          <div class="item" *ngFor="let item of order.DetalleOrden">
+            <span class="qty">{{ item.cantidad }}x</span>
+            <span class="name">{{ item.MenuItem?.nombre }}</span>
           </div>
         </div>
+        <button class="btn-action finalize" (click)="updateStatus(order.id, 'SERVIDO')">
+          ENTREGAR A MESA
+        </button>
       </div>
     </div>
-
   </div>
 </div>

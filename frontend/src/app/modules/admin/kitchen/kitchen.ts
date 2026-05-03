@@ -1,18 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
-interface Plato {
-  cant: number;
-  nombre: string;
-}
-
-interface TicketCocina {
-  id: number;
-  mesa: string;
-  tiempo: number; // Minutos transcurridos
-  platos: Plato[];
-  estado: 'pendiente' | 'preparacion' | 'listo';
-}
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { SupabaseService } from '../../../core/services/supabase';
+import { APP_CONFIG } from '../../../core/constants/config'; // 🚀 La fuente de la verdad
 
 @Component({
   selector: 'app-kitchen',
@@ -21,43 +10,98 @@ interface TicketCocina {
   templateUrl: './kitchen.html',
   styleUrl: './kitchen.css'
 })
-export class Kitchen implements OnInit {
-  
-  public tickets: TicketCocina[] = [
-    {
-      id: 1, mesa: 'Mesa 5', tiempo: 3, estado: 'pendiente',
-      platos: [{ cant: 2, nombre: 'Tartare de Atún' }, { cant: 1, nombre: 'Langosta Thermidor' }]
-    },
-    {
-      id: 2, mesa: 'Mesa 3', tiempo: 1, estado: 'pendiente',
-      platos: [{ cant: 2, nombre: 'Soufflé de Chocolate' }, { cant: 1, nombre: 'Dom Pérignon 2012' }]
-    },
-    {
-      id: 3, mesa: 'Mesa 2', tiempo: 12, estado: 'preparacion',
-      platos: [{ cant: 1, nombre: 'Foie Gras Torchon' }, { cant: 1, nombre: 'Wagyu A5 Ribeye' }]
-    },
-    {
-      id: 4, mesa: 'Mesa 8', tiempo: 22, estado: 'listo',
-      platos: [{ cant: 1, nombre: 'Risotto al Tartufo' }]
-    }
-  ];
+export class Kitchen implements OnInit, OnDestroy {
+  private supabaseSvc = inject(SupabaseService);
+  private cdr = inject(ChangeDetectorRef);
+  private platformId = inject(PLATFORM_ID);
 
-  ngOnInit(): void {}
+  public orders: any[] = [];
+  public isLoading = true;
+  private subscription: any;
 
-  // Lógica para mover el ticket a la siguiente fase
-  avanzarEstado(ticket: TicketCocina) {
-    if (ticket.estado === 'pendiente') {
-      ticket.estado = 'preparacion';
-    } else if (ticket.estado === 'preparacion') {
-      ticket.estado = 'listo';
-    } else {
-      // Si ya está listo, se despacha (se elimina de la vista)
-      this.tickets = this.tickets.filter(t => t.id !== ticket.id);
+  async ngOnInit() {
+    if (isPlatformBrowser(this.platformId)) {
+      // 🚀 Cargamos directamente usando la constante estática
+      await this.loadOrders();
+      this.setupRealtime();
     }
   }
 
-  // Filtros para las columnas
-  get pendientes() { return this.tickets.filter(t => t.estado === 'pendiente'); }
-  get preparacion() { return this.tickets.filter(t => t.estado === 'preparacion'); }
-  get listos() { return this.tickets.filter(t => t.estado === 'listo'); }
+  async loadOrders() {
+    try {
+      this.isLoading = true;
+      const { data, error } = await this.supabaseSvc.supabase
+        .from('Orden')
+        .select(`
+          *,
+          Mesa ( numeroMesa ),
+          DetalleOrden (
+            *,
+            MenuItem ( nombre )
+          )
+        `)
+        .eq('restauranteId', APP_CONFIG.RESTAURANT_ID) // 👈 Sincronizado
+        .in('estado', ['ABIERTA', 'EN_PREPARACION', 'LISTO']) 
+        .order('fechaApertura', { ascending: true });
+
+      if (error) throw error;
+      this.orders = data || [];
+    } catch (err) {
+      console.error('Error en carga de cocina:', err);
+    } finally {
+      this.isLoading = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  setupRealtime() {
+    // 🛡️ El filtro del canal ahora es ultra-seguro con el ID constante
+    this.subscription = this.supabaseSvc.supabase
+      .channel('kitchen_realtime')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'Orden', 
+          filter: `restauranteId=eq.${APP_CONFIG.RESTAURANT_ID}` // 👈 Sincronización Realtime
+        }, 
+        () => {
+          console.log('🔔 Nueva actualización de orden recibida');
+          this.loadOrders();
+        }
+      )
+      .subscribe();
+  }
+
+  async updateStatus(orderId: string, nextStatus: string) {
+    try {
+      const { error } = await this.supabaseSvc.supabase
+        .from('Orden')
+        .update({ estado: nextStatus })
+        .eq('id', orderId)
+        .eq('restauranteId', APP_CONFIG.RESTAURANT_ID); // 👈 Seguridad extra
+
+      if (error) throw error;
+      
+      // Actualización optimista local para que la UI se sienta rápida
+      const order = this.orders.find(o => o.id === orderId);
+      if (order) order.estado = nextStatus;
+      
+    } catch (err) {
+      console.error('Error al actualizar estado en cocina:', err);
+    } finally {
+      this.cdr.detectChanges();
+    }
+  }
+
+  // Getters para las columnas de la cocina
+  get pending() { return this.orders.filter(o => o.estado === 'ABIERTA'); }
+  get cooking() { return this.orders.filter(o => o.estado === 'EN_PREPARACION'); }
+  get ready() { return this.orders.filter(o => o.estado === 'LISTO'); }
+
+  ngOnDestroy() {
+    if (this.subscription) {
+      this.supabaseSvc.supabase.removeChannel(this.subscription);
+    }
+  }
 }

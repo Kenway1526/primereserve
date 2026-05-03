@@ -1,8 +1,8 @@
-import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { SupabaseService } from '../../../core/services/supabase'; // Ajusta la ruta
+import { SupabaseService } from '../../../core/services/supabase';
 
 @Component({
   selector: 'app-new-reservation',
@@ -15,6 +15,7 @@ export class NewReservation implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private supabaseSvc = inject(SupabaseService);
   private router = inject(Router);
+  private platformId = inject(PLATFORM_ID); // 🛡️ Inyectamos el detector de plataforma
 
   public step = 1; 
   public isLoading = false;
@@ -45,16 +46,20 @@ export class NewReservation implements OnInit {
   public timeSlots = ['13:00', '14:00', '15:00', '16:00', '19:00', '20:00', '21:00', '22:00'];
 
   ngOnInit() {
-    // 1. Inicialización inmediata de valores locales (Síncrono)
     this.reservationData.primaryDate.setHours(0,0,0,0);
     this.generateCalendar(new Date());
 
-    // 2. Disparar carga de datos sin bloquear el renderizado
-    const selectedSlug = localStorage.getItem('active_restaurant_slug');
-    if (selectedSlug) {
-      this.loadRestaurantData(selectedSlug);
+    // 🛡️ Blindaje crítico: Solo accedemos a localStorage si estamos en el cliente
+    if (isPlatformBrowser(this.platformId)) {
+      const selectedSlug = localStorage.getItem('active_restaurant_slug');
+      if (selectedSlug) {
+        this.loadRestaurantData(selectedSlug);
+      } else {
+        this.isLoading = false; 
+      }
     } else {
-      this.isLoading = false; // Si no hay slug, dejamos de cargar
+      // En el servidor (durante el build de Netlify), detenemos el loading de inmediato
+      this.isLoading = false;
     }
   }
 
@@ -66,12 +71,17 @@ export class NewReservation implements OnInit {
         this.restaurante = data; 
         this.restauranteId = data.id; 
       }
+    } catch (err) {
+      console.error("Error cargando restaurante:", err);
     } finally {
       this.isLoading = false;
       this.cdr.detectChanges();
     }
   }
 
+  // ... (El resto de tus métodos checkAvailability, finish, etc., permanecen igual 
+  // ya que son disparados por eventos de usuario que solo ocurren en el navegador)
+  
   async checkAvailability() {
     if (!this.reservationData.primaryTime) return;
     this.isLoading = true;
@@ -92,12 +102,11 @@ export class NewReservation implements OnInit {
       const total = totalMesas || 0;
       const resOcupadas = ocupadas || 0;
 
-      // Si no hay mesas disponibles, mandamos a lista de espera (Step 5 o el que manejes)
       this.step = (total > 0 && resOcupadas >= total) ? 5 : 2;
 
     } catch (error) {
       console.error("Error en disponibilidad:", error);
-      this.step = 2; // Fail-safe: dejamos que intente reservar
+      this.step = 2;
     } finally {
       this.isLoading = false;
       this.cdr.detectChanges();
@@ -114,22 +123,19 @@ export class NewReservation implements OnInit {
 
       let mesaIdAsignada = null;
       
-      // --- LÓGICA DE ASIGNACIÓN DE MESA ---
-      // Si el usuario viene del flujo normal (no waitlist)
       if (this.step === 3) {
-        // 1. Buscamos la mesa disponible en el servicio
         mesaIdAsignada = await this.supabaseSvc.findAvailableTable(
           this.restauranteId, 
           fechaStr, 
-          horaStr,//PR-QBJMCE
-          this.reservationData.guests // <-- Pasamos el número de comensales
+          horaStr,
+          this.reservationData.guests
         );
       }
 
       const payload = {
         folio: this.generatedFolio,
         restauranteId: this.restauranteId,
-        mesaId: mesaIdAsignada, // <--- ASIGNAMOS EL ID AQUÍ
+        mesaId: mesaIdAsignada,
         fechaPrincipal: fechaStr,
         horaPrincipal: horaStr,
         fechaPlanB: this.reservationData.altDate?.toISOString().split('T')[0] || null,
@@ -139,32 +145,31 @@ export class NewReservation implements OnInit {
         nombreInvitado: this.reservationData.name,
         telefonoInvitado: this.reservationData.phone,
         emailInvitado: this.reservationData.email,
-        // Si no encontró mesa en step 3, lo mandamos a WAITLIST automáticamente
         estado: (this.step === 7 || !mesaIdAsignada) ? 'WAITLIST' : 'CONFIRMADA',
         isWaitlistActive: (this.step === 7 || !mesaIdAsignada),
         notasEspeciales: this.reservationData.notes
       };
 
-      // 3. Si se asignó mesa, la marcamos como RESERVADA en la DB
-      const { data: newRes, error } = await this.supabaseSvc.createReservacion(payload);
+      const { error } = await this.supabaseSvc.createReservacion(payload);
       if (error) throw error;
 
-      // --- NUEVO: Actualizar estado de la mesa si fue asignada ---
       if (mesaIdAsignada) {
         await this.supabaseSvc.updateTableStatus(mesaIdAsignada, 'RESERVADA');
       }
       
-      this.step = 4; // Pantalla de éxito
+      this.step = 4;
     } catch (err) {
       console.error(err);
-      alert('Error al guardar: ' + (err as any).message);
+      if (isPlatformBrowser(this.platformId)) {
+        alert('Error al guardar: ' + (err as any).message);
+      }
     } finally {
       this.isLoading = false;
       this.cdr.detectChanges();
     }
   }
 
-  // MÉTODOS DE APOYO (Mantienen tu lógica original)
+  // Métodos de apoyo (generateCalendar, selectDate, etc) sin cambios.
   public generateCalendar(baseDate: Date) {
     const year = baseDate.getFullYear();
     const month = baseDate.getMonth();
@@ -211,7 +216,7 @@ export class NewReservation implements OnInit {
     const pattern = /[0-9]/;
     const inputChar = String.fromCharCode(event.charCode);
     if (!pattern.test(inputChar)) {
-      event.preventDefault(); // Bloquea la tecla si no es número
+      event.preventDefault();
     }
   }
 }

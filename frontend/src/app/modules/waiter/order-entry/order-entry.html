@@ -1,1 +1,78 @@
-<p>order-entry works!</p>
+<div class="order-page">
+  <header class="order-header">
+    <div class="left">
+      <button class="back-btn" routerLink="/waiter/table-map">
+        <span class="material-icons">arrow_back</span>
+      </button>
+      <h2>Comanda de Mesa</h2>
+      <div class="table-badge">Mesa {{ selectedTable?.numeroMesa }}</div>
+    </div>
+  </header>
+
+  <div class="order-layout">
+    <section class="menu-section">
+      <div class="category-bar">
+        <button *ngFor="let cat of categories" 
+                [class.active]="activeCategory === cat"
+                (click)="filterByCategory(cat)">
+          {{ cat }}
+        </button>
+      </div>
+
+      <div class="menu-grid" *ngIf="!isLoading">
+        <div class="menu-card" *ngFor="let item of filteredItems" (click)="addToCart(item)">
+          <div class="img-container">
+            <img [src]="item.imagen_url || 'assets/no-food.png'" alt="">
+          </div>
+          <div class="card-body">
+            <h4>{{ item.nombre }}</h4>
+            <p class="price">{{ item.precio | currency }}</p>
+          </div>
+          <div class="add-indicator"><span class="material-icons">add</span></div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="cart-section">
+      <div class="cart-container">
+        <div class="cart-header">
+          <h3>Detalle del Pedido</h3>
+          <span class="count">{{ cart.length }} items</span>
+        </div>
+
+        <div class="cart-items">
+          <div class="empty-cart" *ngIf="cart.length === 0">
+            <span class="material-icons">receipt_long</span>
+            <p>La comanda está vacía</p>
+          </div>
+
+          <div class="cart-row" *ngFor="let item of cart; let i = index">
+            <div class="item-info">
+              <span class="qty">{{ item.quantity }}x</span>
+              <span class="name">{{ item.nombre }}</span>
+            </div>
+            <div class="item-meta">
+              <span class="subtotal">{{ (item.precio * item.quantity) | currency }}</span>
+              <div class="qty-btns">
+                <button (click)="updateQuantity(i, -1)">-</button>
+                <button (click)="updateQuantity(i, 1)">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cart-footer">
+          <div class="total-line">
+            <span>Total a Cocina</span>
+            <span class="val">{{ total | currency }}</span>
+          </div>
+          <button class="btn-send" 
+                  [disabled]="cart.length === 0 || isSending"
+                  (click)="sendToKitchen()">
+            {{ isSending ? 'PROCESANDO...' : 'ENVIAR A COCINA' }}
+          </button>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>

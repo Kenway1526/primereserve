@@ -1,0 +1,36 @@
+<div class="status-container">
+  <header class="status-header">
+    <h1>Mi Orden</h1>
+    <p>Seguimiento de platillos</p>
+  </header>
+
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Consultando la cocina...</p>
+  </div>
+
+  <div class="orders-list" *ngIf="!isLoading">
+    <div class="empty-state" *ngIf="items.length === 0">
+      <i class="material-icons">flat_ware</i>
+      <h3>Sin consumos</h3>
+      <p>Tu orden aparecerá aquí cuando el mesero la registre.</p>
+    </div>
+
+    <div class="order-card" *ngFor="let item of items">
+      <div class="card-content">
+        <div class="img-wrapper">
+          <img [src]="item.MenuItem?.imagenUrl || 'https://via.placeholder.com/80'" alt="food">
+        </div>
+        <div class="info">
+          <h3>{{ item.MenuItem?.nombre }}</h3>
+          <span class="qty">Cantidad: {{ item.cantidad }}</span>
+        </div>
+      </div>
+
+      <div class="status-indicator" [ngClass]="item.estadoItem">
+        <i class="material-icons">{{ getIcon(item.estadoItem) }}</i>
+        <span>{{ item.estadoItem }}</span>
+      </div>
+    </div>
+  </div>
+</div>

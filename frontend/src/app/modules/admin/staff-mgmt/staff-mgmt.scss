@@ -1,258 +1,326 @@
-// Variables de paleta Prime
+/* --- Variables de Color Luxe --- */
 $gold-primary: #d4af37;
-$gold-dark: #aa8d2e;
-$dark-bg: #0a0a0a;
-$dark-card: #141414;
+$gold-hover: #f1c40f;
+$bg-dark: #0a0a0a;
+$bg-card: #111;
+$border-color: #222;
 $text-gray: #888;
-$success-green: #2ecc71;
+$white: #ffffff;
 
-.staff-mgmt-container {
+/* --- Colores de Roles --- */
+$role-waiter: #d4af37;
+$role-kitchen: #3498db;
+$role-admin: #9b59b6;
+
+.staff-container {
   padding: 2rem;
-  background-color: $dark-bg;
+  color: $white;
+  background: $bg-dark;
   min-height: 100vh;
-  color: white;
+  font-family: 'Segoe UI', Roboto, sans-serif;
 
-  .view-header {
-    margin-bottom: 2rem;
-    h1 {
-      font-size: 2rem;
-      letter-spacing: 2px;
-      margin-bottom: 0.5rem;
-      color: $gold-primary;
-    }
-    .title-underline {
-      width: 60px;
-      height: 3px;
-      background: $gold-primary;
-    }
-  }
-}
-
-// Resumen de estadísticas
-.stats-overview-full {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 3rem;
-
-  .stat-card {
-    background: $dark-card;
-    padding: 1.5rem;
-    border-radius: 12px;
-    border: 1px solid rgba($gold-primary, 0.1);
+  .staff-header {
     display: flex;
-    flex-direction: column;
-    
-    .label {
-      font-size: 0.8rem;
-      color: $text-gray;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    
-    .value {
-      font-size: 2rem;
-      font-weight: bold;
-      color: white;
-      margin-top: 0.5rem;
-    }
-
-    &.success .value { color: $success-green; }
-    &.info .value { color: #3498db; }
-    &.warning .value { color: #f1c40f; }
-  }
-}
-
-// Fila de controles (Buscador y botón)
-.controls-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  gap: 1rem;
-
-  .search-field {
-    flex: 1;
-    max-width: 400px;
-    position: relative;
-    background: $dark-card;
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.1);
-    display: flex;
+    justify-content: space-between;
     align-items: center;
-    padding: 0 1rem;
+    margin-bottom: 2.5rem;
 
-    span { color: $gold-primary; margin-right: 10px; }
-    
-    input {
-      background: transparent;
-      border: none;
-      color: white;
-      padding: 0.8rem 0;
-      width: 100%;
-      outline: none;
-      &::placeholder { color: #444; }
-    }
-  }
-
-  .btn-add-staff {
-    background: $gold-primary;
-    color: black;
-    border: none;
-    padding: 0.8rem 1.5rem;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: transform 0.2s;
-    &:hover { background: $gold-dark; transform: translateY(-2px); }
-  }
-}
-
-// Cuadrícula de tarjetas de empleados
-.staff-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 2rem;
-}
-
-.employee-card {
-  background: $dark-card;
-  border-radius: 16px;
-  padding: 1.5rem;
-  border: 1px solid rgba(255,255,255,0.05);
-  transition: all 0.3s ease;
-
-  &:hover {
-    border-color: $gold-primary;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  }
-
-  .card-header {
-    display: flex;
-    align-items: center;
-    gap: 1.2rem;
-    margin-bottom: 1.5rem;
-
-    .avatar-group {
-      position: relative;
-      img {
-        width: 65px;
-        height: 65px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid $gold-primary;
-      }
-      .status-dot {
-        position: absolute;
-        bottom: 4px;
-        right: 4px;
-        width: 14px;
-        height: 14px;
-        border-radius: 50%;
-        background: #95a5a6;
-        border: 2px solid $dark-card;
-        &.online { background: $success-green; box-shadow: 0 0 10px $success-green; }
-      }
-    }
-
-    .name-group {
-      h3 { margin: 0; font-size: 1.2rem; letter-spacing: 0.5px; }
-      .role-badge {
-        font-size: 0.7rem;
-        color: $gold-primary;
-        background: rgba($gold-primary, 0.1);
-        padding: 2px 10px;
-        border-radius: 4px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-      }
-    }
-  }
-
-  .card-body {
-    margin-bottom: 1.5rem;
-    .contact-info {
+    .brand {
       display: flex;
       align-items: center;
-      gap: 0.8rem;
-      color: $text-gray;
-      font-size: 0.9rem;
-      margin-bottom: 0.6rem;
-      span { font-size: 1.2rem; color: rgba($gold-primary, 0.6); }
+      gap: 1.2rem;
+      .gold-accent { width: 4px; height: 35px; background: $gold-primary; box-shadow: 0 0 10px rgba($gold-primary, 0.3); }
+      h1 { font-size: 1.6rem; letter-spacing: 3px; font-weight: 300; margin: 0; text-transform: uppercase; }
     }
   }
 
-  .card-actions {
+  /* --- Dashboard de Estadísticas --- */
+  .staff-stats {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
 
-    button {
-      padding: 0.6rem;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      cursor: pointer;
+    .stat-card {
+      background: $bg-card;
+      padding: 1.5rem;
+      border: 1px solid $border-color;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.3s;
+
+      &:hover { border-color: rgba($gold-primary, 0.5); }
+
+      .label { color: $text-gray; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+      .value { font-size: 2.2rem; font-weight: 700; line-height: 1; }
+      .gold { color: $gold-primary; }
+    }
+  }
+
+  /* --- Barra de Búsqueda --- */
+  .search-bar {
+    position: relative;
+    margin-bottom: 2.5rem;
+    max-width: 600px;
+
+    .material-icons { 
+      position: absolute; 
+      left: 1.2rem; 
+      top: 50%; 
+      transform: translateY(-50%); 
+      color: $gold-primary; 
+      font-size: 1.4rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 1.1rem 1.1rem 1.1rem 3.8rem;
+      background: $bg-card;
+      border: 1px solid $border-color;
+      border-radius: 50px;
+      color: $white;
+      font-size: 1rem;
+      transition: all 0.3s;
+
+      &:focus { outline: none; border-color: $gold-primary; box-shadow: 0 0 15px rgba($gold-primary, 0.1); }
+      &::placeholder { color: #555; }
+    }
+  }
+
+  /* --- Grid y Tarjetas de Empleados --- */
+  .staff-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+
+    .staff-card {
+      background: $bg-card;
+      border-radius: 15px;
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      position: relative;
+      border: 1px solid $border-color;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+      &:hover { 
+        transform: translateY(-8px); 
+        border-color: $gold-primary;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      }
+
+      .card-options {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        display: flex;
+        gap: 8px;
+
+        button {
+          background: rgba(255,255,255,0.05); 
+          border: none; 
+          color: #666; 
+          cursor: pointer;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s;
+
+          .material-icons { font-size: 1.2rem; }
+          &:hover { color: $gold-primary; background: rgba($gold-primary, 0.1); }
+          &.delete:hover { color: #ff4d4d; background: rgba(255, 77, 77, 0.1); }
+        }
+      }
+
+      .avatar-container {
+        position: relative;
+        width: 110px;
+        height: 110px;
+        margin: 0 auto 1.8rem;
+
+        img { 
+          width: 100%; 
+          height: 100%; 
+          border-radius: 50%; 
+          object-fit: cover; 
+          border: 3px solid $border-color;
+          padding: 3px;
+          transition: border-color 0.3s;
+        }
+
+        .role-badge {
+          position: absolute;
+          bottom: -8px;
+          left: 50%;
+          transform: translateX(-50%);
+          padding: 4px 14px;
+          border-radius: 20px;
+          font-size: 0.65rem;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+
+          &.waiter { background: $role-waiter; color: #000; }
+          &.kitchen { background: $role-kitchen; color: #fff; }
+          &.admin { background: $role-admin; color: #fff; }
+        }
+      }
+
+      &:hover img { border-color: $gold-primary; }
+
+      .staff-info {
+        h3 { font-size: 1.3rem; margin: 0 0 0.5rem; font-weight: 500; }
+        .email { color: $text-gray; font-size: 0.85rem; margin-bottom: 0.8rem; display: block; }
+        .phone { 
+          display: inline-flex; 
+          align-items: center; 
+          gap: 6px; 
+          color: $gold-primary; 
+          font-size: 0.85rem;
+          background: rgba($gold-primary, 0.05);
+          padding: 4px 12px;
+          border-radius: 15px;
+        }
+      }
+    }
+  }
+}
+
+/* --- Botón Luxe --- */
+.btn-add-luxe {
+  background: $gold-primary;
+  color: #000;
+  border: none;
+  padding: 0.9rem 1.8rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.3s;
+
+  &:hover { background: $gold-hover; transform: scale(1.02); }
+  &:active { transform: scale(0.98); }
+}
+
+/* --- Estilos Formulario Modal --- */
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+  padding: 1rem 0;
+
+  .avatar-upload {
+    display: flex;
+    justify-content: center;
+    .preview-circle {
+      width: 90px;
+      height: 90px;
+      border: 2px dashed rgba($gold-primary, 0.4);
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 5px;
-      transition: 0.3s;
-    }
+      cursor: pointer;
+      overflow: hidden;
+      transition: border-color 0.3s;
 
-    .btn-edit-action {
-      background: transparent;
-      border: 1px solid rgba(255,255,255,0.1);
-      color: white;
-      &:hover { border-color: $gold-primary; color: $gold-primary; }
+      &:hover { border-color: $gold-primary; background: rgba($gold-primary, 0.05); }
+      img { width: 100%; height: 100%; object-fit: cover; }
+      span { color: $gold-primary; font-size: 2.2rem; }
     }
+  }
 
-    .btn-status-action {
-      background: rgba($success-green, 0.1);
-      border: 1px solid rgba($success-green, 0.3);
-      color: $success-green;
-      &.inactive {
-        background: rgba(231, 76, 60, 0.1);
-        border: 1px solid rgba(231, 76, 60, 0.3);
-        color: #e74c3c;
-      }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    label { color: $text-gray; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+    
+    .dark-input {
+      width: 100%;
+      padding: 0.9rem;
+      background: #080808;
+      border: 1px solid $border-color;
+      border-radius: 6px;
+      color: $white;
+      font-size: 0.95rem;
+      &:focus { border-color: $gold-primary; outline: none; background: #000; }
     }
+    
+    select.dark-input { cursor: pointer; appearance: none; }
   }
 }
 
-// Estilo del Formulario en el Modal
-.prime-form-luxe {
-  padding: 1rem;
-  .form-group {
-    margin-bottom: 1.2rem;
-    label { display: block; margin-bottom: 0.5rem; color: $gold-primary; font-size: 0.85rem; }
-    input, select {
-      width: 100%;
-      background: #1e1e1e;
-      border: 1px solid #333;
-      padding: 0.8rem;
-      color: white;
-      border-radius: 6px;
-      outline: none;
-      &:focus { border-color: $gold-primary; }
+.btn-submit-gold {
+  background: $gold-primary;
+  color: #000;
+  border: none;
+  padding: 1.1rem;
+  width: 100%;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: all 0.3s;
+
+  &:hover:not(:disabled) { background: $gold-hover; box-shadow: 0 5px 15px rgba($gold-primary, 0.2); }
+  &:disabled { background: #333; color: #666; cursor: not-allowed; }
+}
+
+.preview-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 2px solid #d4af37;
+  position: relative;
+  overflow: hidden; // 👈 Crucial para que la imagen sea circular
+  background: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin: 0 auto;
+
+  .avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; // 👈 Evita que la imagen se estire
+  }
+
+  .default-avatar {
+    .material-icons {
+      font-size: 80px;
+      color: #333;
     }
   }
-  .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-  }
-  .btn-submit-form {
+
+  .overlay-camera {
+    position: absolute;
+    bottom: 0;
     width: 100%;
-    background: $gold-primary;
-    padding: 1rem;
-    border: none;
-    border-radius: 6px;
-    font-weight: bold;
-    margin-top: 1rem;
-    cursor: pointer;
-    &:disabled { opacity: 0.5; cursor: not-allowed; }
+    background: rgba(0, 0, 0, 0.6);
+    padding: 5px 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+    display: flex;
+    justify-content: center;
+    
+    .material-icons { font-size: 18px; color: #d4af37; }
+  }
+
+  &:hover .overlay-camera {
+    opacity: 1;
   }
 }

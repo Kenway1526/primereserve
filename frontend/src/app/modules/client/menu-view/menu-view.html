@@ -1,1 +1,40 @@
-<p>menu-view works!</p>
+<div class="menu-container">
+  <header class="menu-header">
+    <h1>Carta Digital</h1>
+    <p>Nuestras especialidades</p>
+  </header>
+
+  <nav class="category-nav" *ngIf="!isLoading && categorias.length > 1">
+    <button 
+      *ngFor="let cat of categorias" 
+      (click)="filtrarPorCategoria(cat)"
+      [class.active]="categoriaSeleccionada === cat">
+      {{ cat }}
+    </button>
+  </nav>
+
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Consultando la cocina...</p>
+  </div>
+
+  <div class="menu-grid" *ngIf="!isLoading && platillosFiltrados.length > 0">
+    <div class="product-card" *ngFor="let item of platillosFiltrados">
+      <div class="image-box">
+        <img [src]="item.imagenUrl || 'https://via.placeholder.com/400x300?text=Sin+Imagen'" 
+             [alt]="item.nombre">
+        <span class="price-tag">${{ item.precio }}</span>
+      </div>
+      <div class="details">
+        <h3>{{ item.nombre }}</h3>
+        <p>{{ item.descripcion }}</p>
+        <span class="category-badge">{{ item.categoria }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="!isLoading && platillosFiltrados.length === 0">
+    <p>No hay platillos disponibles por ahora.</p>
+    <button (click)="getMenu()">Reintentar</button>
+  </div>
+</div>

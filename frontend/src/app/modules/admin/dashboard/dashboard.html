@@ -1,90 +1,91 @@
-<div class="dash-wrapper">
-  
-  <header class="dash-header">
-    <div class="title-info">
-      <h1>Panel Administrativo</h1>
-      <div class="gold-line"></div>
+<div class="dashboard-container">
+  <header class="db-header no-print">
+    <div class="title">
+      <h1>Prime Analytics</h1>
+      <p>Centro de Comando Administrativo</p>
     </div>
     <button class="btn-export" (click)="generatePDF()">
-      <span class="material-icons">picture_as_pdf</span> 
-      EXPORTAR REPORTE
+      <span class="material-icons">picture_as_pdf</span> EXPORTAR REPORTE
     </button>
   </header>
 
-  <section class="kpi-container">
-    <div class="card-kpi gold">
-      <div class="icon"><span class="material-icons">payments</span></div>
-      <div class="data">
-        <label>Ingresos del Día</label>
-        <span class="val">${{ metrics.ingresosDia | number:'1.2-2' }}</span>
-      </div>
+  <div class="metrics-grid no-print">
+    <div class="m-card gold">
+      <span class="label">INGRESOS (PAGADOS)</span>
+      <span class="value">{{ metrics.ingresosDia | currency:'MXN' }}</span>
+    </div>
+    <div class="m-card">
+      <span class="label">MESAS OCUPADAS</span>
+      <span class="value">{{ metrics.mesasOcupadas }}</span>
+    </div>
+    <div class="m-card">
+      <span class="label">TICKETS COCINA</span>
+      <span class="value">{{ metrics.ticketsCocina }}</span>
+    </div>
+  </div>
+
+  <div class="charts-grid no-print">
+    <div class="chart-box wide">
+      <h3>Ocupación vs Tiempo</h3>
+      <canvas #salesChart></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>Distribución</h3>
+      <canvas #categoryChart></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>Eficiencia Operativa</h3>
+      <canvas #efficiencyChart></canvas>
+    </div>
+  </div>
+
+  <div id="printable-report" class="print-only">
+    <div class="report-header">
+      <h2 class="brand">Prime Reserve</h2>
+      <h1>Reporte del Día</h1>
+      <p class="timestamp">Generado: {{ reportDate }}</p>
     </div>
 
-    <div class="card-kpi blue">
-      <div class="icon"><span class="material-icons">chair</span></div>
-      <div class="data">
-        <label>Ocupación Actual</label>
-        <span class="val">{{ metrics.ocupacionActual }}%</span>
-      </div>
-    </div>
+    <section class="report-section">
+      <h3>Resumen Operativo (KPIs)</h3>
+      <table class="report-table">
+        <thead><tr><th>KPI</th><th>Valor</th></tr></thead>
+        <tbody>
+          <tr><td>Ingresos totales (pagados)</td><td>{{ metrics.ingresosDia | currency:'MXN' }}</td></tr>
+          <tr><td>Pagos pendientes</td><td>{{ metrics.pagosPendientes | currency:'MXN' }}</td></tr>
+          <tr><td>Reservaciones confirmadas</td><td>{{ metrics.reservaciones }}</td></tr>
+          <tr><td>Mesas ocupadas</td><td>{{ metrics.mesasOcupadas }}</td></tr>
+          <tr><td>Tickets en cocina</td><td>{{ metrics.ticketsCocina }}</td></tr>
+        </tbody>
+      </table>
+    </section>
 
-    <div class="card-kpi green">
-      <div class="icon"><span class="material-icons">analytics</span></div>
-      <div class="data">
-        <label>Ticket Promedio</label>
-        <span class="val">${{ metrics.ticketPromedio | number:'1.2-2' }}</span>
-      </div>
-    </div>
+    <section class="report-section">
+      <h3>Platillos Estrella</h3>
+      <table class="report-table">
+        <thead><tr><th>#</th><th>Platillo</th><th>Unidades vendidas</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let p of topPlatillos; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ p.nombre }}</td>
+            <td>{{ p.unidades }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
 
-    <div class="card-kpi orange">
-      <div class="icon"><span class="material-icons">schedule</span></div>
-      <div class="data">
-        <label>Rotación Promedio</label>
-        <span class="val">{{ metrics.tiempoPromedioMesa }}</span>
-      </div>
-    </div>
-  </section>
-
-  <section class="charts-grid">
-    
-    <div class="chart-card full">
-      <h3>Tendencia de Ingresos Semanales</h3>
-      <div class="chart-area">
-        <canvas #salesChart></canvas>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <h3>Mix de Categorías (Ventas)</h3>
-      <div class="chart-area">
-        <canvas #categoryChart></canvas>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <h3>Pronóstico de Reservas (Próx. 4 Semanas)</h3>
-      <div class="chart-area">
-        <canvas #forecastChart></canvas>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <h3>Calidad de Servicio: PB vs Terraza</h3>
-      <div class="chart-area">
-        <canvas #efficiencyChart></canvas>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <h3>Crecimiento de Clientes Recurrentes</h3>
-      <div class="chart-area">
-        <canvas #loyaltyChart></canvas>
-      </div>
-    </div>
-
-    <div class="chart-card footer-msg full">
-      <p>Prime Reserve v2.0 • Sistema de Inteligencia de Negocios</p>
-    </div>
-
-  </section>
+    <section class="report-section">
+      <h3>Estado de Inventario</h3>
+      <table class="report-table">
+        <thead><tr><th>Platillo</th><th>Precio</th><th>Stock</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let p of topPlatillos">
+            <td>{{ p.nombre }}</td>
+            <td>{{ p.precio | currency }}</td>
+            <td>Disponible</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
 </div>

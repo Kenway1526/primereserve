@@ -4,7 +4,7 @@
       <div class="gold-accent"></div>
       <h1>RESERVACIONES</h1>
     </div>
-    <button class="btn-add-luxe" (click)="openAddModal()">
+    <button class="btn-add-luxe" (click)="openAddModal()" [disabled]="isLoading">
       <span class="material-icons">add</span> NUEVA RESERVA
     </button>
   </header>
@@ -16,7 +16,12 @@
     <button [class.active]="activeTab === 'canceladas'" (click)="setTab('canceladas')">Canceladas</button>
   </nav>
 
-  <div class="res-grid" *ngIf="activeTab !== 'espera'">
+  <div class="loading-overlay" *ngIf="isLoading && allReservations.length === 0">
+    <div class="spinner-gold"></div>
+    <p>Sincronizando con la colección...</p>
+  </div>
+
+  <div class="res-grid" *ngIf="activeTab !== 'espera' && !isLoading">
     <div class="res-card-premium" *ngFor="let res of filteredReservations">
       <div class="res-card-header">
         <div class="res-info">
@@ -27,39 +32,61 @@
       </div>
 
       <div class="res-card-body">
-        <div class="item"><span class="material-icons">groups</span> {{ res.numPersonas }} Pers.</div>
+        <div class="item">
+          <span class="material-icons">groups</span> 
+          {{ res.numPersonas }} {{ res.numPersonas === 1 ? 'Persona' : 'Personas' }}
+        </div>
         <div class="item">
           <span class="material-icons">chair</span> 
           <span [style.color]="res.Mesa ? '#d4af37' : '#ff4d4d'">
-            {{ res.Mesa ? (res.Mesa.zona === 'PLANTA_BAJA' ? 'PB' : 'T') + '-' + (res.Mesa.numeroMesa | number:'2.0') : 'Sin mesa' }}
+            {{ res.Mesa ? (res.Mesa.zona === 'PLANTA_BAJA' ? 'PB' : 'T') + '-' + (res.Mesa.numeroMesa | number:'2.0') : 'Asignación pendiente' }}
           </span>
         </div>
       </div>
 
       <div class="res-card-footer">
+        <ng-container *ngIf="activeTab === 'proximas'">
+          <button class="btn-action-gold" 
+                  (click)="sentarCliente(res)"
+                  [disabled]="isLoading || !res.mesaId">
+            {{ isLoading ? '...' : 'SENTAR CLIENTE' }}
+          </button>
+          <button class="btn-action-gray" (click)="cambiarEstado(res, 'CANCELADA')" [disabled]="isLoading">
+            CANCELAR
+          </button>
+        </ng-container>
+
         <button class="btn-action-gold" 
-                *ngIf="activeTab === 'proximas'" 
-                (click)="sentarCliente(res)"
-                [disabled]="isLoading">
-          {{ isLoading ? 'PROCESANDO...' : 'SENTAR CLIENTE' }}
-        </button>
-        <button class="btn-action-gray" *ngIf="activeTab === 'proximas'" (click)="cambiarEstado(res, 'CANCELADA')">CANCELAR</button>
-        <button class="btn-action-gray" 
                 *ngIf="activeTab === 'curso'" 
-                (click)="finalizarReserva(res)">
-          FINALIZAR
+                (click)="finalizarReserva(res)"
+                [disabled]="isLoading">
+          FINALIZAR SERVICIO
         </button>
+
+        <span class="status-label-error" *ngIf="activeTab === 'canceladas'">RESERVACIÓN ANULADA</span>
       </div>
+    </div>
+
+    <div class="empty-state" *ngIf="filteredReservations.length === 0">
+      <span class="material-icons">event_busy</span>
+      <p>No hay reservaciones en esta categoría.</p>
     </div>
   </div>
 
-  <div class="wait-list" *ngIf="activeTab === 'espera'">
+  <div class="wait-list" *ngIf="activeTab === 'espera' && !isLoading">
     <div class="wait-card" *ngFor="let wait of filteredReservations">
       <div class="wait-info">
         <h4>{{ wait.nombreInvitado }}</h4>
-        <p>En cola para: {{ wait.fechaPrincipal }} a las {{ wait.horaPrincipal }}</p>
+        <p><span class="material-icons">schedule</span> {{ wait.fechaPrincipal }} | {{ wait.horaPrincipal }}</p>
+        <p><span class="material-icons">groups</span> {{ wait.numPersonas }} Pers.</p>
       </div>
-      <button class="btn-add-luxe" (click)="cambiarEstado(wait, 'CONFIRMADA')">PROMOVER A RESERVA</button>
+      <button class="btn-add-luxe" (click)="cambiarEstado(wait, 'CONFIRMADA')" [disabled]="isLoading">
+        PROMOVER A RESERVA
+      </button>
+    </div>
+    
+    <div class="empty-state" *ngIf="filteredReservations.length === 0">
+      <p>La lista de espera está vacía.</p>
     </div>
   </div>
 
@@ -67,7 +94,7 @@
     <div class="modal-form">
       <div class="form-group">
         <label>Nombre del Titular</label>
-        <input type="text" [(ngModel)]="resForm.nombreInvitado" class="dark-input">
+        <input type="text" [(ngModel)]="resForm.nombreInvitado" class="dark-input" placeholder="Ej. Jonathan Flores">
       </div>
       <div class="form-row">
         <div class="form-group">
@@ -82,16 +109,16 @@
       <div class="form-row">
         <div class="form-group">
           <label>Comensales</label>
-          <input type="number" [(ngModel)]="resForm.numPersonas" class="dark-input">
+          <input type="number" [(ngModel)]="resForm.numPersonas" class="dark-input" min="1">
         </div>
         <div class="form-group">
           <label>Teléfono</label>
-          <input type="text" [(ngModel)]="resForm.telefonoInvitado" class="dark-input">
+          <input type="text" [(ngModel)]="resForm.telefonoInvitado" class="dark-input" placeholder="10 dígitos">
         </div>
       </div>
       <div class="modal-actions">
-        <button class="btn-submit-gold" (click)="saveReservation()" [disabled]="isLoading">
-          {{ isLoading ? 'PROCESANDO...' : 'CONFIRMAR RESERVA' }}
+        <button class="btn-submit-gold" (click)="saveReservation()" [disabled]="isLoading || !resForm.nombreInvitado">
+          {{ isLoading ? 'GUARDANDO...' : 'CONFIRMAR RESERVA' }}
         </button>
         <button class="btn-submit-border" (click)="addToWaitlist()" [disabled]="isLoading">LISTA DE ESPERA</button>
       </div>
