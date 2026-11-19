@@ -1,0 +1,375 @@
+// ==========================================
+// LUXE THEME - MAQUETACIÓN DE CAJA DESCONGESTIONADA
+// ==========================================
+
+.billing-container.luxe-theme {
+  padding: 2.5rem;
+  background-color: #030303;
+  min-height: 100vh;
+  color: #ffffff;
+  font-family: 'Playfair Display', 'Segoe UI', sans-serif;
+
+  .billing-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+    border-bottom: 1px solid #161616;
+    padding-bottom: 1.5rem;
+
+    .btn-back {
+      background: none;
+      border: 1px solid #262626;
+      color: #888;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        color: #cca43b;
+        border-color: #cca43b;
+        background: rgba(204, 164, 59, 0.05);
+      }
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      font-weight: 300;
+      letter-spacing: 2px;
+      color: #fff;
+
+      span {
+        color: #cca43b;
+        font-weight: 600;
+        margin-left: 0.5rem;
+      }
+    }
+  }
+
+  .billing-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 3.5rem;
+    align-items: start;
+  }
+
+  // --- TICKET DE CONSUMO (INVOICE PAPER) ---
+  .invoice-paper {
+    background: #090909;
+    border: 1px solid #121212;
+    border-radius: 4px;
+    padding: 3rem 2.5rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -5px; left: 0; right: 0;
+      height: 5px;
+      background-size: 10px 20px;
+    }
+
+    .invoice-head {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid #1c1c1c;
+      padding-bottom: 1.5rem;
+
+      p {
+        font-size: 1.1rem;
+        letter-spacing: 3px;
+        color: #cca43b;
+        margin-bottom: 0.3rem;
+      }
+
+      small {
+        color: #555;
+        font-family: monospace;
+      }
+    }
+
+    .items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      margin-bottom: 2.5rem;
+      min-height: 150px;
+
+      .item-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.95rem;
+        border-bottom: 1px dashed #151515;
+        padding-bottom: 0.8rem;
+
+        .item-info {
+          display: flex;
+          align-items: center;
+          gap: 0.8rem;
+
+          .qty {
+            color: #cca43b;
+            font-weight: 600;
+            font-family: monospace;
+          }
+          .name { color: #ccc; }
+        }
+        .price { font-family: monospace; color: #fff; }
+      }
+    }
+
+    .totals-area {
+      border-top: 1px solid #222;
+      padding-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+
+      .total-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.9rem;
+        color: #888;
+        letter-spacing: 1px;
+
+        span:last-child { font-family: monospace; color: #bbb; }
+        &.gold { color: #cca43b; span:last-child { color: #cca43b; } }
+      }
+
+      .grand-total {
+        margin-top: 1.5rem;
+        border-top: 1px double #333;
+        padding-top: 1.5rem;
+        text-align: center;
+
+        p { font-size: 0.8rem; letter-spacing: 3px; color: #666; margin-bottom: 0.3rem; }
+        h3 { font-size: 2.4rem; font-weight: 300; color: #cca43b; font-family: monospace; }
+      }
+    }
+  }
+
+  // --- COLUMNA DERECHA DE ACCIONES REORGANIZADA ---
+  .billing-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 2.2rem; // Descongestiona el amontonamiento vertical
+    height: 100%;
+
+    .billing-section-box {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .label {
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      color: #666;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin: 0;
+    }
+
+    .method-group {
+      display: flex;
+      gap: 1rem;
+
+      .method-btn {
+        flex: 1;
+        background: #080808;
+        border: 1px solid #161616;
+        color: #777;
+        padding: 1.2rem 1rem;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+        font-weight: 500;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+        span { font-size: 1.3rem; }
+
+        &:hover:not(.active) {
+          color: #bbb;
+          border-color: #333;
+          background: #0c0c0c;
+        }
+
+        &.active {
+          background: linear-gradient(135deg, #0f0e0a 0%, #050505 100%);
+          border-color: #cca43b;
+          color: #cca43b;
+          box-shadow: 0 0 20px rgba(204, 164, 59, 0.06);
+        }
+      }
+    }
+
+    // --- CONTENEDORES DE CONTROLES DINÁMICOS ---
+    .division-control-box {
+      background: #070707;
+      border: 1px solid #141414;
+      border-radius: 8px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+      animation: fadeIn 0.3s ease-out;
+
+      // Stepper (División Equitativa)
+      .stepper-container {
+        display: flex;
+        gap: 0.6rem;
+        align-items: center;
+
+        .btn-step {
+          width: 40px; height: 40px;
+          background: #111; border: 1px solid #222; color: #fff;
+          font-size: 1.2rem; cursor: pointer; border-radius: 6px;
+          display: flex; align-items: center; justify-content: center;
+          transition: background 0.2s;
+
+          &:hover { background: #1c1c1c; border-color: #444; }
+        }
+
+        .step-input {
+          width: 60px; height: 40px;
+          background: #000; border: 1px solid #222; color: #fff;
+          text-align: center; font-size: 1.1rem; font-family: monospace; border-radius: 6px;
+
+          &:focus { outline: none; border-color: #cca43b; }
+        }
+      }
+
+      // Scroll de Selección (Cobro por Ítem)
+      .cobro-items-scroll {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        max-height: 220px;
+        overflow-y: auto;
+        padding-right: 0.4rem;
+
+        &::-webkit-scrollbar { width: 4px; }
+        &::-webkit-scrollbar-track { background: #000; }
+        &::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
+        &::-webkit-scrollbar-thumb:hover { background: #cca43b; }
+
+        .cobro-item-card {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0.8rem 1rem;
+          background: #0c0c0c;
+          border: 1px solid #1a1a1a;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+
+          .item-left {
+            display: flex; align-items: center; gap: 0.8rem;
+            .checkbox-icon { font-size: 1.3rem; color: #444; transition: color 0.2s; }
+            .item-name { font-size: 0.9rem; color: #aaa; }
+          }
+          .item-price { font-family: monospace; font-size: 0.9rem; color: #888; }
+
+          &.selected {
+            border-color: rgba(204, 164, 59, 0.4);
+            background: rgba(204, 164, 59, 0.03);
+
+            .checkbox-icon { color: #cca43b; }
+            .item-name { color: #fff; }
+            .item-price { color: #cca43b; }
+          }
+        }
+      }
+
+      // Resúmenes Internos de Sección
+      .division-summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9rem;
+        color: #888;
+
+        small { font-size: 0.75rem; color: #555; }
+        &.border-top { border-top: 1px dashed #222; padding-top: 1rem; margin-top: 0.2rem; }
+        
+        .gold-text {
+          color: #cca43b; font-family: monospace; font-size: 1.1rem;
+          &.size-lg { font-size: 1.4rem; font-weight: bold; }
+        }
+      }
+    }
+
+    // --- ACCIÓN FINAL DE LIQUIDACIÓN ---
+    .final-steps {
+      margin-top: auto;
+      border-top: 1px solid #111;
+      padding-top: 1.8rem;
+
+      .btn-luxe-pay {
+        width: 100%;
+        padding: 1.3rem;
+        background: linear-gradient(135deg, #cca43b 0%, #b38f2e 100%);
+        border: none;
+        color: #000;
+        font-size: 0.95rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.8rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(204, 164, 59, 0.12);
+
+        span { font-size: 1.3rem; }
+
+        &:hover:not(:disabled) {
+          transform: translateY(-1px);
+          box-shadow: 0 6px 25px rgba(204, 164, 59, 0.22);
+        }
+
+        &:disabled {
+          background: #1a1a1a;
+          color: #444;
+          cursor: not-allowed;
+          box-shadow: none;
+        }
+      }
+
+      .disclaimer {
+        text-align: center;
+        margin-top: 1rem;
+        font-size: 0.8rem;
+        color: #444;
+        letter-spacing: 0.5px;
+        b { color: #d97736; font-weight: 500; }
+      }
+    }
+  }
+
+  .loader-container {
+    display: flex; justify-content: center; align-items: center;
+    min-height: 200px; color: #cca43b; font-family: monospace;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}

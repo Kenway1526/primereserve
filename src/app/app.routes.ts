@@ -4,6 +4,8 @@ import { AdminComponent } from './modules/admin/admin.component';
 import { KitchenComponent } from '@modules/kitchen/kitchen.component';
 import { ClientLayout } from '@modules/client/client-layout/client-layout';
 import { Dashboard } from './modules/client/dashboard/dashboard';
+import { WaiterComponent } from '@modules/waiter/waiter.component';
+import { ConfirmarReservaComponent } from './modules/confirmar-reserva/confirmar-reserva';
 
 export const routes: Routes = [
   // 1. REDIRECCIÓN INICIAL
@@ -42,23 +44,21 @@ export const routes: Routes = [
     path: 'client',
     loadComponent: () => import('./modules/client/client-layout/client-layout').then(m => m.ClientLayout),
     canActivate: [roleGuard],
-    data: { role: 'CLIENTE' }, // Cambiado a CLIENTE para coincidir con tu servicio Auth
+    data: { role: 'CLIENTE' },
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-    
-    // Las rutas hijas NO llevan 'client/' al inicio
-    { 
-      path: 'dashboard', 
-      loadComponent: () => import('./modules/client/dashboard/dashboard').then(m => m.Dashboard) 
-    },
-    { 
-      path: 'menu', 
-      loadComponent: () => import('./modules/client/menu-view/menu-view').then(m => m.MenuView) 
-    },
-    { 
-      path: 'order-status', 
-      loadComponent: () => import('./modules/client/order-status/order-status').then(m => m.OrderStatus) 
-    }
+      { 
+        path: 'dashboard', 
+        loadComponent: () => import('./modules/client/dashboard/dashboard').then(m => m.Dashboard) 
+      },
+      { 
+        path: 'menu', 
+        loadComponent: () => import('./modules/client/menu-view/menu-view').then(m => m.MenuView) 
+      },
+      { 
+        path: 'order-status', 
+        loadComponent: () => import('./modules/client/order-status/order-status').then(m => m.OrderStatus) 
+      }
     ]
   },
 
@@ -69,6 +69,11 @@ export const routes: Routes = [
     canActivate: [roleGuard],
     data: { role: 'ADMIN' },
     children: [
+      { path: '', loadComponent: () => import('./modules/admin/welcome-hub.component').then(m => m.WelcomeHub)},
+      { 
+        path: 'welcome-hub', 
+        loadComponent: () => import('./modules/admin/welcome-hub.component').then(m => m.WelcomeHub)
+      },
       { path: 'dashboard', loadComponent: () => import('./modules/admin/dashboard/dashboard').then(m => m.Dashboard) },
       { path: 'inventory-mgmt', loadComponent: () => import('./modules/admin/inventory-mgmt/inventory-mgmt').then(m => m.InventoryMgmt) },
       { path: 'table-map', loadComponent: () => import('./modules/admin/table-map/table-map').then(m => m.TableMap) },
@@ -83,15 +88,16 @@ export const routes: Routes = [
 
   // 6. RUTA MESERO
   {
-    path: 'mesero',
+    path: 'waiter',
+    component: WaiterComponent,
     canActivate: [roleGuard],
-    data: { role: 'WAITER' },
+    data: { role: ['WAITER', 'MESERO'] },
     children: [
-      { path: 'dashboard', loadComponent: () => import('./modules/waiter/dashboard/dashboard').then(m => m.WaiterDashboard) },
-      { path: 'mapa', loadComponent: () => import('./modules/waiter/table-map/table-map').then(m => m.TableMap) },
-      { path: 'order-entry', loadComponent: () => import('./modules/waiter/order-entry/order-entry').then(m => m.OrderEntry) },
-      { path: 'ordenes', loadComponent: () => import('./modules/waiter/active-orders/active-orders').then(m => m.ActiveOrders) },
-      { path: 'cobro', loadComponent: () => import('./modules/waiter/billing/billing').then(m => m.Billing) }
+      { path: '', redirectTo: 'table-map', pathMatch: 'full' },
+      { path: 'table-map', loadComponent: () => import('./modules/waiter/table-map/table-map').then(m => m.TableMap)},
+      { path: 'order-entry', loadComponent: () => import('./modules/waiter/order-entry/order-entry').then(m => m.OrderEntry)},
+      { path: 'active-orders', loadComponent: () => import('./modules/waiter/active-orders/active-orders').then(m => m.ActiveOrders)},
+      { path: 'billing', loadComponent: () => import('./modules/waiter/billing/billing').then(m => m.Billing)}
     ]
   },
 
@@ -108,6 +114,8 @@ export const routes: Routes = [
       { path: 'menu', loadComponent: () => import('./modules/kitchen/menu/menu').then(m => m.MenuMgmt) },
     ]
   },
+
+  { path: 'confirmar-reserva', component: ConfirmarReservaComponent },
 
   // 8. COMODÍN FINAL (Evita el bucle de redirecciones)
   { 

@@ -9,15 +9,16 @@ interface RecetaItem {
   nombre: string;
   cantidadUsada: number;
   unidad: string;
+  stockActual?: number;
 }
 
 interface MenuItem {
   id?: string;
   nombre: string;
-  descripcion?: string; // 👈 Campo de descripción
+  descripcion?: string;
   precio: number;
   categoria: string;
-  imagenUrl?: string;   // 👈 Campo de imagen
+  imagenUrl?: string;
   estaDisponible: boolean;
   restauranteId: string;
   receta: RecetaItem[];
@@ -48,8 +49,8 @@ export class MenuMgmt implements OnInit {
 
   async ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
-      await this.loadMenuData();
       await this.loadIngredientes();
+      await this.loadMenuData();
     }
   }
 
@@ -66,6 +67,60 @@ export class MenuMgmt implements OnInit {
     };
   }
 
+  public onImageError(event: any) {
+    event.target.src = 'assets/default-food.png';
+  }
+
+  public preventNegativeInput(event: KeyboardEvent) {
+    if (event.key === '-' || event.key === 'e' || event.key === 'E') {
+      event.preventDefault();
+    }
+  }
+
+  /**
+   * 🔒 Verifica si todos los ingredientes de la receta tienen stock suficiente (> 0 y >= cantidadUsada)
+   */
+  public hasSufficientStockForCurrentItem(): boolean {
+    if (!this.currentItem.receta || this.currentItem.receta.length === 0) return true;
+
+    return this.currentItem.receta.every(r => {
+      const ingCatalogo = this.ingredientesCatalog.find(i => i.id === r.ingredienteId);
+      const stock = Number(ingCatalogo?.stockActual ?? r.stockActual ?? 0);
+      const requerido = Number(r.cantidadUsada ?? 0);
+      return stock > 0 && stock >= requerido;
+    });
+  }
+
+  public getMissingIngredientsWarning(): string {
+    if (!this.currentItem.receta || this.currentItem.receta.length === 0) return '';
+
+    const faltantes = this.currentItem.receta
+      .filter(r => {
+        const ingCatalogo = this.ingredientesCatalog.find(i => i.id === r.ingredienteId);
+        const stock = Number(ingCatalogo?.stockActual ?? r.stockActual ?? 0);
+        return stock <= 0 || stock < Number(r.cantidadUsada ?? 0);
+      })
+      .map(r => r.nombre);
+
+    if (faltantes.length === 0) return '';
+    return `Agotado / stock insuficiente en: ${faltantes.join(', ')}. Agrega stock en Inventario para poder habilitarlo.`;
+  }
+
+  public onAvailabilityToggle(checked: boolean) {
+    if (checked && !this.hasSufficientStockForCurrentItem()) {
+      this.currentItem.estaDisponible = false;
+      alert(this.getMissingIngredientsWarning());
+      return;
+    }
+    this.currentItem.estaDisponible = checked;
+  }
+
+  public onRecipeQtyChange() {
+    if (!this.hasSufficientStockForCurrentItem()) {
+      this.currentItem.estaDisponible = false;
+    }
+  }
+
   async loadMenuData() {
     this.isLoading = true;
     try {
@@ -76,7 +131,25 @@ export class MenuMgmt implements OnInit {
         .order('nombre', { ascending: true });
       
       if (error) throw error;
-      this.menuItems = data || [];
+
+      // Sincronizamos visualmente y en DB si algún platillo activo quedó sin stock suficiente
+      const lista = data || [];
+      for (const item of lista) {
+        const sinStock = (item.Receta || []).some((r: any) => {
+          const stock = Number(r.Ingrediente?.stockActual ?? 0);
+          return stock <= 0 || stock < Number(r.cantidadUsada ?? 0);
+        });
+
+        if (sinStock && item.estaDisponible) {
+          item.estaDisponible = false;
+          await this.supabaseSvc.supabase
+            .from('MenuItem')
+            .update({ estaDisponible: false })
+            .eq('id', item.id);
+        }
+      }
+
+      this.menuItems = lista;
     } catch (err) {
       console.error("Error cargando menú:", err);
     } finally {
@@ -94,8 +167,10 @@ export class MenuMgmt implements OnInit {
     this.ingredientesCatalog = data || [];
   }
 
-  openModal(platillo?: MenuItem) {
+  async openModal(platillo?: MenuItem) {
     this.searchIngrediente = '';
+    await this.loadIngredientes();
+
     if (platillo) {
       this.currentItem = { 
         ...platillo, 
@@ -103,13 +178,18 @@ export class MenuMgmt implements OnInit {
           ingredienteId: r.Ingrediente.id,
           nombre: r.Ingrediente.nombre,
           cantidadUsada: r.cantidadUsada,
-          unidad: r.Ingrediente.unidad
+          unidad: r.Ingrediente.unidad,
+          stockActual: r.Ingrediente.stockActual
         })) || []
       };
+      if (!this.hasSufficientStockForCurrentItem()) {
+        this.currentItem.estaDisponible = false;
+      }
     } else {
       this.currentItem = this.getEmptyItem();
     }
     this.showModal = true;
+    this.cdr.detectChanges();
   }
 
   closeModal() { this.showModal = false; }
@@ -126,9 +206,11 @@ export class MenuMgmt implements OnInit {
         ingredienteId: ing.id,
         nombre: ing.nombre,
         cantidadUsada: 1,
-        unidad: ing.unidad
+        unidad: ing.unidad,
+        stockActual: ing.stockActual
       });
       this.searchIngrediente = '';
+      this.onRecipeQtyChange();
     }
   }
 
@@ -137,12 +219,19 @@ export class MenuMgmt implements OnInit {
   }
 
   async savePlatillo() {
-    if (!this.currentItem.nombre || this.isSaving) return;
+    if (!this.currentItem.nombre || this.currentItem.precio <= 0 || this.isSaving) return;
     this.isSaving = true;
 
     try {
+      // Bloqueo estricto antes de guardar: si no hay stock suficiente, no puede quedar disponible
+      const tieneStock = this.hasSufficientStockForCurrentItem();
+      if (!tieneStock) {
+        this.currentItem.estaDisponible = false;
+      }
+
       const { receta, Receta, ...payload } = this.currentItem as any;
       payload.restauranteId = APP_CONFIG.RESTAURANT_ID;
+      payload.estaDisponible = tieneStock ? this.currentItem.estaDisponible : false;
 
       const { data: savedItem, error: itemError } = await this.supabaseSvc.supabase
         .from('MenuItem').upsert(payload).select().single();

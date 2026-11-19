@@ -1,1 +1,129 @@
-<p>billing works!</p>
+<div class="billing-container luxe-theme">
+  <header class="billing-header">
+    <button class="btn-back" (click)="goBack()">
+        <span class="material-icons">arrow_back</span>
+    </button>
+    <h2>CUENTA <span>MESA {{ order?.Mesa?.numeroMesa }}</span></h2>
+  </header>
+
+  <div class="billing-grid" *ngIf="!isLoading">
+    <section class="invoice-paper">
+      <div class="invoice-head">
+        <p>PRIME RESERVE - LA MAISON DORÉE</p>
+        <small>{{ order?.fechaApertura | date:'short' }}</small>
+      </div>
+
+      <div class="items-list">
+        <div class="item-row" *ngFor="let item of order?.DetalleOrden">
+          <div class="item-info">
+            <span class="qty">{{ item.cantidad }}x</span>
+            <span class="name">{{ item.MenuItem?.nombre }}</span>
+          </div>
+          <span class="price">{{ item.subtotal | currency }}</span>
+        </div>
+      </div>
+
+      <div class="totals-area">
+        <div class="total-row"><span>CONSUMO:</span> <span>{{ subtotal | currency }}</span></div>
+        <div class="total-row"><span>IVA (16%):</span> <span>{{ iva | currency }}</span></div>
+        <div class="total-row gold"><span>PROPINA (10%):</span> <span>{{ propina | currency }}</span></div>
+        <div class="grand-total">
+          <p>TOTAL A PAGAR</p>
+          <h3>{{ totalFinal | currency }}</h3>
+        </div>
+      </div>
+    </section>
+
+    <section class="billing-actions">
+      <div class="billing-actions-wrapper">
+        
+        <div class="billing-section-box">
+          <p class="label">MODALIDAD DE CUENTA</p>
+          <div class="method-group">
+            <button class="method-btn" [class.active]="tipoDivision === 'TOTAL'" (click)="cambiarDivision('TOTAL')">
+              <span class="material-icons">receipt</span> COMPLETA
+            </button>
+            <button class="method-btn" [class.active]="tipoDivision === 'EQUITA'" (click)="cambiarDivision('EQUITA')">
+              <span class="material-icons">groups</span> DIVIDIR
+            </button>
+            <button class="method-btn" [class.active]="tipoDivision === 'PLATILLO'" (click)="cambiarDivision('PLATILLO')">
+              <span class="material-icons">restaurant_menu</span> POR ÍTEM
+            </button>
+          </div>
+        </div>
+
+        <div class="division-control-box equita-box" *ngIf="tipoDivision === 'EQUITA'">
+          <p class="label">NÚMERO DE COMENSALES</p>
+          <div class="stepper-container">
+            <button class="btn-step" (click)="modificarPersonas(-1)">-</button>
+            <input type="number" class="step-input" [(ngModel)]="numPersonas" (change)="recalcularPartes()" min="2">
+            <button class="btn-step" (click)="modificarPersonas(1)">+</button>
+          </div>
+          <div class="division-summary">
+            <span>Cada persona aporta:</span>
+            <strong class="gold-text">{{ totalPorPersona | currency }}</strong>
+          </div>
+        </div>
+
+        <div class="division-control-box platillo-box" *ngIf="tipoDivision === 'PLATILLO'">
+          <p class="label">SELECCIONA LO QUE PAGA ESTE COMENSAL</p>
+          
+          <div class="cobro-items-scroll">
+            <div class="cobro-item-card" 
+                 *ngFor="let item of itemsParaCobrar" 
+                 (click)="toggleItemSeleccionado(item)"
+                 [class.selected]="item.seleccionado">
+              
+              <div class="item-left">
+                <span class="material-icons checkbox-icon">
+                  {{ item.seleccionado ? 'check_box' : 'check_box_outline_blank' }}
+                </span>
+                <span class="item-name">{{ item.cantidadAPagar }}x {{ item.MenuItem?.nombre }}</span>
+              </div>
+              <span class="item-price">{{ item.subtotal | currency }}</span>
+            </div>
+          </div>
+
+          <div class="division-summary border-top">
+            <span>Monto de este comensal <small>(con IVA/Propina)</small>:</span>
+            <strong class="gold-text size-lg">{{ totalPorPersona | currency }}</strong>
+          </div>
+        </div>
+
+        <div class="billing-section-box">
+          <p class="label">MÉTODO DE PAGO</p>
+          <div class="method-group">
+            <button class="method-btn" [class.active]="metodoPago === 'EFECTIVO'" (click)="metodoPago = 'EFECTIVO'">
+              <span class="material-icons">payments</span> EFECTIVO
+            </button>
+            <button class="method-btn" [class.active]="metodoPago === 'TARJETA'" (click)="metodoPago = 'TARJETA'">
+              <span class="material-icons">credit_card</span> TARJETA
+            </button>
+          </div>
+        </div>
+
+        <div class="final-steps">
+          <div *ngIf="!isOrderServed" style="background: rgba(255, 77, 77, 0.12); border: 1px solid #ff4d4d; color: #ff6b6b; padding: 12px; border-radius: 6px; font-size: 0.8rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+            <span class="material-icons" style="font-size: 18px;">hourglass_top</span>
+            <span>{{ pendingStatusMessage }}</span>
+          </div>
+
+          <button class="btn-luxe-pay"
+                  (click)="processPayment()"
+                  [disabled]="isLoading || !isOrderServed"
+                  [style.opacity]="!isOrderServed ? '0.4' : '1'"
+                  [style.cursor]="!isOrderServed ? 'not-allowed' : 'pointer'">
+            <span class="material-icons">check_circle</span>
+            {{ tipoDivision === 'TOTAL' ? 'CONFIRMAR PAGO Y CERRAR MESA' : 'REGISTRAR PAGO (' + (totalPorPersona | currency) + ')' }}
+          </button>
+          <p class="disclaimer">Al confirmar, la mesa cambiará automáticamente a estado <b>SUCIA</b>.</p>
+        </div>
+
+      </div>
+    </section>
+  </div>
+
+  <div class="loader-container" *ngIf="isLoading">
+    <p>Procesando transacción y liberando mesa...</p>
+  </div>
+</div>

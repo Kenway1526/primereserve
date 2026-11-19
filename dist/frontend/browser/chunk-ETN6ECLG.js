@@ -1,1 +1,0 @@
-import{Ga as r,Xa as i,Ya as o,ob as s}from"./chunk-7BP7CLYR.js";var a=class t{static{this.\u0275fac=function(e){return new(e||t)}}static{this.\u0275cmp=r({type:t,selectors:[["app-active-orders"]],decls:2,vars:0,template:function(e,c){e&1&&(i(0,"p"),s(1,"active-orders works!"),o())},encapsulation:2})}};export{a as ActiveOrders};

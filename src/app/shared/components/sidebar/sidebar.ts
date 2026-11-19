@@ -30,6 +30,7 @@ export class Sidebar implements OnInit {
 
     if (currentRole === 'ADMIN') {
       this.menuItems = [
+        { path: '/admin/welcome-hub', icon: 'home', label: 'Inicio' },
         { path: '/admin/dashboard', icon: 'dashboard', label: 'Estadistica' },
         { path: '/admin/reservations', icon: 'event_available', label: 'Reservaciones' },
         { path: '/admin/table-map', icon: 'layers', label: 'Mapa de Mesas' },
@@ -48,9 +49,10 @@ export class Sidebar implements OnInit {
       ];
     } else if (currentRole === 'WAITER' || currentRole === 'MESERO') {
       this.menuItems = [
-        { path: '/mesero/mapa', icon: 'layers', label: 'Mesas' },
-        { path: '/mesero/ordenes', icon: 'receipt_long', label: 'Pedidos' },
-        { path: '/mesero/pedido', icon: 'add_shopping_cart', label: 'Nuevo Pedido' }
+        { path: '/waiter/table-map', icon: 'layers', label: 'Mesas' },
+        { path: '/waiter/order-entry', icon: 'add_shopping_cart', label: 'Nueva orden' },
+        { path: '/waiter/active-orders', icon: 'receipt_long', label: 'Pedidos' }, // 👈 Corregido: receipt_long
+        { path: '/waiter/billing', icon: 'payments', label: 'Cuenta' }            // 👈 Corregido: payments (más acorde a 'bill')
       ];
     }
   }

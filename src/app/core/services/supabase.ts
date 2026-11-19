@@ -22,23 +22,18 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
   providedIn: 'root'
 })
 export class SupabaseService {
-  public supabase!: SupabaseClient; // Usamos ! para decirle a TS que se inicializará
+  public supabase!: SupabaseClient;
   private platformId = inject(PLATFORM_ID);
 
   constructor() {
-    // Definimos tus credenciales fijas aquí
     const supabaseUrl = 'https://uzeyiwrxccmfcalbuynr.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6ZXlpd3J4Y2NtZmNhbGJ1eW5yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNjI5NDgsImV4cCI6MjA4NjgzODk0OH0.g-if5J361k1PJA5keyXCL_guKJ-3UrQd_wU6-jxptQs';
 
-    // Solo intentamos acceder a 'window' si estamos en el navegador
     if (isPlatformBrowser(this.platformId)) {
-      // Si existiera una configuración dinámica en window, la tomaría, 
-      // si no, usa las de arriba.
       const url = (window as any)._env?.supabaseUrl || supabaseUrl;
       const key = (window as any)._env?.supabaseKey || supabaseKey;
       this.supabase = createClient(url, key);
     } else {
-      // Si estamos en el SERVIDOR (SSR), inicializamos con las fijas
       this.supabase = createClient(supabaseUrl, supabaseKey);
     }
   }
@@ -89,54 +84,57 @@ export class SupabaseService {
   }
 
   async createReservacion(data: any) {
-    return await this.supabase.from('Reservacion').insert([data]);
+    return await this.supabase
+      .from('Reservacion')
+      .insert([data]) // Mantenemos el array para asegurar consistencia
+      .select()       // Esto obliga a retornar la fila creada
+      .single();      // Indica que esperamos un solo objeto, no un array
   }
 
 //==================================== reservaciones ====================================
 
-  async findAvailableTable(restauranteId: string, fecha: string, hora: string, personas: number) {
-    try {
-      // 1. Obtener IDs de mesas que YA están reservadas para ese bloque de tiempo
-      // Agregamos .neq('estado', 'FINALIZADA') por si quieres liberar mesas tras el servicio
-      const { data: ocupadas } = await this.supabase
-        .from('Reservacion')
-        .select('mesaId')
-        .eq('restauranteId', restauranteId)
-        .eq('fechaPrincipal', fecha)
-        .eq('horaPrincipal', hora)
-        .not('mesaId', 'is', null)
-        .not('estado', 'in', '("CANCELADA", "FINALIZADA")');
+  async findAvailableTable(restId: string, fecha: string, hora: string, zona: string, personas: number) {
+  try {
+    // 1. Obtener IDs de mesas que ya tienen una reservación activa en esa fecha y hora
+    const { data: ocupadas, error: errorOcupadas } = await this.supabase
+      .from('Reservacion')
+      .select('mesaId')
+      .eq('fechaPrincipal', fecha)
+      .eq('horaPrincipal', hora)
+      .neq('estado', 'CANCELADA');
 
-      const idsOcupados = ocupadas?.map(r => r.mesaId) || [];
+    if (errorOcupadas) throw errorOcupadas;
 
-      // 2. Buscar una mesa que:
-      // - No esté en la lista de ocupadas para esa hora.
-      // - Tenga capacidad suficiente (gte = Greater Than or Equal).
-      // - Sea la más pequeña posible que quepa al grupo (para no desperdiciar mesas grandes).
-      let query = this.supabase
-        .from('Mesa')
-        .select('id, capacidad')
-        .eq('restauranteId', restauranteId)
-        .gte('capacidad', personas) 
-        .order('capacidad', { ascending: true }); // Prioridad: Mesa de 2 para 2 personas.
+    // Extraemos solo los IDs válidos
+    const idsOcupados = ocupadas?.map(o => o.mesaId).filter(id => id !== null) || [];
 
-      if (idsOcupados.length > 0) {
-        // Usamos el formato de filtro de Supabase para arreglos de UUIDs
-        query = query.not('id', 'in', `(${idsOcupados.join(',')})`);
-      }
+    // 2. Buscar una mesa en la tabla 'Mesa' que:
+    //    - Pertenezca al restaurante actual
+    //    - Esté en la zona preferida (PLANTA_BAJA / TERRAZA)
+    //    - Tenga capacidad suficiente para el número de personas
+    //    - NO esté en la lista de mesas ya apartadas (idsOcupados)
+    let query = this.supabase
+      .from('Mesa')
+      .select('id')
+      .eq('restauranteId', restId)
+      .eq('zona', zona)
+      .gte('capacidad', personas)
+      .order('capacidad', { ascending: true }); // Prioriza mesas que se ajusten mejor al tamaño del grupo
 
-      const { data: mesas, error } = await query.limit(1);
-
-      if (error) throw error;
-
-      // Retornamos el ID si existe, o null si el restaurante está lleno
-      return (mesas && mesas.length > 0) ? mesas[0].id : null;
-
-    } catch (error) {
-      console.error("Error en findAvailableTable:", error);
-      return null;
+    if (idsOcupados.length > 0) {
+      query = query.not('id', 'in', `(${idsOcupados.join(',')})`);
     }
+
+    const { data: mesa, error: errorMesa } = await query.limit(1).maybeSingle();
+
+    if (errorMesa) throw errorMesa;
+
+    return mesa ? mesa.id : null;
+  } catch (error) {
+    console.error('Error en findAvailableTable:', error);
+    return null;
   }
+}
 
 //======================================== admin - mapa de mesas ====================================
 
@@ -191,12 +189,27 @@ export class SupabaseService {
 
   // Método para crear reserva (usado en saveReservation)
   async createReservation(reserva: any) {
-    const { data, error } = await this.supabase // o el nombre que tenga tu cliente en el servicio
+    const payload = {
+      ...reserva,
+      folio: reserva.folio || `PR-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+      emailInvitado: reserva.emailInvitado?.trim() || 'recepcion@primereserve.com'
+    };
+
+    // Eliminamos propiedades undefined para evitar conflictos en PostgREST
+    Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);
+
+    const { data, error } = await this.supabase
       .from('Reservacion')
-      .insert([reserva])
+      .insert([payload])
       .select()
       .single();
-    return { data, error };
+
+    if (error) {
+      console.error('Error al insertar en Reservacion:', error);
+      throw error;
+    }
+
+    return data;
   }
 
   // Método para actualizar estado (usado en cambiarEstado)

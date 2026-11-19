@@ -1,15 +1,24 @@
+$gold: #d4af37;
+$bg-dark: #000;
+$card-bg-gradient: linear-gradient(145deg, #0f0f0f, #050505);
+$border-color: #1a1a1a;
+$orange-neon: #ffaa00;
+$blue-neon: #3498db;
+$green-neon: #2ecc71;
+
 .orders-wrapper {
   padding: 2rem;
-  background-color: #000;
-  min-height: 90vh;
+  background-color: $bg-dark;
+  min-height: 100vh;
   font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
 }
 
-/* Header de estadísticas */
+/* Header de Estadísticas Operativas */
 .summary-header {
   display: flex;
   gap: 1.5rem;
-  margin-bottom: 3rem;
+  margin-bottom: 2.5rem;
 }
 
 .stat-box {
@@ -19,162 +28,192 @@
   border: 1px solid #222;
   display: flex;
   flex-direction: column;
+  flex: 1;
 }
 
 .stat-box.highlight {
-  border-color: #d4af37;
+  border-color: $gold;
   box-shadow: 0 0 15px rgba(212, 175, 55, 0.05);
 }
 
-.stat-label { color: #666; font-size: 0.7rem; letter-spacing: 2px; margin-bottom: 0.5rem; }
+.stat-label { color: #666; font-size: 0.7rem; letter-spacing: 2px; margin-bottom: 0.5rem; text-transform: uppercase; }
 .stat-value { font-size: 1.8rem; font-weight: bold; color: #fff; }
-.gold-text { color: #d4af37; }
+.gold-text { color: $gold; }
+.text-ready { color: $green-neon; }
 
-/* Grid y Tarjetas */
+/* Maquetación Kanban (3 Columnas estrictas) */
 .orders-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  align-items: start;
 }
 
-.order-luxe-card {
-  background: linear-gradient(145deg, #0f0f0f, #050505);
-  border: 1px solid #1a1a1a;
+.kanban-column {
+  background: #050505;
+  border: 1px solid #111;
   border-radius: 16px;
-  padding: 1.5rem;
-  position: relative;
-  transition: all 0.3s ease;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+
+  .column-title-bar {
+    padding-bottom: 12px;
+    border-bottom: 2px solid #1a1a1a;
+    margin-bottom: 15px;
+    
+    h3 {
+      margin: 0;
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+  }
+
+  &.pending { .column-title-bar h3 { color: $orange-neon; } .column-title-bar { border-bottom-color: rgba($orange-neon, 0.2); } }
+  &.cooking { .column-title-bar h3 { color: $blue-neon; } .column-title-bar { border-bottom-color: rgba($blue-neon, 0.2); } }
+  &.ready-col { .column-title-bar h3 { color: $green-neon; } .column-title-bar { border-bottom-color: rgba($green-neon, 0.2); } }
 }
 
-.order-luxe-card:hover {
-  border-color: #d4af37;
-  transform: translateY(-5px);
+.column-body {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  padding-right: 4px;
+}
+
+/* Tarjetas de Platillo */
+.order-luxe-card {
+  background: $card-bg-gradient;
+  border: 1px solid $border-color;
+  border-radius: 14px;
+  padding: 1.2rem;
+  transition: border-color 0.3s;
+
+  &:hover { border-color: $gold; }
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
-.table-tag { display: flex; flex-direction: column; }
-.table-tag .label { font-size: 0.6rem; color: #d4af37; font-weight: bold; }
-.table-tag .number { font-size: 1.5rem; color: #fff; font-weight: 800; }
+.table-tag {
+  display: flex;
+  flex-direction: column;
+  .label { font-size: 0.55rem; color: $gold; font-weight: bold; letter-spacing: 1px; }
+  .number { font-size: 1.4rem; color: #fff; font-weight: 800; line-height: 1.1; }
+}
 
-/* Badges de Estado del Enum */
+.dish-title {
+  font-size: 1.1rem;
+  color: #fff;
+  margin: 0 0 10px 0;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Badges de Estado */
 .status-badge {
-  font-size: 0.65rem;
-  padding: 4px 10px;
+  font-size: 0.6rem;
+  padding: 4px 8px;
   border-radius: 4px;
   font-weight: bold;
-  text-transform: uppercase;
-}
-
-.abierta { background: rgba(212, 175, 55, 0.1); color: #d4af37; border: 1px solid #d4af37; }
-.en_preparacion { background: rgba(52, 152, 219, 0.1); color: #3498db; border: 1px solid #3498db; }
-.listo { background: rgba(46, 204, 113, 0.1); color: #2ecc71; border: 1px solid #2ecc71; }
-.servido { background: rgba(155, 89, 182, 0.1); color: #9b59b6; border: 1px solid #9b59b6; }
-
-.card-content {
-  margin-bottom: 1.5rem;
+  letter-spacing: 0.5px;
+  
+  &.abierta { background: rgba($orange-neon, 0.08); color: $orange-neon; border: 1px solid rgba($orange-neon, 0.2); }
+  &.en_preparacion { background: rgba($blue-neon, 0.08); color: $blue-neon; border: 1px solid rgba($blue-neon, 0.2); }
+  &.listo { background: rgba($green-neon, 0.08); color: $green-neon; border: 1px solid rgba($green-neon, 0.2); }
 }
 
 .info-group {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: #666;
-  font-size: 0.85rem;
-  margin-bottom: 1rem;
+  gap: 6px;
+  color: #888;
+  font-size: 0.8rem;
+  margin-bottom: 10px;
+  .material-icons { font-size: 14px; color: $gold; }
+  b { color: #fff; }
 }
 
-.info-group .material-icons { font-size: 16px; color: #d4af37; }
+.dish-notes {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  background: rgba($orange-neon, 0.03);
+  border: 1px dashed rgba($orange-neon, 0.2);
+  padding: 8px;
+  border-radius: 6px;
+  margin-top: 10px;
 
-.total-display {
-  text-align: right;
-  border-top: 1px solid #1a1a1a;
-  padding-top: 1rem;
+  .material-icons { font-size: 14px; color: $orange-neon; margin-top: 2px; }
+  p { margin: 0; font-size: 0.75rem; color: #dcb365; line-height: 1.3; }
 }
 
-.total-display .amount { font-size: 1.4rem; font-weight: bold; color: #fff; }
-
+/* Botones Operativos con sus colores de acción */
 .btn-manage {
   width: 100%;
-  padding: 0.8rem;
+  padding: 0.75rem;
   background: transparent;
-  border: 1px solid #333;
+  border: 1px solid #222;
   color: #fff;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   font-weight: bold;
-  transition: all 0.3s;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+
+  &.btn-start:hover { background: $orange-neon; color: #000; border-color: $orange-neon; }
+  &.btn-ready:hover { background: $blue-neon; color: #000; border-color: $blue-neon; }
+  &.btn-deliver:hover { background: $green-neon; color: #000; border-color: $green-neon; }
 }
 
-.btn-manage:hover {
-  background: #fff;
-  color: #000;
-  border-color: #fff;
-}
-
-/* --- Estilos para Empty States --- */
-.empty-state-luxe, .empty-kitchen-msg {
+/* Empty States */
+.empty-state-luxe {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem;
+  padding: 4rem 2rem;
   text-align: center;
-  color: #444; /* Color tenue para que no distraiga */
-}
+  width: 100%;
+  grid-column: span 3;
 
-.empty-state-luxe .icon-container {
-  background: rgba(212, 175, 55, 0.05);
-  padding: 2rem;
-  border-radius: 50%;
-  margin-bottom: 1.5rem;
-}
+  .icon-container {
+    background: rgba(212, 175, 55, 0.03);
+    padding: 1.5rem;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+    border: 1px solid rgba($gold, 0.05);
+  }
 
-.empty-state-luxe .material-icons {
-  font-size: 4rem;
-  color: #d4af37;
-}
-
-.empty-state-luxe h3 {
-  color: #fff;
-  letter-spacing: 2px;
-  margin-bottom: 0.5rem;
-}
-
-.empty-kitchen-msg .material-icons {
-  font-size: 2.5rem;
-  color: #2ecc71; /* Verde éxito */
-  margin-bottom: 0.5rem;
-  opacity: 0.5;
-}
-
-.empty-kitchen-msg p {
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  .material-icons { font-size: 3rem; color: $gold; }
+  h3 { color: #fff; letter-spacing: 1px; margin: 0 0 6px 0; font-weight: 400; }
+  p { color: #555; font-size: 0.85rem; margin: 0 0 20px 0; }
 }
 
 .btn-outline-gold {
-  margin-top: 1.5rem;
   background: transparent;
-  border: 1px solid #d4af37;
-  color: #d4af37;
+  border: 1px solid $gold;
+  color: $gold;
   padding: 0.6rem 1.5rem;
   border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  letter-spacing: 1px;
   cursor: pointer;
   transition: 0.3s;
-}
 
-.btn-outline-gold:hover {
-  background: #d4af37;
-  color: #000;
+  &:hover { background: $gold; color: #000; }
 }

@@ -1,0 +1,35 @@
+<div class="confirm-page-wrapper">
+  <div class="feedback-card" [ngClass]="error ? 'card-error' : 'card-success'">
+    
+    <div *ngIf="isLoading" class="loading-container">
+       <div class="neon-spinner"></div>
+       <h2 class="loading-title">Procesando...</h2>
+       <p class="loading-subtitle">Sincronizando asignación inteligente de mesas.</p>
+    </div>
+
+    <div *ngIf="!isLoading" class="result-container">
+      
+      <div class="icon-sphere" [ngClass]="{'error-sphere': error, 'success-sphere': !error}">
+        <span class="material-icons status-icon">
+          {{ error ? 'error' : (titulo.includes('Cancelada') ? 'cancel' : 'check_circle') }}
+        </span>
+      </div>
+
+      <h2 class="response-title" [class.text-error]="error">
+        {{ titulo }}
+      </h2>
+      
+      <p class="response-message" [innerHTML]="mensaje"></p>
+      
+      <a routerLink="/" class="btn-luxe-return">
+        Volver al inicio
+      </a>
+
+      <footer class="brand-footer">
+        <p class="brand-signature">PRIME RESERVE</p>
+        <span class="footer-note">Ya puedes cerrar esta ventana con seguridad.</span>
+      </footer>
+    </div>
+
+  </div>
+</div>

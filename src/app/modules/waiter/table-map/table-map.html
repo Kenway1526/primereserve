@@ -1,31 +1,121 @@
-<div class="container-map">
-  <h2>Mapa de Mesas</h2>
-  <div class="legend">
-    <span class="dot libre"></span> Disponible
-    <span class="dot ocupada"></span> Ocupada
-    <span class="dot sucia"></span> Sucia
-  </div>
-
-  <div class="canvas-mesas">
-    <div *ngFor="let m of mesas" 
-         class="mesa-icon" 
-         [ngClass]="m.estado"
-         [style.left.px]="m.x" 
-         [style.top.px]="m.y"
-         (click)="abrirOpciones(m)">
-      {{ m.numeroMesa }}
-      <small>{{ m.capacidad }}p</small>
+<div class="luxe-map-wrapper">
+  <header class="luxe-header">
+    <div class="floor-tabs">
+      <button [class.active]="currentFloor === 'PLANTA_BAJA'" (click)="currentFloor = 'PLANTA_BAJA'">
+        PLANTA BAJA
+      </button>
+      <button [class.active]="currentFloor === 'TERRAZA'" (click)="currentFloor = 'TERRAZA'">
+        TERRAZA
+      </button>
     </div>
-  </div>
+    
+    <div class="luxe-legend">
+      <div class="leg-item"><span class="dot libre"></span> LIBRE</div>
+      <div class="leg-item"><span class="dot reservada"></span> RESERVADA</div>
+      <div class="leg-item"><span class="dot ocupada"></span> OCUPADA</div>
+      <div class="leg-item"><span class="dot sucia"></span> SUCIA</div>
+    </div>
+  </header>
 
-  <div class="overlay" *ngIf="mesaSeleccionada" (click)="mesaSeleccionada = null">
-    <div class="modal-mesero" (click)="$event.stopPropagation()">
-      <h3>Mesa {{ mesaSeleccionada.numeroMesa }}</h3>
-      <div class="actions">
-        <button class="btn-primary" (click)="irAPedido()">Tomar Pedido</button>
-        <button class="btn-secondary" *ngIf="mesaSeleccionada.estado === 'OCUPADA'">Cobrar</button>
-        <button class="btn-accent" *ngIf="mesaSeleccionada.estado === 'SUCIA'">Limpiar</button>
+  <div class="luxe-canvas">
+    <div class="luxe-loader" *ngIf="isLoading">
+      <div class="neon-spinner"></div>
+      <p>SINCRONIZANDO...</p>
+    </div>
+
+    <div *ngFor="let table of filteredTables" 
+         class="neon-table" 
+         [ngClass]="[table.estado.toLowerCase(), table.forma]"
+         [style.left.px]="table.x" 
+         [style.top.px]="table.y"
+         (click)="openActions(table)">
+      
+      <div class="neon-inner">
+        <div class="content">
+          <span class="id-text">
+            {{ currentFloor === 'PLANTA_BAJA' ? 'PB' : 'T' }}-{{ table.numeroMesa | number:'2.0-0' }}
+          </span>
+          <div class="pax-info">
+            <span class="material-icons">groups</span>
+            {{ table.capacidad }}
+          </div>
+        </div>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="luxe-overlay" *ngIf="isModalOpen" (click)="closeModal()">
+  <div class="luxe-modal-card" (click)="$event.stopPropagation()">
+    
+    <header class="sheet-header">
+      <div class="icon-glow">
+        <span class="material-icons">restaurant</span>
+      </div>
+      <h3>MESA {{ selectedTable?.numeroMesa }}</h3>
+      <span class="status-pill" [ngClass]="selectedTable?.estado.toLowerCase()">
+        {{ selectedTable?.estado }}
+      </span>
+    </header>
+
+    <div class="actions-stack" *ngIf="!mostrandoListaReservas">
+      <button class="luxe-btn gold-pulse" 
+              *ngIf="selectedTable?.estado === 'LIBRE' || selectedTable?.estado === 'RESERVADA'" 
+              (click)="handleAction('OCCUPY')">
+        <span class="material-icons">person_pin</span>
+        SENTAR CLIENTE
+      </button>
+
+      <button class="luxe-btn gold" 
+              *ngIf="selectedTable?.estado === 'OCUPADA'" 
+              (click)="handleAction('ORDER')">
+        <span class="material-icons">add_shopping_cart</span>
+        TOMAR PEDIDO
+      </button>
+      
+      <button class="luxe-btn border-gold" 
+              *ngIf="selectedTable?.estado === 'OCUPADA'" 
+              (click)="handleAction('BILL')">
+        <span class="material-icons">payments</span>
+        VER CUENTA
+      </button>
+
+      <button class="luxe-btn yellow" 
+              *ngIf="selectedTable?.estado === 'SUCIA'" 
+              (click)="handleAction('CLEAN')">
+        <span class="material-icons">cleaning_services</span>
+        MARCAR LIMPIA
+      </button>
+    </div>
+
+    <div class="reservation-selector-panel" *ngIf="mostrandoListaReservas">
+      <h4 class="sub-title">Selecciona el Cliente a Asignar:</h4>
+      
+      <div class="reservations-list-scroller">
+        <div *ngFor="let res of reservacionesConfirmadas" 
+            class="reservation-row-card" 
+            (click)="asignarReservaAMesa(res.id)">
+          <div class="res-meta">
+            <span class="client-name">{{ res.nombreInvitado }}</span>
+            <span class="folio-tag">{{ res.folio }}</span>
+          </div>
+          <div class="res-pax">
+            <span class="material-icons">groups</span>
+            {{ res.numPersonas }} Pax
+          </div>
+        </div>
+
+        <div class="empty-reservations" *ngIf="reservacionesConfirmadas.length === 0">
+          <span class="material-icons">event_busy</span>
+          <p>No hay reservas web confirmadas pendientes para {{ selectedTable?.capacidad }} personas o menos.</p>
+        </div>
+      </div>
+      
+      <button class="back-btn" (click)="mostrandoListaReservas = false">
+        <span class="material-icons">arrow_back</span> Volver a acciones
+      </button>
+    </div>
+    
+    <button class="luxe-btn-cancel" (click)="closeModal()">CERRAR</button>
   </div>
 </div>

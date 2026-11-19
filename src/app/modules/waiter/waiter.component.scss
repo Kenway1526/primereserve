@@ -1,0 +1,50 @@
+.admin-wrapper {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: #080808;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #050505;
+  min-width: 0; // 👈 Importante: evita que el contenido empuje al sidebar fuera de la pantalla
+}
+
+.content-viewport {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  overflow-x: auto; // 👈 Permite scroll horizontal si el mapa de mesas es muy ancho
+  background-color: #0a0a0a; 
+  
+  background: radial-gradient(
+    circle at top right, 
+    rgba(212, 175, 55, 0.03) 0%, // Un poco más de intensidad al dorado (0.03)
+    transparent 70%
+  );
+
+  /* Scrollbar "Luxe" */
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px; // 👈 También para el scroll horizontal
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #080808;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #1a1a1a;
+    border-radius: 10px;
+    border: 1px solid rgba(212, 175, 55, 0.1);
+    
+    &:hover {
+      background: #d4af37;
+    }
+  }
+}

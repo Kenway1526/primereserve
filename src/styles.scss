@@ -94,4 +94,19 @@ button {
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
+  position: relative;
+  &.has-modal-open {
+    overflow: hidden !important;
+  }
+}
+
+/* 🛡️ Contenedor principal adaptable para evitar desbordamiento por zoom */
+.dashboard-layout, 
+.admin-layout, 
+.layout-container {
+  display: flex;
+  width: 100vw;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: #000000;
 }

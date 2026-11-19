@@ -49,27 +49,61 @@
 
       <div class="modal-body">
         <div class="form-group">
-          <label>NOMBRE</label>
-          <input type="text" [(ngModel)]="selectedIngrediente.nombre">
+          <label>NOMBRE *</label>
+          <input
+            type="text"
+            [(ngModel)]="selectedIngrediente.nombre"
+            placeholder="Ej. Pechuga de pollo"
+            maxlength="60">
+          <small class="error-hint" *ngIf="selectedIngrediente.nombre && selectedIngrediente.nombre.trim().length < 2">
+            El nombre debe tener al menos 2 caracteres.
+          </small>
         </div>
+
         <div class="form-row">
           <div class="form-group">
-            <label>STOCK ACTUAL</label>
-            <input type="number" [(ngModel)]="selectedIngrediente.stockActual">
+            <label>STOCK ACTUAL *</label>
+            <input
+              type="number"
+              min="0"
+              step="any"
+              (keydown)="preventNegativeKey($event)"
+              (ngModelChange)="onNonNegativeChange('stockActual', $event)"
+              [ngModel]="selectedIngrediente.stockActual">
+            <small class="error-hint" *ngIf="selectedIngrediente.stockActual < 0">
+              El stock no puede ser negativo.
+            </small>
           </div>
+
           <div class="form-group">
-            <label>MÍNIMO ALERTA</label>
-            <input type="number" [(ngModel)]="selectedIngrediente.stockMinimoAlerta">
+            <label>MÍNIMO ALERTA *</label>
+            <input
+              type="number"
+              min="0"
+              step="any"
+              (keydown)="preventNegativeKey($event)"
+              (ngModelChange)="onNonNegativeChange('stockMinimoAlerta', $event)"
+              [ngModel]="selectedIngrediente.stockMinimoAlerta">
+            <small class="error-hint" *ngIf="selectedIngrediente.stockMinimoAlerta < 0">
+              El mínimo de alerta no puede ser negativo.
+            </small>
           </div>
         </div>
+
         <div class="form-group">
-          <label>UNIDAD</label>
-          <input type="text" [(ngModel)]="selectedIngrediente.unidad" placeholder="KG, PZ, LT">
+          <label>UNIDAD *</label>
+          <input
+            type="text"
+            [(ngModel)]="selectedIngrediente.unidad"
+            placeholder="KG, PZ, LT, GR"
+            maxlength="15">
         </div>
       </div>
 
       <footer class="modal-footer">
-        <button class="btn-save" (click)="saveIngrediente()">GUARDAR INSUMO</button>
+        <button class="btn-save" (click)="saveIngrediente()" [disabled]="isLoading || !isFormValid()">
+          {{ isLoading ? 'GUARDANDO...' : 'GUARDAR INSUMO' }}
+        </button>
       </footer>
     </div>
   </div>

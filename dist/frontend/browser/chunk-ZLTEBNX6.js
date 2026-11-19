@@ -1,1 +1,0 @@
-import{Ga as a,Xa as s,Ya as n,ob as r}from"./chunk-7BP7CLYR.js";var o=class t{static{this.\u0275fac=function(e){return new(e||t)}}static{this.\u0275cmp=a({type:t,selectors:[["app-restaurant-select"]],decls:2,vars:0,template:function(e,l){e&1&&(s(0,"p"),r(1,"restaurant-select works!"),n())},encapsulation:2})}};export{o as RestaurantSelect};

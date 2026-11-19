@@ -1,4 +1,5 @@
 <div class="res-container">
+  <!-- LOADER GLOBAL -->
   <div class="global-loader fade-in" *ngIf="isLoading && step !== 4">
     <div class="spinner"></div>
     <p>VERIFICANDO DISPONIBILIDAD...</p>
@@ -6,18 +7,20 @@
 
   <div class="res-card" *ngIf="!isLoading || step === 4">
     <header class="res-header" *ngIf="step !== 4">
-      <a routerLink="/" class="back-pill"><span>←</span> CATÁLOGO</a>
+      <!-- 🔗 Redirección corregida al Menú Digital -->
+      <a routerLink="/menu" class="back-pill"><span>←</span> MENÚ DIGITAL</a>
       <div class="header-titles">
         <small class="gold-label">{{ restaurante?.nombre }}</small>
         <h1>{{ (step >= 5) ? 'ALTA DEMANDA' : 'NUEVA RESERVA' }}</h1>
       </div>
     </header>
 
+    <!-- PASO 1: SELECCIÓN INICIAL -->
     <div *ngIf="step === 1" class="fade-in">
       <div class="luxe-field" (click)="openDatePicker('primary')">
         <div class="field-info">
           <label>FECHA PREFERIDA</label>
-          <span>{{ reservationData.primaryDate | date:'fullDate' | uppercase }}</span>
+          <span>{{ reservationData.primaryDate | date:'fullDate':'':'es-MX' | uppercase }}</span>
         </div>
         <div class="field-icon">📅</div>
       </div>
@@ -28,6 +31,21 @@
           <span>{{ reservationData.primaryTime || 'SELECCIONAR HORARIO' }}</span>
         </div>
         <div class="field-icon">🕒</div>
+      </div>
+
+      <!-- MODIFICACIÓN 1: SELECCIÓN DE ZONA (Nueva) -->
+      <div class="luxe-field luxe-select-field">
+        <div class="field-info">
+          <label for="zonaSelect">ZONA PREFERIDA</label>
+          <span class="selected-value">{{ (reservationData.zona | replace:'_':' ') }}</span>
+        </div>
+        <div class="field-icon">🪑</div>
+        
+        <!-- El select invisible o desplegable abarca todo el recuadro -->
+        <select id="zonaSelect" name="zona" [(ngModel)]="reservationData.zona" class="luxe-full-select">
+          <option value="PLANTA_BAJA">PLANTA BAJA</option>
+          <option value="TERRAZA">TERRAZA</option>
+        </select>
       </div>
 
       <div class="guest-selector-card">
@@ -46,47 +64,65 @@
       </button>
     </div>
 
+    <!-- PASO 2 Y 6: FORMULARIO DE DATOS -->
     <div *ngIf="step === 2 || step === 6" class="fade-in">
       <div class="form-luxe">
         <div class="input-field-luxe">
           <label>OCASIÓN</label>
           <select [(ngModel)]="reservationData.ocasion" class="luxe-select">
-            <option value="CENA">ESTÁNDAR</option>
+            <option value="CENA">ESTÁNDAR / CENA</option>
             <option value="CUMPLEAÑOS">CUMPLEAÑOS</option>
             <option value="ANIVERSARIO">ANIVERSARIO</option>
             <option value="NEGOCIOS">NEGOCIOS</option>
           </select>
         </div>
+
         <div class="input-field-luxe">
-          <label>NOMBRE COMPLETO</label>
-          <input type="text" [(ngModel)]="reservationData.name" placeholder="Ej. Juan Pérez" minlength="5" maxlength="20">
+          <label>NOMBRE COMPLETO *</label>
+          <input type="text" [(ngModel)]="reservationData.name" placeholder="Ej. Juan Pérez" minlength="3" maxlength="40">
+          <small class="error-hint" *ngIf="reservationData.name && !isValidName(reservationData.name)">
+            El nombre debe tener al menos 3 caracteres.
+          </small>
         </div>
+
         <div class="input-field-luxe">
-          <label>TELÉFONO</label>
-          <input (keypress)="onlyNumbers($event)" type="tel" [(ngModel)]="reservationData.phone" placeholder="10 DÍGITOS" pattern="\d{10}" minlength="10" maxlength="10" inputmode="numeric">
+          <label>TELÉFONO (10 DÍGITOS) *</label>
+          <input (keypress)="onlyNumbers($event)" type="tel" [(ngModel)]="reservationData.phone" placeholder="Ej. 5512345678" maxlength="10" inputmode="numeric">
+          <small class="error-hint" *ngIf="reservationData.phone && !isValidPhone(reservationData.phone)">
+            El teléfono debe contener exactamente 10 dígitos numéricos.
+          </small>
         </div>
+
         <div class="input-field-luxe">
-          <label>EMAIL</label>
-          <input type="email" [(ngModel)]="reservationData.email" placeholder="ejemplo@dominio.com" pattern="[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$">
+          <label>CORREO ELECTRÓNICO *</label>
+          <input type="email" [(ngModel)]="reservationData.email" placeholder="ejemplo@dominio.com">
+          <small class="error-hint" *ngIf="reservationData.email && !isValidEmail(reservationData.email)">
+            Ingresa un correo electrónico válido (ejemplo&#64;dominio.com).
+          </small>
         </div>
+
         <div class="input-field-luxe">
-          <label>NOTAS</label>
-          <textarea [(ngModel)]="reservationData.notes" placeholder="Alguna petición especial..."></textarea>
+          <label>NOTAS ESPECIALES</label>
+          <textarea [(ngModel)]="reservationData.notes" placeholder="Peticiones de alergias, ubicación especial, etc."></textarea>
         </div>
       </div>
+
       <div class="btn-group">
         <button class="btn-sec" (click)="step = (step === 2 ? 1 : 5)">ATRÁS</button>
         <button class="gold-main-btn" (click)="step = (step === 2 ? 3 : 7)" 
-                [disabled]="!reservationData.name || !reservationData.phone">SIGUIENTE</button>
+                [disabled]="!isStep2Valid()">
+          SIGUIENTE
+        </button>
       </div>
     </div>
 
+    <!-- PASO 5: ALTA DEMANDA / PLAN B -->
     <div *ngIf="step === 5" class="fade-in">
       <div class="alert-card">
         <div class="alert-icon">!</div>
         <div class="alert-text">
-          <strong>CAPACIDAD MÁXIMA ALCANZADA</strong>
-          <p>Lo sentimos, todas nuestras mesas están reservadas para este horario. Puedes unirte a la <b>Lista de Espera</b> o elegir un <b>Plan B</b>.</p>
+          <strong>ZONA SIN DISPONIBILIDAD</strong>
+          <p>Lo sentimos, no hay mesas libres en <b>{{ reservationData.zona | replace:'_':' ' }}</b> para este horario. Intenta otro horario o únete a la <b>Lista de Espera</b>.</p>
         </div>
       </div>
 
@@ -112,91 +148,118 @@
       </div>
     </div>
 
+    <!-- PASO 3 Y 7: RESUMEN FINAL -->
     <div *ngIf="step === 3 || step === 7" class="step-container fade-in">
-  <div class="summary-wrapper">
-    <div class="summary-header">
-      <small>VERIFICACIÓN DE RESERVA</small>
-      <button class="edit-link" (click)="step = 1">MODIFICAR</button>
-    </div>
-
-    <div class="summary-box" [class.is-wait]="step === 7">
-      <div class="status-indicator">
-        <span class="dot"></span>
-        {{ step === 7 ? 'SOLICITUD EN LISTA DE ESPERA' : 'ESPACIO DISPONIBLE' }}
-      </div>
-      <p class="main-val">{{reservationData.primaryDate | date:'EEEE d, MMMM' | uppercase}}</p>
-      <p class="sub-val">{{reservationData.primaryTime}} HRS • {{reservationData.guests}} PAX</p>
-      <div class="ocasion-tag">{{ reservationData.ocasion }}</div>
-    </div>
-
-    <div class="summary-box secondary" *ngIf="step === 7">
-      <label>OPCIÓN DE RESPALDO (PLAN B)</label>
-      <p>{{reservationData.altDate | date:'dd/MM/yyyy'}} • {{reservationData.altTime}} HRS</p>
-    </div>
-
-    <div class="confirmation-summary">
-      <div class="client-header">
-        <span class="gold-dot"></span>
-        <h3>DATOS DEL COMENSAL</h3>
-      </div>
-
-      <div class="details-grid">
-        <div class="detail-row">
-          <span class="label">CLIENTE</span>
-          <span class="value">{{ reservationData.name | uppercase }}</span>
+      <div class="summary-wrapper">
+        <div class="summary-header">
+          <small>VERIFICACIÓN DE RESERVA</small>
+          <button class="edit-link" (click)="step = 1">MODIFICAR</button>
         </div>
-        <div class="detail-row">
-          <span class="label">TELÉFONO</span>
-          <span class="value">{{ reservationData.phone }}</span>
+
+        <div class="summary-box" [class.is-wait]="step === 7">
+          <div class="status-indicator">
+            <span class="dot"></span>
+            {{ step === 7 ? 'SOLICITUD EN LISTA DE ESPERA' : 'ESPACIO DISPONIBLE' }}
+          </div>
+          <p class="main-val">{{ reservationData.primaryDate | date:'EEEE d, MMMM':'':'es-MX' | uppercase }}</p>
+          <p class="sub-val">{{reservationData.primaryTime}} HRS • {{reservationData.guests}} PAX</p>
+          <!-- MODIFICACIÓN 2: MOSTRAR ZONA EN EL RESUMEN -->
+          <div class="ocasion-tag">{{ reservationData.zona | replace:'_':' ' }}</div>
+          <div class="ocasion-tag">{{ reservationData.ocasion }}</div>
         </div>
-        <div class="detail-row">
-          <span class="label">EMAIL</span>
-          <span class="value text-lowercase">{{ reservationData.email }}</span>
+
+        <div class="summary-box secondary" *ngIf="step === 7">
+          <label>OPCIÓN DE RESPALDO (PLAN B)</label>
+          <p>{{reservationData.altDate | date:'dd/MM/yyyy'}} • {{reservationData.altTime}} HRS</p>
+        </div>
+
+        <div class="confirmation-summary">
+          <div class="client-header">
+            <span class="gold-dot"></span>
+            <h3>DATOS DEL COMENSAL</h3>
+          </div>
+
+          <div class="details-grid">
+            <div class="detail-row">
+              <span class="label">CLIENTE</span>
+              <span class="value">{{ reservationData.name | uppercase }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">TELÉFONO</span>
+              <span class="value">{{ reservationData.phone }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">EMAIL</span>
+              <span class="value text-lowercase">{{ reservationData.email }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn-sec" (click)="step = (step === 3 ? 2 : 6)">VOLVER</button>
+          <button class="gold-main-btn" (click)="finish()">CONFIRMAR Y FINALIZAR</button>
         </div>
       </div>
     </div>
 
-    <div class="btn-group">
-      <button class="btn-sec" (click)="step = (step === 3 ? 2 : 6)">VOLVER</button>
-      <button class="gold-main-btn" (click)="finish()">CONFIRMAR Y FINALIZAR</button>
-    </div>
-  </div>
-</div>
-
+    <!-- PASO 4: ÉXITO -->
     <div *ngIf="step === 4" class="success-screen fade-in">
       <div class="check-icon">✓</div>
       <h2>¡RESERVA REGISTRADA!</h2>
       <p>Folio digital:</p>
       <div class="folio-display">{{ generatedFolio }}</div>
+      <p>Se te ennviara el folio por correo o bien guárdalo para acceder a tu reservación.</p>
+      <p></p>
       <button class="gold-main-btn" routerLink="/">TERMINAR</button>
     </div>
   </div>
 </div>
 
+<!-- MODAL DE FECHA / HORA -->
 <div class="sheet-overlay" *ngIf="showDateModal || showTimeModal" (click)="showDateModal = false; showTimeModal = false">
   <div class="sheet-card animate-up" (click)="$event.stopPropagation()">
     <header class="sheet-header">
       <div class="header-info">
         <small>{{ showDateModal ? 'CALENDARIO' : 'HORARIOS' }}</small>
-        <h3>{{ showDateModal ? currentMonthName : 'SELECCIONAR' }}</h3>
+        
+        <!-- 📅 NAVEGACIÓN ENTRE MESES -->
+        <div class="month-nav" *ngIf="showDateModal">
+          <button class="nav-arrow" (click)="prevMonth()">‹</button>
+          <h3>{{ currentMonthName }}</h3>
+          <button class="nav-arrow" (click)="nextMonth()">›</button>
+        </div>
+
+        <h3 *ngIf="showTimeModal">SELECCIONAR HORA</h3>
       </div>
       <button class="close-x" (click)="showDateModal = false; showTimeModal = false">×</button>
     </header>
 
     <div class="sheet-body">
-      <div class="calendar-container" *ngIf="showDateModal">
-        <div class="week-header"><span *ngFor="let w of weekDays">{{w}}</span></div>
+      <!-- CALENDARIO -->
+      <div *ngIf="showDateModal">
+        <div class="week-header">
+          <span *ngFor="let day of weekDays">{{ day }}</span>
+        </div>
         <div class="days-grid">
           <div class="day-cell" *ngFor="let d of calendarDays" 
-               [class.empty]="!d" [class.selected]="isSelected(d)" (click)="selectDate(d)">
+               [class.empty]="!d" 
+               [class.selected]="isSelected(d)" 
+               [class.disabled]="isPastDate(d)"
+               (click)="selectDate(d, $event)">
             {{ d ? (d | date:'d') : '' }}
           </div>
         </div>
       </div>
 
-      <div class="time-content" *ngIf="showTimeModal">
+      <!-- HORARIOS -->
+      <div *ngIf="showTimeModal">
         <div class="time-grid">
-          <button class="time-chip" *ngFor="let t of timeSlots" (click)="selectTime(t)">
+          <button 
+            class="time-chip" 
+            *ngFor="let t of timeSlots" 
+            [class.disabled]="isPastTime(t)"
+            [disabled]="isPastTime(t)"
+            (click)="selectTime(t)">
             {{ t }}
           </button>
         </div>

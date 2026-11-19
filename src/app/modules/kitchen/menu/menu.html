@@ -18,7 +18,9 @@
   <div class="menu-grid" *ngIf="!isLoading">
     <div class="menu-card" *ngFor="let item of menuItems" [class.archived]="!item.estaDisponible">
       <div class="card-img-box">
-        <img [src]="item.imagenUrl || 'https://via.placeholder.com/300x200?text=Sin+Imagen'" [alt]="item.nombre">
+        <img [src]="item.imagenUrl || 'assets/default-food.png'" 
+             (error)="onImageError($event)" 
+             [alt]="item.nombre">
         <div class="card-status" [class.active]="item.estaDisponible" [title]="item.estaDisponible ? 'Disponible' : 'Agotado'"></div>
       </div>
       
@@ -59,12 +61,14 @@
         <button class="btn-close" (click)="closeModal()">×</button>
       </header>
 
-      <form (ngSubmit)="savePlatillo()" #menuForm="ngForm" class="modal-form">
+      <form (ngSubmit)="savePlatillo()" #menuForm="ngForm" class="modal-form-wrapper">
         <div class="form-content-scroll">
           
           <div class="image-setup">
              <div class="img-preview-circle">
-                <img [src]="currentItem.imagenUrl || 'https://via.placeholder.com/150?text=Platillo'" alt="Preview">
+                <img [src]="currentItem.imagenUrl || 'assets/default-food.png'" 
+                     (error)="onImageError($event)" 
+                     alt="Preview">
              </div>
              <div class="form-group full-width">
                 <label>Enlace de la Imagen (URL)</label>
@@ -89,7 +93,7 @@
                 <label for="pPrecio">Precio de Venta ($)</label>
                 <div class="input-with-icon">
                   <span class="icon">$</span>
-                  <input type="number" id="pPrecio" [(ngModel)]="currentItem.precio" name="precio" required step="0.5" placeholder="0.00">
+                  <input type="number" id="pPrecio" [(ngModel)]="currentItem.precio" name="precio" min="0.01" (keydown)="preventNegativeInput($event)" required step="0.5" placeholder="0.00">
                 </div>
               </div>
 
@@ -131,7 +135,7 @@
                 <div class="recipe-item-row" *ngFor="let r of currentItem.receta; let i = index">
                   <div class="col-name"><span class="material-icons ing-icon">inventory_2</span> {{ r.nombre }}</div>
                   <div class="col-cant">
-                    <input type="number" [(ngModel)]="r.cantidadUsada" [name]="'cant_'+i" step="0.01" min="0.01" required>
+                    <input type="number" [(ngModel)]="r.cantidadUsada" (ngModelChange)="onRecipeQtyChange()" (keydown)="preventNegativeInput($event)" [name]="'cant_'+i" step="0.01" min="0.01" required>
                     <span class="unidad">{{ r.unidad }}</span>
                   </div>
                   <div class="col-action">
@@ -144,16 +148,24 @@
                 </div>
               </div>
             </div>
+
+            <div *ngIf="!hasSufficientStockForCurrentItem()" style="margin-top: 12px; padding: 10px 14px; border-radius: 8px; background: rgba(255, 82, 82, 0.12); border: 1px solid #ff5252; color: #ff8a8a; font-size: 0.82rem;">
+              {{ getMissingIngredientsWarning() }}
+            </div>
           </fieldset>
         </div>
 
         <footer class="modal-footer">
-          <div class="status-group">
-            <label class="switch-label">
-              <input type="checkbox" [(ngModel)]="currentItem.estaDisponible" name="disponible">
+          <div class="status-group" [title]="!hasSufficientStockForCurrentItem() ? getMissingIngredientsWarning() : ''">
+            <label class="switch-label" [style.opacity]="!hasSufficientStockForCurrentItem() ? '0.4' : '1'">
+              <input type="checkbox"
+                     [ngModel]="currentItem.estaDisponible"
+                     (ngModelChange)="onAvailabilityToggle($event)"
+                     [disabled]="!hasSufficientStockForCurrentItem()"
+                     name="disponible">
               <span class="slider"></span>
             </label>
-            <span>{{ currentItem.estaDisponible ? 'Disponible en Carta' : 'Marcar como Agotado' }}</span>
+            <span>{{ currentItem.estaDisponible ? 'Disponible en Carta' : 'Agotado / Fuera de Menú' }}</span>
           </div>
           <div class="action-group">
             <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>

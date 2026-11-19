@@ -10,22 +10,10 @@
   </header>
 
   <section class="staff-stats">
-    <div class="stat-card">
-      <span class="label">Total</span>
-      <span class="value">{{ stats.total }}</span>
-    </div>
-    <div class="stat-card">
-      <span class="label">Meseros</span>
-      <span class="value gold">{{ stats.meseros }}</span>
-    </div>
-    <div class="stat-card">
-      <span class="label">Cocina</span>
-      <span class="value gold">{{ stats.cocina }}</span>
-    </div>
-    <div class="stat-card">
-      <span class="label">Administradores</span>
-      <span class="value gold">{{ stats.admin }}</span>
-    </div>
+    <div class="stat-card"><span class="label">Total</span><span class="value">{{ stats.total }}</span></div>
+    <div class="stat-card"><span class="label">Meseros</span><span class="value gold">{{ stats.meseros }}</span></div>
+    <div class="stat-card"><span class="label">Cocina</span><span class="value gold">{{ stats.cocina }}</span></div>
+    <div class="stat-card"><span class="label">Administradores</span><span class="value gold">{{ stats.admin }}</span></div>
   </section>
 
   <div class="search-bar">
@@ -36,15 +24,23 @@
   <div class="staff-grid">
     <div class="staff-card" *ngFor="let member of staff | filter: searchText : 'nombre'">
       <div class="card-options">
-        <button (click)="openEditModal(member)"><span class="material-icons">edit</span></button>
-        <button (click)="deleteMember(member.id)" class="delete"><span class="material-icons">delete</span></button>
+        <button (click)="openEditModal(member)" title="Editar Perfil">
+          <span class="material-icons">edit</span>
+        </button>
+        
+        <!-- 🛡️ Botón de borrado protegido para el usuario en sesión -->
+        <button (click)="deleteMember(member.id)" 
+                class="delete" 
+                [class.btn-disabled]="member.id === currentUserId"
+                [disabled]="member.id === currentUserId"
+                [title]="member.id === currentUserId ? 'No puedes eliminar tu propio usuario activo' : 'Dar de Baja'">
+          <span class="material-icons">delete</span>
+        </button>
       </div>
       
       <div class="avatar-container">
         <img [src]="member.avatarUrl || 'assets/default-avatar.png'" alt="Avatar">
-        <div class="role-badge" [ngClass]="member.rol.toLowerCase()">
-          {{ member.rol }}
-        </div>
+        <div class="role-badge" [ngClass]="member.rol.toLowerCase()">{{ member.rol }}</div>
       </div>
 
       <div class="staff-info">
@@ -58,21 +54,40 @@
   </div>
 
   <app-modal [isOpen]="isModalOpen" [title]="modalTitle" (close)="closeModal()">
-    <div class="modal-form">
+    
+    <div class="credentials-toast-card" *ngIf="credentialsGenerated">
+      <div class="success-icon-glow">
+        <span class="material-icons">verified_user</span>
+      </div>
+      <h3>¡Empleado registrado!</h3>
+      <p class="subtitle">El perfil operativo ha sido activado en el sistema. El acceso a la plataforma es inmediato.</p>
+      
+      <div class="ticket-details">
+        <div class="ticket-row">
+          <span class="tag">Usuario de Acceso:</span>
+          <span class="value select-all" style="user-select: all; font-family: monospace;">{{ credentialsGenerated.email }}</span>
+        </div>
+        <div class="ticket-row">
+          <span class="tag">Contraseña Asignada:</span>
+          <span class="value secure-pass select-all" style="user-select: all; font-family: monospace; color: #cca43b; font-weight: bold;">{{ credentialsGenerated.pass }}</span>
+        </div>
+      </div>
+
+      <button class="btn-done-gold" (click)="closeModal()" style="width: 100%; margin-top: 1.5rem;">
+        ENTENDIDO Y COMPLETAR
+      </button>
+    </div>
+
+    <div class="modal-form" *ngIf="!credentialsGenerated">
+      
       <div class="avatar-upload">
         <label for="avatarFile">
           <div class="preview-circle">
-            <img *ngIf="imagePreview" [src]="imagePreview" class="avatar-img">
-            
-            <img *ngIf="!imagePreview && memberForm.avatarUrl" 
-                [src]="memberForm.avatarUrl" 
-                (error)="memberForm.avatarUrl = null" 
-                class="avatar-img">
-            
-            <div *ngIf="!imagePreview && !memberForm.avatarUrl" class="default-avatar">
+            <img *ngIf="imagePreview" [src]="imagePreview" class="avatar-img" alt="Previsualización">
+            <img *ngIf="!imagePreview && memberForm.avatarUrl" [src]="memberForm.avatarUrl" (error)="memberForm.avatarUrl = null" class="avatar-img" alt="Avatar">
+            <div class="default-avatar" *ngIf="!imagePreview && !memberForm.avatarUrl">
               <span class="material-icons">account_circle</span>
             </div>
-            
             <div class="overlay-camera">
               <span class="material-icons">photo_camera</span>
             </div>
@@ -83,34 +98,44 @@
 
       <div class="form-group">
         <label>Nombre Completo</label>
-        <input type="text" [(ngModel)]="memberForm.nombre" class="dark-input" placeholder="Nombre del empleado">
+        <input type="text" [(ngModel)]="memberForm.nombre" class="dark-input" placeholder="Ej. Juan Pérez">
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label>Correo Electrónico</label>
-          <input type="email" [(ngModel)]="memberForm.email" class="dark-input" placeholder="correo@ejemplo.com">
+          <input type="email" [(ngModel)]="memberForm.email" class="dark-input" placeholder="ejemplo@primereserve.com" [disabled]="!!memberForm.id">
         </div>
         <div class="form-group">
-          <label>Teléfono</label>
-          <input type="text" [(ngModel)]="memberForm.telefono" class="dark-input" placeholder="10 dígitos">
+          <label>Contraseña de Acceso</label>
+          <input type="text" [(ngModel)]="memberForm.password" class="dark-input" placeholder="Mínimo 6 caracteres" *ngIf="!memberForm.id">
+          <input type="text" class="dark-input" placeholder="🔒 Protegida por cifrado" *ngIf="memberForm.id" disabled>
         </div>
       </div>
 
-      <div class="form-group">
-        <label>Rol en el Restaurante</label>
-        <select [(ngModel)]="memberForm.rol" class="dark-input">
-          <option value="MESERO">Mesero</option>
-          <option value="COCINA">Cocina</option>
-          <option value="ADMIN">Administrador</option>
-        </select>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Teléfono (Opcional)</label>
+          <input type="text" [(ngModel)]="memberForm.telefono" class="dark-input" placeholder="10 dígitos">
+        </div>
+        <div class="form-group">
+          <label>Rol en el Restaurante</label>
+          <select [(ngModel)]="memberForm.rol" class="dark-input">
+            <option value="MESERO">Mesero</option>
+            <option value="COCINA">Cocina</option>
+            <option value="ADMIN">Administrador</option>
+          </select>
+        </div>
       </div>
 
       <div class="modal-actions">
-        <button class="btn-submit-gold" (click)="saveMember()" [disabled]="isLoading">
-          {{ isLoading ? 'GUARDANDO...' : 'GUARDAR CAMBIOS' }}
+        <button class="btn-submit-gold" 
+                (click)="saveMember()" 
+                [disabled]="isLoading || !memberForm.nombre || !memberForm.email || (!memberForm.id && !memberForm.password)">
+          {{ isLoading ? 'INYECTANDO TALENTO...' : 'GUARDAR CAMBIOS' }}
         </button>
       </div>
+
     </div>
   </app-modal>
 </div>

@@ -7,6 +7,7 @@
   <ul class="nav-list">
     <li *ngFor="let item of menuItems" 
         [routerLinkActive]="'active'" 
+        [routerLinkActiveOptions]="{exact: true}"
         [ngClass]="{'nav-bottom': item.isBottom}">
       <a [routerLink]="item.path">
         <span class="material-icons">{{ item.icon }}</span>

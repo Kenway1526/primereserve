@@ -2,7 +2,7 @@ import { Component, OnInit, inject, ChangeDetectorRef, PLATFORM_ID } from '@angu
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SupabaseService } from '../../../core/services/supabase';
-import { APP_CONFIG } from '../../../core/constants/config'; // 🚀 Sincronización con la constante
+import { APP_CONFIG } from '../../../core/constants/config';
 
 @Component({
   selector: 'app-inventory',
@@ -26,7 +26,6 @@ export class InventoryMgmt implements OnInit {
 
   async ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
-      // 🚀 Cargamos directamente usando la constante estática
       await this.loadInventory();
     }
   }
@@ -39,7 +38,7 @@ export class InventoryMgmt implements OnInit {
       const { data, error } = await this.supabaseSvc.supabase
         .from('Ingrediente')
         .select('*')
-        .eq('restauranteId', APP_CONFIG.RESTAURANT_ID) // 👈 Sincronizado para CARGAR
+        .eq('restauranteId', APP_CONFIG.RESTAURANT_ID)
         .order('nombre', { ascending: true });
 
       if (error) throw error;
@@ -55,15 +54,44 @@ export class InventoryMgmt implements OnInit {
     }
   }
 
+  // Bloquea la tecla '-' y 'e' en los inputs numéricos
+  preventNegativeKey(event: KeyboardEvent): void {
+    if (event.key === '-' || event.key === 'e' || event.key === 'E') {
+      event.preventDefault();
+    }
+  }
+
+  // Garantiza que nunca quede un número negativo incluso si pegan texto
+  onNonNegativeChange(field: 'stockActual' | 'stockMinimoAlerta', value: any): void {
+    const num = Number(value);
+    if (isNaN(num) || num < 0) {
+      this.selectedIngrediente[field] = 0;
+    } else {
+      this.selectedIngrediente[field] = num;
+    }
+  }
+
+  isFormValid(): boolean {
+    const nombreValido = !!this.selectedIngrediente.nombre && this.selectedIngrediente.nombre.trim().length >= 2;
+    const unidadValida = !!this.selectedIngrediente.unidad && this.selectedIngrediente.unidad.trim().length >= 1;
+    const stockValido = this.selectedIngrediente.stockActual !== null &&
+                        this.selectedIngrediente.stockActual !== undefined &&
+                        Number(this.selectedIngrediente.stockActual) >= 0;
+    const alertaValida = this.selectedIngrediente.stockMinimoAlerta !== null &&
+                         this.selectedIngrediente.stockMinimoAlerta !== undefined &&
+                         Number(this.selectedIngrediente.stockMinimoAlerta) >= 0;
+
+    return nombreValido && unidadValida && stockValido && alertaValida;
+  }
+
   openModal() {
     this.isEditing = false;
-    // 🛡️ Inicializamos con el ID estático y dejamos que Supabase genere el UUID si prefieres
     this.selectedIngrediente = {
       nombre: '',
       stockActual: 0,
-      unidad: 'kg', // Valor por defecto común
+      unidad: 'KG',
       stockMinimoAlerta: 0,
-      restauranteId: APP_CONFIG.RESTAURANT_ID // 👈 Sincronizado para NUEVOS
+      restauranteId: APP_CONFIG.RESTAURANT_ID
     };
     this.showModal = true;
   }
@@ -80,26 +108,39 @@ export class InventoryMgmt implements OnInit {
   }
 
   async saveIngrediente() {
-    if (!this.selectedIngrediente.nombre || this.isLoading) return;
+    if (!this.isFormValid() || this.isLoading) return;
+
+    const stockActual = Math.max(0, Number(this.selectedIngrediente.stockActual));
+    const stockMinimoAlerta = Math.max(0, Number(this.selectedIngrediente.stockMinimoAlerta));
+
+    if (stockActual < 0 || stockMinimoAlerta < 0) {
+      alert('El stock y el mínimo de alerta no pueden ser números negativos.');
+      return;
+    }
     
     this.isLoading = true;
     try {
-      // 🛡️ Forzamos que el restauranteId sea el correcto antes de enviar
-      this.selectedIngrediente.restauranteId = APP_CONFIG.RESTAURANT_ID;
+      const payload = {
+        ...this.selectedIngrediente,
+        nombre: this.selectedIngrediente.nombre.trim(),
+        unidad: this.selectedIngrediente.unidad.trim().toUpperCase(),
+        stockActual,
+        stockMinimoAlerta,
+        restauranteId: APP_CONFIG.RESTAURANT_ID
+      };
 
       const { error } = this.isEditing 
         ? await this.supabaseSvc.supabase
             .from('Ingrediente')
-            .update(this.selectedIngrediente)
-            .eq('id', this.selectedIngrediente.id)
-            .eq('restauranteId', APP_CONFIG.RESTAURANT_ID) // Seguridad extra
+            .update(payload)
+            .eq('id', payload.id)
+            .eq('restauranteId', APP_CONFIG.RESTAURANT_ID)
         : await this.supabaseSvc.supabase
             .from('Ingrediente')
-            .insert([this.selectedIngrediente]);
+            .insert([payload]);
 
       if (error) throw error;
 
-      console.log('📦 Inventario actualizado en:', APP_CONFIG.RESTAURANT_NAME);
       this.closeModal();
       await this.loadInventory();
 
@@ -111,7 +152,6 @@ export class InventoryMgmt implements OnInit {
     }
   }
 
-  // Opcional: Método para eliminar ingredientes
   async deleteItem(id: string) {
     if (!confirm('¿Seguro que deseas eliminar este insumo?')) return;
     

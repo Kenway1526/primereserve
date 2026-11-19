@@ -1,46 +1,100 @@
-<div class="order-container">
+<div class="order-page">
   <header class="order-header">
-    <button (click)="volver()" class="btn-back">← Volver al Mapa</button>
-    <h2>Nueva Orden - Mesa {{ numeroMesa }}</h2>
+    <div class="left">
+      <button class="back-btn" routerLink="/waiter/table-map">
+        <span class="material-icons">arrow_back</span>
+      </button>
+      <h2>Comanda de Mesa</h2>
+      <div class="table-badge">Mesa {{ selectedTable?.numeroMesa }}</div>
+    </div>
   </header>
 
   <div class="order-layout">
-    <section class="menu-grid">
-      <div *ngIf="isLoading" class="loader">Validando stock...</div>
-      
-      <div *ngFor="let item of menuItems" 
-           class="menu-card" 
-           (click)="agregarAlCarrito(item)">
-        <div class="card-img">
-          <img [src]="item.imagenUrl || 'https://via.placeholder.com/150'" alt="platillo">
-        </div>
-        <div class="card-info">
-          <h4>{{ item.nombre }}</h4>
-          <span class="price">${{ item.precio }}</span>
+    <section class="menu-section">
+      <div class="category-bar">
+        <button *ngFor="let cat of categories" 
+                [class.active]="activeCategory === cat"
+                (click)="filterByCategory(cat)">
+          {{ cat }}
+        </button>
+      </div>
+
+      <div class="menu-grid" *ngIf="!isLoading">
+        <div class="menu-card" *ngFor="let item of filteredItems">
+          <div class="img-container">
+            <img [src]="item.imagenUrl || 'assets/default-food.png'" 
+                (error)="onImageError($event)" 
+                [alt]="item.nombre">
+          </div>
+          <div class="card-body">
+            <h4>{{ item.nombre }}</h4>
+            <p class="price">{{ item.precio | currency }}</p>
+            
+            <div class="stepper-box" style="display: flex; align-items: center; gap: 0.8rem; margin-top: 1rem;">
+              <button class="step-btn" 
+                      *ngIf="obtenerCantidadItem(item.id) > 0" 
+                      (click)="restarDelCart(item.id)"
+                      style="width: 32px; height: 32px; background: #181818; border: 1px solid #333; color: white; border-radius: 4px; cursor: pointer; font-weight: bold;">-</button>
+              
+              <span class="step-count" 
+                    *ngIf="obtenerCantidadItem(item.id) > 0"
+                    style="font-family: monospace; font-weight: bold; font-size: 1.1rem; color: #cca43b;">
+                {{ obtenerCantidadItem(item.id) }}
+              </span>
+              
+              <button class="step-btn main-add" 
+                      (click)="addToCart(item)"
+                      [style.background]="obtenerCantidadItem(item.id) > 0 ? '#181818' : '#cca43b'"
+                      [style.color]="obtenerCantidadItem(item.id) > 0 ? 'white' : 'black'"
+                      [style.border]="obtenerCantidadItem(item.id) > 0 ? '1px solid #333' : 'none'"
+                      style="padding: 0.4rem 1rem; font-weight: bold; border-radius: 4px; cursor: pointer; min-width: 40px;">
+                {{ obtenerCantidadItem(item.id) > 0 ? '+' : 'AGREGAR' }}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <aside class="order-summary">
-      <h3>Resumen de Cuenta</h3>
-      <div class="items-list">
-        <div *ngFor="let c of carrito" class="item-row">
-          <span class="qty">{{ c.cantidad }}x</span>
-          <span class="name">{{ c.nombre }}</span>
-          <span class="subtotal">${{ c.precio * c.cantidad }}</span>
+    <aside class="cart-section">
+      <div class="cart-container">
+        <div class="cart-header">
+          <h3>Detalle del Pedido</h3>
+          <span class="count">{{ cart.length }} items</span>
         </div>
-      </div>
 
-      <div class="summary-footer">
-        <div class="total-line">
-          <span>TOTAL:</span>
-          <strong>${{ total }}</strong>
+        <div class="cart-items">
+          <div class="empty-cart" *ngIf="cart.length === 0">
+            <span class="material-icons">receipt_long</span>
+            <p>La comanda está vacía</p>
+          </div>
+
+          <div class="cart-row" *ngFor="let item of cart; let i = index">
+            <div class="item-info">
+              <span class="qty">{{ item.cantidad }}x</span>
+              <span class="name">{{ item.nombre }}</span>
+            </div>
+            <div class="item-meta">
+              <span class="subtotal">{{ item.subtotal | currency }}</span>
+              <div class="qty-btns">
+                <button (click)="updateQuantity(i, -1)">-</button>
+                <button (click)="updateQuantity(i, 1)">+</button>
+              </div>
+            </div>
+          </div>
         </div>
-        <button class="btn-confirm" 
-                [disabled]="carrito.length === 0 || isLoading"
-                (click)="confirmarPedido()">
-          Enviar a Cocina
-        </button>
+
+        <div class="cart-footer">
+          <div class="total-line">
+            <span>Total a Cocina</span>
+            <span class="val">{{ total | currency }}</span>
+          </div>
+          <button class="btn-send" 
+                  [disabled]="cart.length === 0 || isSending"
+                  (click)="sendToKitchen()">
+            {{ isSending ? 'PROCESANDO...' : 'ENVIAR A COCINA' }}
+          </button>
+        </div>
       </div>
     </aside>
   </div>

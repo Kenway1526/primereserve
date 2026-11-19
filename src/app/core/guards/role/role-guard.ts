@@ -10,8 +10,13 @@ export const roleGuard: CanActivateFn = (route, state) => {
 
   if (!isPlatformBrowser(platformId)) return true; 
 
-  const userRole = auth.getRole(); 
+  const user = auth.getUser();
+  const userRole = user?.role?.toUpperCase();
   const expectedRole = route.data['role'];
+
+  const allowedRoles = Array.isArray(expectedRole) 
+    ? expectedRole.map(r => r.toUpperCase()) 
+    : [expectedRole.toUpperCase()];
 
   console.group('%c🛡️ DIAGNÓSTICO GUARD', 'background: #222; color: #bada55');
   console.log('Ruta intentada:', state.url);
@@ -25,7 +30,7 @@ export const roleGuard: CanActivateFn = (route, state) => {
     return false;
   }
 
-  if (userRole === expectedRole) {
+  if (userRole && allowedRoles.includes(userRole)) {
     console.log('✅ Guard: Acceso PERMITIDO. Cargando componente...');
     return true; 
   }

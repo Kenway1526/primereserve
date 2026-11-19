@@ -1,42 +1,384 @@
-.canvas-mesas {
-  position: relative;
-  width: 100%;
-  height: 500px;
-  background: #111;
-  border-radius: 15px;
-  border: 1px solid #333;
-}
+/* --- VARIABLES DE COLOR LUXURY NEÓN (Sincronizadas con Admin) --- */
+$gold: #d4af37;
+$free: #00ff88;  // Verde Neón Admin
+$busy: #ff3e3e;  // Rojo Neón Admin
+$res: #00bfff;   // Azul Neón Admin
+$dirty: #ffaa00; // Naranja Neón Admin
+$dark-bg: #050505;
+$glass-bg: rgba(20, 20, 20, 0.9);
 
-.mesa-icon {
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
+.luxe-map-wrapper {
+  height: 100%;
   display: flex;
   flex-direction: column;
+  gap: 25px;
+  background-color: $dark-bg;
+  padding: 10px;
+}
+
+.luxe-header {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-weight: bold;
-  
-  &.LIBRE { background: #2ecc71; color: white; }
-  &.OCUPADA { background: #e74c3c; color: white; }
-  &.SUCIA { background: #f1c40f; color: black; }
-  
-  small { font-size: 0.7rem; opacity: 0.8; }
-}
+  position: relative;
+  z-index: 5;
 
-.overlay {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center;
-}
+  .floor-tabs {
+    display: flex;
+    background: #0a0a0a;
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid #1a1a1a;
+    
+    button {
+      background: transparent; border: none; color: #444;
+      padding: 10px 22px; border-radius: 8px; cursor: pointer;
+      font-weight: 700; font-size: 0.75rem; letter-spacing: 1px;
+      transition: 0.3s;
 
-.modal-mesero {
-  background: #1a1a1a; padding: 2rem; border-radius: 20px; text-align: center;
-  border: 1px solid #d4af37;
-  .actions {
-    display: flex; flex-direction: column; gap: 10px; margin-top: 20px;
-    button { padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
-    .btn-primary { background: #d4af37; color: black; }
+      &.active {
+        background: rgba($gold, 0.1);
+        color: $gold;
+        border: 1px solid $gold;
+        box-shadow: 0 0 15px rgba($gold, 0.2);
+      }
+    }
   }
+
+  .luxe-legend {
+    display: flex; gap: 20px;
+    .leg-item {
+      display: flex; align-items: center; gap: 8px; font-size: 0.7rem; color: #666; font-weight: 700;
+      .dot {
+        width: 8px; height: 8px; border-radius: 50%;
+        &.libre { background: $free; box-shadow: 0 0 10px $free; }
+        &.ocupada { background: $busy; box-shadow: 0 0 10px $busy; }
+        &.reservada { background: $res; box-shadow: 0 0 10px $res; }
+        &.sucia { background: $dirty; box-shadow: 0 0 10px $dirty; }
+      }
+    }
+  }
+}
+
+.luxe-canvas {
+  flex: 1;
+  min-height: 600px;
+  background-color: #080808;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #151515;
+  background-image: radial-gradient(rgba($gold, 0.08) 1px, transparent 1px);
+  background-size: 40px 40px;
+  z-index: 1;
+}
+
+.neon-table {
+  position: absolute !important;
+  width: 90px;
+  height: 90px;
+  cursor: pointer !important;
+  pointer-events: auto !important; 
+  z-index: 10;
+  transition: all 0.3s ease;
+
+  &:hover { transform: scale(1.08); z-index: 12; }
+
+  .neon-inner {
+    width: 100%; height: 100%;
+    background: $glass-bg;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid #333;
+    backdrop-filter: blur(5px);
+  }
+
+  &.circular .neon-inner { border-radius: 50%; }
+  &.cuadrada .neon-inner { border-radius: 12px; }
+
+  .content {
+    text-align: center;
+    pointer-events: none; 
+    .id-text { display: block; font-size: 1.3rem; font-weight: 800; color: #fff; }
+    .pax-info {
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+      font-size: 0.7rem; color: #666; margin-top: 2px;
+      .material-icons { font-size: 14px; }
+    }
+  }
+
+  /* --- ESTADOS SINCRONIZADOS --- */
+  &.libre {
+    .neon-inner { border-color: $free; box-shadow: 0 0 15px rgba($free, 0.2); }
+    .id-text { color: $free; }
+  }
+  &.ocupada {
+    .neon-inner { border-color: $busy; box-shadow: 0 0 15px rgba($busy, 0.2); }
+    .id-text { color: $busy; }
+  }
+  &.reservada {
+    .neon-inner { border-color: $res; box-shadow: 0 0 15px rgba($res, 0.2); }
+    .id-text { color: $res; }
+  }
+  &.sucia {
+    .neon-inner { border-color: $dirty; box-shadow: 0 0 15px rgba($dirty, 0.2); }
+    .id-text { color: $dirty; }
+  }
+}
+
+/* --- CAPA DEL MODAL FIJADA --- */
+.luxe-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(0, 0, 0, 0.92) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 9999 !important; 
+  backdrop-filter: blur(8px);
+}
+
+/* --- MODAL Y BOTONES --- */
+.luxe-modal-card {
+  background: #050505; 
+  border: 1px solid #1a1a1a; 
+  padding: 40px; 
+  border-radius: 30px;
+  width: 90%; 
+  max-width: 360px; 
+  text-align: center;
+  box-sizing: border-box;
+  
+  .sheet-header {
+    margin-bottom: 20px;
+    h3 { color: #fff; font-size: 2rem; margin: 10px 0 0 0; letter-spacing: 1px; }
+  }
+  
+  .icon-glow { color: $gold; .material-icons { font-size: 45px; } }
+  
+  .status-pill {
+    display: inline-block; font-size: 0.7rem; font-weight: 800; padding: 4px 15px;
+    border-radius: 20px; text-transform: uppercase; margin-top: 10px;
+    &.libre { color: $free; background: rgba($free, 0.05); }
+    &.ocupada { color: $busy; background: rgba($busy, 0.05); }
+    &.reservada { color: $res; background: rgba($res, 0.05); }
+    &.sucia { color: $dirty; background: rgba($dirty, 0.05); }
+  }
+}
+
+.actions-stack {
+  display: flex; flex-direction: column; gap: 15px; margin: 35px 0;
+  
+  .luxe-btn {
+    padding: 18px; border-radius: 15px; border: none; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer;
+    transition: 0.3s;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    
+    &.gold { background: $gold; color: #000; }
+    &.border-gold { background: transparent; border: 2px solid $gold; color: $gold; }
+    &.yellow { background: #f1c40f; color: #000; }
+    
+    &:hover { opacity: 0.8; transform: translateY(-2px); }
+  }
+}
+
+/* --- SELECTOR DE RESERVACIONES EN PISO --- */
+.reservation-selector-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  margin: 20px 0;
+  animation: modalFadeIn 0.25s ease-out;
+
+  .sub-title {
+    color: $gold;
+    font-size: 0.95rem;
+    margin: 5px 0;
+    letter-spacing: 1px;
+    text-align: left;
+    font-weight: 700;
+  }
+
+  .reservations-list-scroller {
+    max-height: 180px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 5px;
+
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: $gold;
+      border-radius: 4px;
+    }
+  }
+
+  .reservation-row-card {
+    background: rgba(15, 15, 15, 0.8);
+    border: 1px solid rgba($gold, 0.15);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: $gold;
+      background: rgba($gold, 0.08);
+      box-shadow: 0 0 10px rgba($gold, 0.15);
+      transform: scale(1.01);
+    }
+
+    .res-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+
+      .client-name {
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+      .folio-tag {
+        color: #666;
+        font-size: 0.75rem;
+        font-family: monospace;
+        letter-spacing: 0.5px;
+      }
+    }
+
+    .res-pax {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: $gold;
+      font-size: 0.85rem;
+      background: rgba($gold, 0.05);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      
+      .material-icons { font-size: 1rem; }
+    }
+  }
+
+  .empty-reservations {
+    padding: 25px 10px;
+    text-align: center;
+    color: #555;
+    font-size: 0.8rem;
+    border: 1px dashed #1a1a1a;
+    border-radius: 10px;
+    
+    .material-icons { font-size: 1.8rem; margin-bottom: 6px; color: #333; }
+    p { margin: 0; line-height: 1.3; }
+  }
+
+  .divider-text {
+    text-align: center;
+    position: relative;
+    margin: 10px 0;
+    span {
+      background: #050505; 
+      padding: 0 12px;
+      color: #444;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+    &:before {
+      content: "";
+      position: absolute;
+      top: 50%; left: 0; right: 0;
+      height: 1px; background: rgba(255, 255, 255, 0.05);
+      z-index: -1;
+    }
+  }
+
+  .walkin-btn {
+    padding: 16px;
+    border-radius: 12px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px dashed rgba(255, 255, 255, 0.2) !important;
+    color: #aaa !important;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08) !important;
+      border-color: #fff !important;
+      color: #fff !important;
+      transform: translateY(-1px);
+    }
+  }
+
+  .back-btn {
+    background: none;
+    border: none;
+    color: #444;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 15px;
+    transition: color 0.2s;
+    letter-spacing: 0.5px;
+    
+    &:hover { color: #fff; }
+    .material-icons { font-size: 0.9rem; }
+  }
+}
+
+.luxe-btn-cancel { 
+  background: none; border: none; color: #444; font-weight: 800; cursor: pointer; letter-spacing: 1px;
+  margin-top: 10px;
+  &:hover { color: #fff; }
+}
+
+.gold-pulse {
+  background: white !important; 
+  color: black !important;
+  font-weight: bold;
+  animation: pulse-white 2s infinite;
+  &:hover { background: $gold !important; }
+}
+
+@keyframes pulse-white {
+  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
+
+.luxe-loader {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; 
+  justify-content: center; background: #000; z-index: 200;
+  .neon-spinner {
+    width: 40px; height: 40px; border: 3px solid #111; border-top-color: $gold; 
+    border-radius: 50%; animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }

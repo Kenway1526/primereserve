@@ -1,0 +1,187 @@
+/* ==========================================
+   PALETA DE COLORES Y CONFIGURACIÓN LUXE
+   ========================================== */
+.confirm-page-wrapper {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #030303;
+  padding: 20px;
+  box-sizing: border-box;
+  color: #ffffff;
+}
+
+.feedback-card {
+  text-align: center;
+  padding: 40px 30px;
+  border-radius: 16px;
+  background: #0a0a0a;
+  border: 1px solid #141414;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+  max-width: 450px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+/* Modificadores condicionales según el estado de la comanda */
+.feedback-card.card-success {
+  border-color: rgba(212, 175, 55, 0.15);
+}
+
+.feedback-card.card-error {
+  border-color: rgba(231, 76, 60, 0.25);
+}
+
+/* ==========================================
+   ESTADO DE CARGA (LOADING)
+   ========================================== */
+.neon-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(212, 175, 55, 0.1);
+  border-top: 3px solid #d4af37;
+  border-radius: 50%;
+  margin: 0 auto 20px auto;
+  animation: spinLuxe 1s infinite linear;
+}
+
+.loading-title {
+  color: #ffffff;
+  font-weight: 300;
+  letter-spacing: 1px;
+  margin: 0 0 10px 0;
+  font-size: 1.4rem;
+}
+
+.loading-subtitle {
+  color: #a0a0a0;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* ==========================================
+   ESFERA DE ICONOS DINÁMICOS
+   ========================================== */
+.icon-sphere {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 1px solid #222;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 25px auto;
+  transition: transform 0.3s ease;
+}
+
+.icon-sphere .status-icon {
+  font-size: 32px;
+}
+
+/* Esfera con feedback positivo */
+.icon-sphere.success-sphere {
+  border-color: #d4af37;
+  background: rgba(212, 175, 55, 0.05);
+}
+
+.icon-sphere.success-sphere .status-icon {
+  color: #d4af37;
+}
+
+/* Esfera con feedback de error */
+.icon-sphere.error-sphere {
+  border-color: #e74c3c;
+  background: rgba(231, 76, 60, 0.05);
+}
+
+.icon-sphere.error-sphere .status-icon {
+  color: #e74c3c;
+}
+
+/* ==========================================
+   TEXTOS Y MENSAJES DE RESPUESTA
+   ========================================== */
+.response-title {
+  font-size: 1.5rem;
+  font-weight: 300;
+  margin-bottom: 15px;
+  letter-spacing: 0.5px;
+  color: #ffffff;
+}
+
+.response-title.text-error {
+  color: #e74c3c;
+}
+
+.response-message {
+  color: #a0a0a0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-top: 0;
+  margin-bottom: 35px;
+}
+
+/* Resaltado del número de mesa inyectado por el TS */
+.response-message b {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* ==========================================
+   BOTÓN PREMIUM DE REGRESO
+   ========================================== */
+.btn-luxe-return {
+  display: inline-block;
+  padding: 12px 35px;
+  background: transparent;
+  color: #d4af37;
+  border: 1px solid #d4af37;
+  border-radius: 30px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-luxe-return:hover {
+  background: #d4af37;
+  color: #000000;
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+}
+
+/* ==========================================
+   PIE DE PÁGINA (BRANDING)
+   ========================================== */
+.brand-footer {
+  margin-top: 30px;
+  border-top: 1px solid #111;
+  padding-top: 15px;
+}
+
+.brand-signature {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: #d4af37;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin: 0 0 4px 0;
+}
+
+.footer-note {
+  font-size: 10px;
+  color: #444444;
+}
+
+/* ==========================================
+   ANIMACIONES NATIVAS
+   ========================================== */
+@keyframes spinLuxe {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

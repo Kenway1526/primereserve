@@ -168,35 +168,49 @@ $shadow-premium: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 // ============================================
-// DISEÑO DEL MODAL PREMIUM
+// FIX DEFINITIVO DE SCROLL INTERNO PARA MODAL
 // ============================================
 .modal-overlay {
-  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
   background-color: rgba(0, 0, 0, 0.85);
-  display: flex; justify-content: center; align-items: center;
-  z-index: 1000;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  z-index: 99999 !important; /* Por encima de cualquier layout */
   backdrop-filter: blur(8px);
-  animation: fadeIn 0.3s ease;
+  padding: 1.5rem;
+  box-sizing: border-box;
 }
 
 .premium-modal {
   background-color: $bg-modal;
   border: 1px solid rgba($gold-primary, 0.4);
-  width: 90%;
+  width: 100%;
   max-width: 650px;
+  height: 80vh !important; /* 🎯 Fuerza un alto estricto del 80% de la ventana */
+  max-height: 80vh !important;
   border-radius: 16px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-  display: flex;
-  flex-direction: column;
-  max-height: 90vh;
-  overflow: hidden;
-  animation: slideUp 0.4s ease-out;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
 
   .modal-header {
     padding: 1.2rem 2rem;
     border-bottom: 1px solid $border-color;
-    display: flex; justify-content: space-between; align-items: center;
-    background-color: rgba(255,255,255,0.02);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.02);
+    flex-shrink: 0 !important; /* Nunca se comprime */
+    height: 65px;
+    box-sizing: border-box;
 
     .header-title {
       display: flex; align-items: center; gap: 12px;
@@ -211,13 +225,54 @@ $shadow-premium: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
   }
 
+  /* 🎯 FORMULARIO CONTENEDOR CONTENIDO */
+  .modal-form-wrapper, .modal-form {
+    display: flex !important;
+    flex-direction: column !important;
+    height: calc(100% - 65px) !important; /* Resta el alto exacto de la cabecera */
+    width: 100%;
+    overflow: hidden !important;
+  }
+
+  /* 🎯 CONTENEDOR CON SCROLL REAL Y RECEPTOR DE WHEEL */
   .form-content-scroll {
     padding: 2rem;
-    overflow-y: auto;
-    flex-grow: 1;
+    overflow-y: scroll !important; /* FORZAR APARICIÓN Y EVENTO DE SCROLL */
+    overflow-x: hidden !important;
+    flex: 1 1 auto !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    box-sizing: border-box;
 
-    &::-webkit-scrollbar { width: 6px; }
-    &::-webkit-scrollbar-thumb { background: rgba($gold-primary, 0.2); border-radius: 3px; }
+    /* Estilos del Scrollbar */
+    &::-webkit-scrollbar {
+      width: 8px !important;
+      display: block !important;
+    }
+    &::-webkit-scrollbar-track {
+      background: #111111 !important;
+      border-radius: 4px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: $gold-primary !important;
+      border-radius: 4px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background: lighten($gold-primary, 15%) !important;
+    }
+
+    scrollbar-width: thin;
+    scrollbar-color: $gold-primary #111111;
+  }
+
+  .modal-footer {
+    padding: 1.2rem 2rem;
+    border-top: 1px solid $border-color;
+    background: #181818;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0 !important; /* Footer siempre fijo abajo */
   }
 }
 

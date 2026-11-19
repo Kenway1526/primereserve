@@ -19,6 +19,9 @@ export class OrderStatus implements OnInit, OnDestroy {
 
   public items: any[] = [];
   public isLoading = true;
+  
+  private realtimeChannel: any; 
+  private currentOrderId?: string;
 
   async ngOnInit() {
     this.authSub = this.auth.user$.subscribe(user => {
@@ -33,24 +36,55 @@ export class OrderStatus implements OnInit, OnDestroy {
 
   public async fetchDetalleOrden(reservaId: string) {
     try {
-      // 1. Buscamos la Orden vinculada a esta reservación
-      const { data: orden, error: ordenError } = await this.supabaseSvc.supabase
+      let orden: any = null;
+
+      // 1. Buscar la orden activa más reciente vinculada directamente a la reservación
+      const resReserva = await this.supabaseSvc.supabase
         .from('Orden')
-        .select('id')
+        .select('id, estado')
         .eq('reservacionId', reservaId)
-        .eq('estado', 'ABIERTA') // Solo órdenes actuales
+        .neq('estado', 'PAGADO')
+        .order('fechaApertura', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
-      if (ordenError) throw ordenError;
+      if (resReserva.error) throw resReserva.error;
+      orden = resReserva.data;
+
+      // 2. Respaldo: si el mesero abrió la orden desde el mapa sin vincular reservacionId,
+      // obtenemos la mesa asignada a esta reservación y buscamos la orden activa de esa mesa
+      if (!orden) {
+        const { data: reserva } = await this.supabaseSvc.supabase
+          .from('Reservacion')
+          .select('mesaId')
+          .eq('id', reservaId)
+          .maybeSingle();
+
+        if (reserva?.mesaId) {
+          const resMesa = await this.supabaseSvc.supabase
+            .from('Orden')
+            .select('id, estado')
+            .eq('mesaId', reserva.mesaId)
+            .neq('estado', 'PAGADO')
+            .order('fechaApertura', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (resMesa.error) throw resMesa.error;
+          orden = resMesa.data;
+        }
+      }
 
       if (orden) {
-        // 2. Buscamos los platillos en DetalleOrden usando el ordenId
+        this.currentOrderId = orden.id;
+
         const { data: detalles, error: detalleError } = await this.supabaseSvc.supabase
           .from('DetalleOrden')
           .select(`
             id,
             cantidad,
             estadoItem,
+            notasCocina,
             menuItemId,
             MenuItem (
               nombre,
@@ -60,12 +94,19 @@ export class OrderStatus implements OnInit, OnDestroy {
           .eq('ordenId', orden.id);
 
         if (detalleError) throw detalleError;
+        
+        // Cada platillo mantiene su propio estado real (PENDIENTE, COCINANDO, LISTO o SERVIDO)
         this.items = detalles || [];
+
+        this.setupOrderRealtime(orden.id, reservaId);
+      } else {
+        this.items = [];
       }
     } catch (err) {
       console.error('❌ Error cargando DetalleOrden:', err);
     } finally {
       this.isLoading = false;
+      this.cdr.markForCheck();
       this.cdr.detectChanges();
     }
   }
@@ -73,14 +114,53 @@ export class OrderStatus implements OnInit, OnDestroy {
   public getIcon(estado: string): string {
     const icons: Record<string, string> = {
       'PENDIENTE': 'schedule',
-      'EN_PREPARACION': 'restaurant',
-      'LISTO': 'check_circle',
-      'ENTREGADO': 'local_dining'
+      'COCINANDO': 'soup_kitchen',
+      'LISTO': 'room_service',
+      'SERVIDO': 'check_circle'
     };
-    return icons[estado] || 'help_outline';
+    return icons[estado] || 'schedule';
+  }
+
+  public getStatusLabel(estado: string): string {
+    const labels: Record<string, string> = {
+      'PENDIENTE': 'En espera',
+      'COCINANDO': 'En preparación',
+      'LISTO': '¡Listo en barra! 🛎️',
+      'SERVIDO': 'Servido en mesa 🍽️'
+    };
+    return labels[estado] || 'En espera';
+  }
+
+  private setupOrderRealtime(ordenId: string, reservaId: string) {
+    if (this.realtimeChannel) return;
+
+    const uniqueChannelId = `client_status_chan_${ordenId.substring(0, 6)}_${Math.random().toString(36).substring(2, 6)}`;
+
+    this.realtimeChannel = this.supabaseSvc.supabase
+      .channel(uniqueChannelId)
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'DetalleOrden',
+        filter: `ordenId=eq.${ordenId}` 
+      }, () => {
+        this.fetchDetalleOrden(reservaId);
+      })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'Orden',
+        filter: `id=eq.${ordenId}`
+      }, () => {
+        this.fetchDetalleOrden(reservaId);
+      })
+      .subscribe();
   }
 
   ngOnDestroy() {
     this.authSub?.unsubscribe();
+    if (this.realtimeChannel) {
+      this.supabaseSvc.supabase.removeChannel(this.realtimeChannel);
+    }
   }
 }

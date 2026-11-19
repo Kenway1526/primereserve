@@ -68,7 +68,7 @@ $text-muted: #444;
         margin: 25px 0;
         .number { font-size: 3rem; font-weight: 800; }
         .unit { color: $text-muted; margin-left: 8px; font-size: 0.9rem; }
-        .min-qty { color: #222; font-size: 0.75rem; margin-top: 5px; }
+        .min-qty { color: #666; font-size: 0.75rem; margin-top: 5px; }
       }
 
       .card-footer {
@@ -105,8 +105,14 @@ $text-muted: #444;
       label { display: block; color: $gold; font-size: 0.65rem; margin-bottom: 8px; }
       input {
         width: 100%; background: #111; border: 1px solid #222;
-        padding: 12px; color: #fff; border-radius: 4px;
+        padding: 12px; color: #fff; border-radius: 4px; box-sizing: border-box;
         &:focus { border-color: $gold; outline: none; }
+      }
+      .error-hint {
+        color: $danger;
+        font-size: 0.72rem;
+        display: block;
+        margin-top: 5px;
       }
     }
 
@@ -116,7 +122,8 @@ $text-muted: #444;
       width: 100%; background: $gold; color: #000; border: none;
       padding: 14px; font-weight: bold; border-radius: 4px; cursor: pointer;
       margin-top: 15px;
-      &:hover { background: #fff; }
+      &:hover:not(:disabled) { background: #fff; }
+      &:disabled { opacity: 0.4; cursor: not-allowed; }
     }
   }
 }

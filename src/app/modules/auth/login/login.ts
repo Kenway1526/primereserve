@@ -20,7 +20,6 @@ export class Login implements OnInit {
   private supabaseSvc = inject(SupabaseService);
   private platformId = inject(PLATFORM_ID);
 
-  // El modo inicial es CLIENTE, pero no dispara lógica hasta que el usuario actúe
   public mode: 'staff' | 'client' = 'client'; 
   public isLoading = false;
   public errorMessage = '';
@@ -31,15 +30,14 @@ export class Login implements OnInit {
   public clientAccess = { folio: '', phone: '' };
 
   ngOnInit() {
-    // 🛡️ Al entrar al Login, si hay algo raro en el storage, lo limpiamos
-    // para que "Gestionar" no herede basura de "Mi Mesa"
     if (isPlatformBrowser(this.platformId) && !this.auth.isAuthenticated()) {
       this.auth.logout(); 
+      sessionStorage.clear(); // Limpieza absoluta de contingencia
     }
   }
 
   /**
-   * ACCESO STAFF
+   * ACCESO STAFF TRANSACCIONAL DIRECTO 🛡️
    */
   public async handleLogin(): Promise<void> {
     if (!this.userEmail || !this.password) {
@@ -51,38 +49,40 @@ export class Login implements OnInit {
     this.errorMessage = '';
     this.cdr.detectChanges();
 
+    const roleMap: Record<string, UserRole> = {
+      'ADMIN': 'ADMIN',
+      'COCINA': 'KITCHEN',
+      'KITCHEN': 'KITCHEN',
+      'MESERO': 'MESERO'
+    };
+
     try {
-      const { data: authData, error: authError } = await this.supabaseSvc.supabase.auth.signInWithPassword({
-        email: this.userEmail,
-        password: this.password
-      });
-
-      if (authError || !authData.user) throw new Error('Credenciales incorrectas.');
-
-      const { data: profile, error: profileError } = await this.supabaseSvc.supabase
+      // Realizamos la validación directa en la tabla pública de control operativo
+      const { data: publicUser, error: publicErr } = await this.supabaseSvc.supabase
         .from('Usuario')
-        .select('rol, nombre')
-        .eq('id', authData.user.id)
+        .select('*')
+        .eq('email', this.userEmail.toLowerCase().trim())
+        .eq('password', this.password)
         .single();
 
-      if (profileError || !profile) throw new Error('Perfil no encontrado.');
+      if (publicErr || !publicUser) {
+        throw new Error('Credenciales incorrectas o usuario inexistente.');
+      }
 
-      const roleMap: Record<string, UserRole> = {
-        'ADMIN': 'ADMIN',
-        'COCINA': 'KITCHEN',
-        'KITCHEN': 'KITCHEN',
-        'MESERO': 'MESERO'
-      };
+      const normalizedRole = roleMap[publicUser.rol.toUpperCase()] || null;
+      if (!normalizedRole) throw new Error('Rol operativo no parametrizado.');
 
-      const normalizedRole = roleMap[profile.rol.toUpperCase()] || null;
-      if (!normalizedRole) throw new Error('Rol no autorizado.');
+      // 🔑 LA JUGADA CLAVE: Almacenamos el perfil completo en la sesión local del navegador
+      if (isPlatformBrowser(this.platformId)) {
+        sessionStorage.setItem('current_user', JSON.stringify(publicUser));
+      }
 
-      // Login y Redirección Limpia
-      this.auth.login(normalizedRole, profile.nombre, APP_CONFIG.RESTAURANT_ID); 
+      // Iniciamos sesión en tu servicio compartido Auth
+      this.auth.login(normalizedRole, publicUser.nombre, APP_CONFIG.RESTAURANT_ID, undefined, publicUser.id);
       this.redirectByUserRole();
 
     } catch (err: any) {
-      this.errorMessage = err.message || 'Error de autenticación.';
+      this.errorMessage = err.message || 'Error de autenticación operativo.';
     } finally {
       this.isLoading = false;
       this.cdr.detectChanges();
@@ -110,15 +110,12 @@ export class Login implements OnInit {
         .from('Reservacion')
         .select('*')
         .eq('folio', folio)
-        .eq('telefonoInvitado', phone) // 👈 Campo verificado en tu captura de Supabase
+        .eq('telefonoInvitado', phone) 
         .single();
 
       if (error || !reserva) throw new Error('Acceso denegado. Verifique sus datos.');
 
-      // Login Cliente
-      console.log('🔑 Login: Datos válidos. Guardando sesión...');
       this.auth.login('CLIENTE', reserva.folio, APP_CONFIG.RESTAURANT_ID, reserva.id);
-      console.log('🏃 Login: Intentando navegar a /client/dashboard');
       this.router.navigate(['/client/dashboard'], { replaceUrl: true });
 
     } catch (err: any) {
@@ -132,9 +129,9 @@ export class Login implements OnInit {
   private redirectByUserRole() {
     const role = this.auth.getRole();
     const redirectMap: Record<string, string> = {
-      'ADMIN': '/admin/dashboard',
+      'ADMIN': '/admin',
       'KITCHEN': '/kitchen/order-monitor',
-      'MESERO': '/mesero/mapa',
+      'MESERO': '/waiter/table-map',
       'CLIENTE': '/client/dashboard'
     };
 
@@ -146,7 +143,10 @@ export class Login implements OnInit {
   public setMode(newMode: 'staff' | 'client') {
     this.mode = newMode;
     this.errorMessage = '';
-    this.auth.logout(); // 🛡️ Limpiamos al cambiar de pestaña
+    this.auth.logout(); 
+    if (isPlatformBrowser(this.platformId)) {
+      sessionStorage.clear();
+    }
     this.cdr.detectChanges();
   }
 }

@@ -133,6 +133,14 @@ $role-admin: #9b59b6;
           &:hover { color: $gold-primary; background: rgba($gold-primary, 0.1); }
           &.delete:hover { color: #ff4d4d; background: rgba(255, 77, 77, 0.1); }
         }
+
+        button.delete.btn-disabled,
+        button.delete:disabled {
+          opacity: 0.25;
+          cursor: not-allowed;
+          pointer-events: none;
+          filter: grayscale(1);
+        }
       }
 
       .avatar-container {

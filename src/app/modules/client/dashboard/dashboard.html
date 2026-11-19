@@ -1,20 +1,34 @@
 <div class="dashboard-container">
+  <!-- LOADER -->
   <div *ngIf="isLoading" class="loader">
     <div class="spinner"></div>
     <p>Sincronizando con tu mesa...</p>
   </div>
 
+  <!-- CONTENIDO PRINCIPAL -->
   <div *ngIf="!isLoading && reserva" class="fade-in">
-    <header class="card-header">
+    
+    <header class="card-header" [ngClass]="reserva.estado.toLowerCase()">
       <span class="folio-tag">FOLIO: {{ reserva.folio }}</span>
-      <h2>¡Mesa Lista!</h2>
-      <p>Bienvenido al restaurante</p>
+      
+      <ng-container [ngSwitch]="reserva.estado">
+        <h2 *ngSwitchCase="'SENTADO'">¡Buen Provecho!</h2>
+        <h2 *ngSwitchCase="'CONFIRMADA'">¡Mesa Lista!</h2>
+        <h2 *ngSwitchCase="'PENDIENTE_CONFIRMAR'">Casi listos...</h2>
+        <h2 *ngSwitchCase="'WAITLIST'">En Lista de Espera</h2>
+        <h2 *ngSwitchCase="'CANCELADA'">Reserva Cancelada</h2>
+        <h2 *ngSwitchDefault>Tu Reserva</h2>
+      </ng-container>
+
+      <p>{{ getStatusMessage(reserva.estado) }}</p>
     </header>
 
+    <!-- GRID DE ESTADÍSTICAS -->
     <div class="stats-grid">
       <div class="stat-item">
-        <span class="label">Estado</span>
-        <strong [class]="reserva.estado">{{ reserva.estado }}</strong>
+        <span class="label">Estado actual</span>
+        <!-- Se aplica la clase dinámica para colores de estado -->
+        <strong [class]="'status-' + reserva.estado.toLowerCase()">{{ reserva.estado }}</strong>
       </div>
       <div class="stat-item">
         <span class="label">Personas</span>
@@ -22,24 +36,35 @@
       </div>
     </div>
 
-    <div class="waiting-info" *ngIf="reserva.isWaitlistActive">
+    <!-- LISTA DE ESPERA (Solo si aplica) -->
+    <div class="waiting-info" *ngIf="reserva.estado === 'WAITLIST' || reserva.isWaitlistActive">
       <p>Tu posición en la fila:</p>
       <div class="pos-number">{{ reserva.posicionEspera || '1' }}</div>
+      <small>Te notificaremos cuando tu mesa esté libre</small>
     </div>
 
+    <!-- ACCIONES DINÁMICAS -->
     <div class="actions">
-      <button class="btn-main">
-        <i class="material-icons">menu_book</i>
-        Ver Menú Digital
+      <!-- Botón de Menú: Disponible para todos excepto cancelados -->
+      <button class="btn-luxe-menu" [routerLink]="['/client/menu']">
+        <span class="material-icons">restaurant_menu</span>
+        VER MENÚ DIGITAL
       </button>
-      <button class="btn-secondary">
-        <i class="material-icons">notifications</i>
-        Llamar Mesero
-      </button>
+
+      <!-- Botón de ayuda: Disponible vía WhatsApp con el número proporcionado -->
+      <a [href]="'https://wa.me/7225491098?text=Hola, necesito ayuda con mi reserva Folio: ' + reserva.folio" 
+        target="_blank" 
+        class="btn-help">
+        <i class="material-icons">support_agent</i>
+        ¿Necesitas ayuda con la reserva?
+      </a>
     </div>
   </div>
 
+  <!-- MENSAJE DE ERROR O VACÍO -->
   <div *ngIf="!isLoading && !reserva" class="error-msg">
+    <i class="material-icons" style="font-size: 48px; color: #bdc3c7;">event_busy</i>
     <p>No se encontró información de la reserva.</p>
+    <button (click)="ngOnInit()" class="btn-retry">Reintentar</button>
   </div>
 </div>

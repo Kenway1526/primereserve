@@ -1,55 +1,109 @@
 <div class="orders-wrapper">
   <header class="summary-header">
     <div class="stat-box">
-      <span class="stat-label">MESAS ACTIVAS</span>
-      <span class="stat-value">{{ activeOrders.length }}</span>
+      <span class="stat-label">ENTRANTES</span>
+      <span class="stat-value">{{ itemsPendientes.length }}</span>
     </div>
     <div class="stat-box highlight">
-      <span class="stat-label">TOTAL ACUMULADO</span>
-      <span class="stat-value gold-text">{{ totalVentasActivas | currency:'MXN':'symbol-narrow':'1.2-2' }}</span>
+      <span class="stat-label">EN PREPARACIÓN</span>
+      <span class="stat-value gold-text">{{ itemsCocinando.length }}</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-label">LISTOS EN BARRA</span>
+      <span class="stat-value text-ready">{{ itemsListos.length }}</span>
     </div>
   </header>
 
   <div class="orders-grid" *ngIf="!isLoading">
-    <div class="order-luxe-card" *ngFor="let order of activeOrders">
-      <div class="card-glow"></div>
-      
-      <div class="card-header">
-        <div class="table-tag">
-          <span class="label">MESA</span>
-          <span class="number">{{ order.mesald }}</span>
+    
+    <div class="kanban-column pending">
+      <div class="column-title-bar"><h3>PLATILLOS ENTRANTES</h3></div>
+      <div class="column-body">
+        <div class="order-luxe-card" *ngFor="let item of itemsPendientes">
+          <div class="card-header">
+            <div class="table-tag">
+              <span class="label">COMANDA</span>
+              <span class="number">#{{ item.ordenId.substring(0,4) }}</span>
+            </div>
+            <span class="status-badge abierta">PENDIENTE</span>
+          </div>
+          <div class="card-content">
+            <h2 class="dish-title">{{ item.MenuItem?.nombre || 'Platillo' }}</h2>
+            <div class="info-group">
+              <span class="material-icons">restaurant</span>
+              <span>Cantidad: <b>{{ item.cantidad }}</b></span>
+            </div>
+            <div class="dish-notes" *ngIf="item.notasCocina">
+              <span class="material-icons">priority_high</span>
+              <p>{{ item.notasCocina }}</p>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button class="btn-manage btn-start" (click)="avanzarEstado(item)">
+              <span class="material-icons">play_arrow</span> PREPARAR
+            </button>
+          </div>
         </div>
-        <span class="status-badge" [ngClass]="order.estado.toLowerCase()">
-          {{ order.estado.replace('_', ' ') }}
-        </span>
-      </div>
-
-      <div class="card-content">
-        <div class="info-group">
-          <span class="material-icons">timer</span>
-          <span>Iniciada: {{ order.fechaApertura | date:'HH:mm' }}</span>
-        </div>
-        <div class="total-display">
-          <span class="total-label">Subtotal</span>
-          <span class="amount">{{ order.totalCalculado | currency:'MXN':'symbol-narrow':'1.2-2' }}</span>
-        </div>
-      </div>
-
-      <div class="card-actions">
-        <button class="btn-manage" (click)="gestionarOrden(order.id)">
-          <span class="material-icons">edit_note</span>
-          GESTIONAR / COBRAR
-        </button>
       </div>
     </div>
-  </div>
 
-  <div class="empty-state-luxe" *ngIf="activeOrders.length === 0 && !isLoading">
-    <div class="icon-container">
-      <span class="material-icons">restaurant_menu</span>
+    <div class="kanban-column cooking">
+      <div class="column-title-bar"><h3>EN PREPARACIÓN</h3></div>
+      <div class="column-body">
+        <div class="order-luxe-card" *ngFor="let item of itemsCocinando">
+          <div class="card-header">
+            <div class="table-tag">
+              <span class="label">COMANDA</span>
+              <span class="number">#{{ item.ordenId.substring(0,4) }}</span>
+            </div>
+            <span class="status-badge en_preparacion">COCINANDO</span>
+          </div>
+          <div class="card-content">
+            <h2 class="dish-title">{{ item.MenuItem?.nombre || 'Platillo' }}</h2>
+            <div class="info-group">
+              <span class="material-icons">restaurant</span>
+              <span>Cantidad: <b>{{ item.cantidad }}</b></span>
+            </div>
+            <div class="dish-notes" *ngIf="item.notasCocina">
+              <span class="material-icons">priority_high</span>
+              <p>{{ item.notasCocina }}</p>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button class="btn-manage btn-ready" (click)="avanzarEstado(item)">
+              <span class="material-icons">done</span> TERMINAR
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-    <h3>SIN ÓRDENES ABIERTAS</h3>
-    <p>No hay mesas consumiendo en este momento.</p>
-    <button class="btn-outline-gold" (click)="loadOrders()">REFRESCAR DATOS</button>
+
+    <div class="kanban-column ready-col">
+      <div class="column-title-bar"><h3>LISTOS PARA SERVIR</h3></div>
+      <div class="column-body">
+        <div class="order-luxe-card" *ngFor="let item of itemsListos">
+          <div class="card-header">
+            <div class="table-tag">
+              <span class="label">COMANDA</span>
+              <span class="number">#{{ item.ordenId.substring(0,4) }}</span>
+            </div>
+            <span class="status-badge listo">LISTO</span>
+          </div>
+          <div class="card-content">
+            <h2 class="dish-title">{{ item.MenuItem?.nombre || 'Platillo' }}</h2>
+            <div class="info-group">
+              <span class="material-icons">restaurant</span>
+              <span>Cantidad: <b>{{ item.cantidad }}</b></span>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button class="btn-manage btn-deliver" (click)="avanzarEstado(item)">
+              <span class="material-icons">takeout_dining</span> DESPACHAR
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>

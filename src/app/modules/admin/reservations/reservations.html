@@ -25,6 +25,9 @@
     <div class="res-card-premium" *ngFor="let res of filteredReservations">
       <div class="res-card-header">
         <div class="res-info">
+          <small style="font-family: monospace; font-weight: bold; color: #cca43b; letter-spacing: 1px; font-size: 0.8rem; display: block; margin-bottom: 0.2rem;">
+            FOLIO: {{ res.folio || '---' }}
+          </small>
           <h3>{{ res.nombreInvitado }}</h3>
           <span class="res-date">{{ res.fechaPrincipal | date:'dd/MM/yyyy' }}</span>
         </div>
@@ -33,11 +36,11 @@
 
       <div class="res-card-body">
         <div class="item">
-          <span class="material-icons">groups</span> 
+          <span class="material-icons">groups</span>
           {{ res.numPersonas }} {{ res.numPersonas === 1 ? 'Persona' : 'Personas' }}
         </div>
         <div class="item">
-          <span class="material-icons">chair</span> 
+          <span class="material-icons">chair</span>
           <span [style.color]="res.Mesa ? '#d4af37' : '#ff4d4d'">
             {{ res.Mesa ? (res.Mesa.zona === 'PLANTA_BAJA' ? 'PB' : 'T') + '-' + (res.Mesa.numeroMesa | number:'2.0') : 'Asignación pendiente' }}
           </span>
@@ -46,7 +49,7 @@
 
       <div class="res-card-footer">
         <ng-container *ngIf="activeTab === 'proximas'">
-          <button class="btn-action-gold" 
+          <button class="btn-action-gold"
                   (click)="sentarCliente(res)"
                   [disabled]="isLoading || !res.mesaId">
             {{ isLoading ? '...' : 'SENTAR CLIENTE' }}
@@ -56,8 +59,8 @@
           </button>
         </ng-container>
 
-        <button class="btn-action-gold" 
-                *ngIf="activeTab === 'curso'" 
+        <button class="btn-action-gold"
+                *ngIf="activeTab === 'curso'"
                 (click)="finalizarReserva(res)"
                 [disabled]="isLoading">
           FINALIZAR SERVICIO
@@ -76,6 +79,9 @@
   <div class="wait-list" *ngIf="activeTab === 'espera' && !isLoading">
     <div class="wait-card" *ngFor="let wait of filteredReservations">
       <div class="wait-info">
+        <small style="font-family: monospace; font-weight: bold; color: #cca43b; letter-spacing: 0.5px; display: block; margin-bottom: 0.2rem;">
+          FOLIO: {{ wait.folio || '---' }}
+        </small>
         <h4>{{ wait.nombreInvitado }}</h4>
         <p><span class="material-icons">schedule</span> {{ wait.fechaPrincipal }} | {{ wait.horaPrincipal }}</p>
         <p><span class="material-icons">groups</span> {{ wait.numPersonas }} Pers.</p>
@@ -84,43 +90,120 @@
         PROMOVER A RESERVA
       </button>
     </div>
-    
+
     <div class="empty-state" *ngIf="filteredReservations.length === 0">
       <p>La lista de espera está vacía.</p>
     </div>
   </div>
 
   <app-modal [isOpen]="isModalOpen" [title]="'Registrar Reservación'" (close)="closeModal()">
-    <div class="modal-form">
+    <div class="modal-form" (click)="closeAllPickers()">
       <div class="form-group">
-        <label>Nombre del Titular</label>
-        <input type="text" [(ngModel)]="resForm.nombreInvitado" class="dark-input" placeholder="Ej. Jonathan Flores">
+        <label>Nombre del Titular *</label>
+        <input type="text" [(ngModel)]="resForm.nombreInvitado" class="dark-input" placeholder="Ej. Jonathan Flores" minlength="3" maxlength="40">
+        <small class="error-hint" *ngIf="resForm.nombreInvitado && !isValidName(resForm.nombreInvitado)">
+          El nombre debe tener al menos 3 caracteres.
+        </small>
       </div>
+
+      <div class="form-row">
+        <!-- PICKER PERSONALIZADO DE FECHA -->
+        <div class="form-group picker-wrapper" (click)="$event.stopPropagation()">
+          <label>Fecha *</label>
+          <button type="button" class="custom-picker-trigger" [class.open]="isDatePickerOpen" (click)="toggleDatePicker()">
+            <span>{{ formatDisplayDate(resForm.fechaPrincipal) }}</span>
+            <span class="material-icons">calendar_today</span>
+          </button>
+
+          <div class="luxe-dropdown calendar-dropdown" *ngIf="isDatePickerOpen">
+            <div class="cal-header">
+              <button type="button" class="cal-nav-btn" (click)="changeMonth(-1)" [disabled]="!canGoPrevMonth()">
+                <span class="material-icons">chevron_left</span>
+              </button>
+              <span class="cal-month-title">{{ currentMonthLabel }}</span>
+              <button type="button" class="cal-nav-btn" (click)="changeMonth(1)">
+                <span class="material-icons">chevron_right</span>
+              </button>
+            </div>
+
+            <div class="cal-weekdays">
+              <span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
+            </div>
+
+            <div class="cal-days-grid">
+              <button
+                type="button"
+                *ngFor="let cell of calendarCells"
+                class="cal-day-btn"
+                [class.empty]="!cell.dateStr"
+                [class.disabled]="cell.disabled"
+                [class.selected]="cell.dateStr === resForm.fechaPrincipal"
+                [class.today]="cell.dateStr === minDate"
+                [disabled]="!cell.dateStr || cell.disabled"
+                (click)="selectCalendarDate(cell.dateStr)">
+                {{ cell.day || '' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PICKER PERSONALIZADO DE HORA -->
+        <div class="form-group picker-wrapper" (click)="$event.stopPropagation()">
+          <label>Hora *</label>
+          <button
+            type="button"
+            class="custom-picker-trigger"
+            [class.open]="isTimePickerOpen"
+            [class.placeholder]="!resForm.horaPrincipal"
+            [disabled]="filteredHours.length === 0"
+            (click)="toggleTimePicker()">
+            <span>
+              {{ resForm.horaPrincipal ? (resForm.horaPrincipal + ' hrs') : (filteredHours.length > 0 ? 'Selecciona horario' : 'Sin horarios hoy') }}
+            </span>
+            <span class="material-icons">schedule</span>
+          </button>
+
+          <div class="luxe-dropdown time-dropdown" *ngIf="isTimePickerOpen">
+            <div class="time-grid">
+              <button
+                type="button"
+                *ngFor="let hour of filteredHours"
+                class="time-slot-btn"
+                [class.selected]="hour === resForm.horaPrincipal"
+                (click)="selectTimeSlot(hour)">
+                {{ hour }}
+              </button>
+            </div>
+          </div>
+
+          <small class="error-hint" *ngIf="resForm.fechaPrincipal === minDate && filteredHours.length === 0">
+            Sin horarios disponibles hoy. Elige otra fecha.
+          </small>
+        </div>
+      </div>
+
       <div class="form-row">
         <div class="form-group">
-          <label>Fecha</label>
-          <input type="date" [(ngModel)]="resForm.fechaPrincipal" class="dark-input">
+          <label>Comensales *</label>
+          <input type="number" [(ngModel)]="resForm.numPersonas" class="dark-input" min="1" max="20">
         </div>
+
         <div class="form-group">
-          <label>Hora</label>
-          <input type="time" [(ngModel)]="resForm.horaPrincipal" class="dark-input">
+          <label>Teléfono (10 dígitos) *</label>
+          <input type="tel" (keypress)="onlyNumbers($event)" [(ngModel)]="resForm.telefonoInvitado" class="dark-input" placeholder="Ej. 5512345678" maxlength="10" inputmode="numeric">
+          <small class="error-hint" *ngIf="resForm.telefonoInvitado && !isValidPhone(resForm.telefonoInvitado)">
+            Debe contener exactamente 10 dígitos numéricos.
+          </small>
         </div>
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Comensales</label>
-          <input type="number" [(ngModel)]="resForm.numPersonas" class="dark-input" min="1">
-        </div>
-        <div class="form-group">
-          <label>Teléfono</label>
-          <input type="text" [(ngModel)]="resForm.telefonoInvitado" class="dark-input" placeholder="10 dígitos">
-        </div>
-      </div>
+
       <div class="modal-actions">
-        <button class="btn-submit-gold" (click)="saveReservation()" [disabled]="isLoading || !resForm.nombreInvitado">
+        <button class="btn-submit-gold" (click)="saveReservation()" [disabled]="isLoading || !isFormValid()">
           {{ isLoading ? 'GUARDANDO...' : 'CONFIRMAR RESERVA' }}
         </button>
-        <button class="btn-submit-border" (click)="addToWaitlist()" [disabled]="isLoading">LISTA DE ESPERA</button>
+        <button class="btn-submit-border" (click)="addToWaitlist()" [disabled]="isLoading || !isFormValid()">
+          MANDAR A LISTA DE ESPERA
+        </button>
       </div>
     </div>
   </app-modal>

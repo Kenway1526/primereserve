@@ -24,12 +24,15 @@
         <div class="info">
           <h3>{{ item.MenuItem?.nombre }}</h3>
           <span class="qty">Cantidad: {{ item.cantidad }}</span>
+          <small class="item-notes" *ngIf="item.notasCocina" style="display: block; color: #666; margin-top: 4px; font-style: italic;">
+            "{{ item.notasCocina }}"
+          </small>
         </div>
       </div>
 
-      <div class="status-indicator" [ngClass]="item.estadoItem">
+      <div class="status-indicator" [ngClass]="item.estadoItem?.toLowerCase().replace('_', '-').replace('---', 'entregado')">
         <i class="material-icons">{{ getIcon(item.estadoItem) }}</i>
-        <span>{{ item.estadoItem }}</span>
+        <span>{{ getStatusLabel(item.estadoItem) }}</span>
       </div>
     </div>
   </div>
